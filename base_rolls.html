@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>BASE Field Roller</title>
+    <title>RED Winter Character Sheet Roller</title>
     <style>
       :root {
         color-scheme: light dark;
@@ -332,10 +332,7 @@
     <div class="wrap">
       <header>
         <div>
-          <h1>BASE Field Roller</h1>
-          <p class="subtitle">
-            Shows only AcroForm fields whose names start with <span class="mono">BASE </span>.
-          </p>
+          <h1>RED Winter Character Sheet Roller</h1>
         </div>
         <div class="panel" style="max-width: 420px">
           <div class="muted" style="font-size: 12px">
@@ -365,12 +362,6 @@
 
         <div id="list" class="list" hidden></div>
 
-        <div class="hint">
-          If opening via <span class="mono">file://</span> blocks loading pdf-lib, run (PowerShell):
-          <span class="mono">python -m http.server 8000</span>
-          and open
-          <span class="mono">http://localhost:8000/base_rolls.html</span>.
-        </div>
       </section>
     </div>
 
@@ -646,9 +637,7 @@
         lastItems = [];
 
         if (!window.PDFLib?.PDFDocument) {
-          throw new Error(
-            "pdf-lib failed to load. If you're opening this file via file://, try running a local server: python -m http.server 8000"
-          );
+          throw new Error("pdf-lib failed to load. Refresh the page and try again.");
         }
 
         const bytes = await file.arrayBuffer();
