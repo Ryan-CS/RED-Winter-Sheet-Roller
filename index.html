@@ -3,12 +3,1116 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content="0; url=base_rolls.html" />
     <title>RED Winter Character Sheet Roller</title>
+    <style>
+      /* ---------- System Palette ---------- */
+      :root{
+        color-scheme: dark;
+
+        /* base */
+        --bg: #05070c;
+        --bg2: #070b14;
+        --panel: rgba(6, 10, 18, 0.78);
+        --panel2: rgba(8, 14, 26, 0.62);
+        --border: rgba(110, 255, 246, 0.18);
+        --border2: rgba(255, 212, 80, 0.16);
+
+        /* text */
+        --text: rgba(235, 246, 255, 0.92);
+        --muted: rgba(180, 205, 225, 0.72);
+
+        /* accents */
+        --accent: #2cf6e8;     /* cyan/teal focus */
+        --warn: #ffd450;       /* amber actions */
+        --danger: #ff3b6a;     /* red faults */
+        --ok: #72ff4a;         /* toxic green success */
+
+        /* glows */
+        --glowA: 0 0 0.65rem rgba(44, 246, 232, 0.24), 0 0 1.4rem rgba(44, 246, 232, 0.10);
+        --glowW: 0 0 0.65rem rgba(255, 212, 80, 0.20), 0 0 1.2rem rgba(255, 212, 80, 0.08);
+        --glowD: 0 0 0.65rem rgba(255, 59, 106, 0.24), 0 0 1.2rem rgba(255, 59, 106, 0.10);
+        --shadow: 0 18px 42px rgba(0,0,0,0.62);
+
+        /* typography */
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+
+        /* geometry */
+        --r0: 0px;
+        --r1: 2px;     /* slight chamfer feel */
+        --pad: 14px;
+
+        /* surface effects */
+        --scanline: rgba(190, 255, 245, 0.03);
+        --noise: rgba(255,255,255,0.035);
+      }
+
+      /* Disable the light-theme overrides from the original file */
+      @media (prefers-color-scheme: light){
+        :root{ color-scheme: dark; }
+      }
+
+      /* ---------- Background / HUD Layer ---------- */
+      html, body{
+        /* Do NOT lock to 100% height; it truncates backgrounds on long pages (mobile especially). */
+        min-height: 100%;
+        background: var(--bg);
+      }
+
+      html{ height: auto; }
+      body{ min-height: 100vh; }
+
+      body{
+        margin:0;
+        color: var(--text);
+        font-family: var(--sans);
+        line-height:1.3;
+        background:
+          radial-gradient(1200px 520px at 12% 8%, rgba(44,246,232,0.12), transparent 60%),
+          radial-gradient(920px 620px at 88% 92%, rgba(255,212,80,0.10), transparent 58%),
+          linear-gradient(180deg, rgba(7,10,16,0.0), rgba(7,10,16,0.35)),
+          var(--bg);
+        overflow-x:hidden;
+        background-repeat:no-repeat;
+      }
+
+      /* Scanlines + subtle noise + faint grid */
+      body::before{
+        content:"";
+        position:fixed;
+        inset:0;
+        pointer-events:none;
+        z-index:-1; /* Move to behind content */
+        will-change: transform;
+        transform: translateZ(0);
+        background:
+          /* scanlines */
+          repeating-linear-gradient(
+            to bottom,
+            rgba(0,0,0,0.00),
+            rgba(0,0,0,0.00) 2px,
+            var(--scanline) 3px,
+            rgba(0,0,0,0.00) 5px
+          ),
+          /* tiny noise */
+          repeating-linear-gradient(
+            90deg,
+            rgba(255,255,255,0.00),
+            rgba(255,255,255,0.00) 3px,
+            var(--noise) 4px
+          );
+        opacity:0.75;
+        mix-blend-mode: overlay;
+        background-repeat: no-repeat; /* Prevent tiling */
+      }
+
+      body::after{
+        content:"";
+        position:fixed;
+        inset:0;
+        pointer-events:none;
+        z-index:-1; /* Move to behind content */
+        will-change: transform;
+        transform: translateZ(0);
+        background:
+          linear-gradient(rgba(44,246,232,0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(44,246,232,0.05) 1px, transparent 1px);
+        background-size: 28px 28px, 28px 28px;
+        opacity:0.14;
+        filter: saturate(1.1);
+        background-repeat: no-repeat; /* Prevent tiling */
+      }
+
+      /* ensure app content sits above HUD effects */
+      .wrap, header, section, .modalBackdrop{ position:relative; z-index:1; }
+
+      /* ---------- Layout ---------- */
+      .wrap{
+        max-width: 1040px;
+        margin: 22px auto;
+        padding: 0 18px 44px;
+      }
+
+      header{
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:16px;
+        margin-bottom:14px;
+      }
+
+      h1{
+        margin:0 0 0 0;
+        font-size: 24px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: rgba(225, 235, 238, 0.92);
+        text-shadow: 0 0 14px rgba(44,246,232,0.12);
+      }
+
+      label{
+        display:block;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: rgba(180,205,225,0.70);
+        margin-bottom: 7px;
+      }
+
+      .muted{ color: var(--muted); }
+
+      .text-sm{ font-size: 12px; }
+
+      .mono{
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      .panel{
+        background:
+          linear-gradient(180deg, rgba(12,18,30,0.68), rgba(6,10,18,0.78));
+        border: 1px solid var(--border);
+        border-radius: var(--r0);
+        padding: var(--pad);
+        box-shadow: var(--shadow);
+        position:relative;
+      }
+
+      .panel--narrow{ max-width: 420px; }
+
+      .panel::before,
+      .panel::after{
+        content:"";
+        position:absolute;
+        width: 14px;
+        height: 14px;
+        border-top: 1px solid rgba(44,246,232,0.38);
+        border-left: 1px solid rgba(44,246,232,0.38);
+        top: -1px;
+        left: -1px;
+        opacity:0.9;
+      }
+
+      .panel::after{
+        top:auto;
+        left:auto;
+        right:-1px;
+        bottom:-1px;
+        border-top:none;
+        border-left:none;
+        border-right: 1px solid rgba(255,212,80,0.30);
+        border-bottom: 1px solid rgba(255,212,80,0.30);
+        width: 18px;
+        height: 18px;
+      }
+
+      .controls{
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 12px;
+        align-items:end;
+      }
+
+      @media (max-width: 820px){
+        .controls{ grid-template-columns: 1fr; }
+      }
+
+      input[type="file"],
+      input[type="text"]{
+        width:100%;
+        box-sizing:border-box;
+        border-radius: var(--r0);
+        border: 1px solid rgba(44,246,232,0.18);
+        padding: 10px 10px;
+        background:
+          linear-gradient(180deg, rgba(2,4,8,0.75), rgba(8,12,20,0.65));
+        color: var(--text);
+        outline:none;
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.55);
+      }
+
+      input[type="text"]{
+        font-family: var(--mono);
+        letter-spacing:0.01em;
+      }
+
+      input::placeholder{
+        color: rgba(180,205,225,0.42);
+      }
+
+      input[type="file"]:focus,
+      input[type="text"]:focus{
+        border-color: rgba(44,246,232,0.62);
+        box-shadow:
+          inset 0 0 0 1px rgba(0,0,0,0.55),
+          0 0 0 2px rgba(44,246,232,0.12),
+          var(--glowA);
+      }
+
+      input[type="file"]::file-selector-button{
+        border-radius: var(--r0);
+        border: 1px solid rgba(255,212,80,0.22);
+        padding: 8px 10px;
+        margin-right: 10px;
+        background: rgba(12,18,30,0.72);
+        color: rgba(235,246,255,0.88);
+        font-family: var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      input[type="file"]::file-selector-button:hover{
+        border-color: rgba(255,212,80,0.55);
+        box-shadow: var(--glowW);
+      }
+
+      .error{
+        color: rgba(255, 210, 220, 0.98);
+        font-size: 12px;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border: 1px solid rgba(255,59,106,0.42);
+        background: rgba(20, 6, 10, 0.55);
+        box-shadow: var(--glowD);
+        white-space: pre-wrap;
+        font-family: var(--mono);
+      }
+
+      /* ---------- Cards / List ---------- */
+      .list{
+        display:grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      @media (max-width: 820px){
+        .list{ grid-template-columns: 1fr; }
+      }
+
+      .card{
+        border: 1px solid rgba(44,246,232,0.16);
+        border-radius: var(--r0);
+        padding: 0px;
+        background:
+          linear-gradient(180deg, rgba(10,16,28,0.62), rgba(5,7,12,0.78));
+        position:relative;
+        overflow:hidden;
+        max-height: 6em;
+        clip-path: polygon(0 18px, 0 100%, 100% 100%, 100% 0, 18px 0);
+      }
+
+      .card::after{
+        content:"";
+        position:absolute;
+        inset: -1px;
+        pointer-events:none;
+        background:
+          linear-gradient(90deg, rgba(44,246,232,0.16), transparent 40%, rgba(255,212,80,0.10));
+        opacity:0.22;
+        mix-blend-mode: screen;
+      }
+
+
+      /* ---------- Buttons ---------- */
+
+      button{
+        border-radius: var(--r0);
+        border: 1px solid rgba(44,246,232,0.22);
+        padding: 10px 12px;
+        background:
+          linear-gradient(180deg, rgba(7,10,16,0.55), rgba(3,5,9,0.85));
+        color: rgba(235,246,255,0.90);
+        cursor:pointer;
+        font-family: var(--mono);
+        letter-spacing: 0.10em;
+        text-transform: uppercase;
+        position:relative;
+        transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
+        user-select:none;
+      }
+
+      button::before{
+        content:"";
+        position:absolute;
+        left:-1px; top:-1px;
+        width: 12px; height: 12px;
+        border-left: 1px solid rgba(44,246,232,0.55);
+        border-top: 1px solid rgba(44,246,232,0.55);
+        opacity:0.85;
+      }
+
+      button:hover{
+        border-color: rgba(44,246,232,0.62);
+        box-shadow: var(--glowA);
+        transform: translateY(-1px);
+        color: rgba(255,255,255,0.96);
+      }
+
+      button:active{
+        transform: translateY(0px);
+        box-shadow: 0 0 0.6rem rgba(44,246,232,0.18);
+      }
+
+      /* Make the "Copy" button feel armed */
+      #copyBtn{
+        border-color: rgba(255,212,80,0.30);
+      }
+
+      #copyBtn:hover{
+        border-color: rgba(255,212,80,0.70);
+        box-shadow: var(--glowW);
+      }
+
+      #cancelBtn{
+        border-color: rgba(255,59,106,0.22);
+      }
+
+      #cancelBtn:hover{
+        border-color: rgba(255,59,106,0.62);
+        box-shadow: var(--glowD);
+      }
+
+      /* ---------- Toast / Hint ---------- */
+      .toast{
+        margin-left:auto;
+        font-size: 11px;
+        color: rgba(180,205,225,0.66);
+        font-family: var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* ---------- Modal: system interrupt ---------- */
+      .modalBackdrop{
+        position:fixed;
+        inset:0;
+        background: rgba(0,0,0,0.70);
+        display:none;
+        align-items:center;
+        justify-content:center;
+        padding: 16px;
+        z-index: 50;
+        backdrop-filter: blur(2px);
+      }
+
+      .modalBackdrop[data-open="true"]{ display:flex; }
+
+      .modal{
+        width: min(560px, 100%);
+        border-radius: var(--r0);
+        border: 1px solid rgba(255,212,80,0.26);
+        background:
+          linear-gradient(180deg, rgba(10,16,28,0.86), rgba(3,5,9,0.92));
+        box-shadow: var(--shadow), var(--glowW);
+        padding: 14px;
+        position:relative;
+      }
+
+      .modal::before{
+        content:"MODIFER INPUT";
+        position:absolute;
+        top: -10px;
+        left: 12px;
+        padding: 2px 8px;
+        background: rgba(3,5,9,0.92);
+        border: 1px solid rgba(255,212,80,0.28);
+        color: rgba(255,212,80,0.90);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .modalTitle{
+        margin: 6px 0 0 0;
+        font-size: 13px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 800;
+        color: rgba(235,246,255,0.94);
+      }
+
+      .modalSub{
+        margin: 8px 0 0 0;
+        font-size: 12px;
+        color: rgba(180,205,225,0.78);
+        font-family: var(--mono);
+      }
+
+      .modalActions{
+        margin-top: 12px;
+        display:flex;
+        gap: 10px;
+        align-items:center;
+      }
+
+      .modalActions .right{ margin-left:auto; }
+
+      .modalField{ margin-top: 10px; }
+
+      /* Modifier input in modal */
+      #modifierInput{
+        font-family: var(--mono);
+      }
+
+      /* ---------- Links ---------- */
+      a{
+        color: var(--accent);
+        text-decoration:none;
+        border-bottom: 1px solid rgba(44,246,232,0.22);
+        padding-bottom: 1px;
+      }
+
+      a:hover{
+        border-bottom-color: rgba(44,246,232,0.62);
+        text-shadow: 0 0 14px rgba(44,246,232,0.18);
+      }
+
+      /* ---------- Small targeted tweaks ---------- */
+      .row .muted{
+        font-family: var(--mono);
+        letter-spacing: 0.04em;
+      }
+
+      header .panel{
+        border-color: rgba(44,246,232,0.16);
+        background: rgba(6,10,18,0.72);
+      }
+
+      header .panel .muted{
+        font-family: var(--mono);
+        letter-spacing: 0.04em;
+      }
+
+      /* ---------- Card Redesign: CP77 header + BASE/MOD/ROLL row ---------- */
+      .cardHeader{
+        position: relative;
+        padding: 0px 20px 0px 18px;
+        background-color: rgba(255, 212, 80, 0.2);
+        clip-path: polygon(0 18px, 0 100%, 100% 100%, 100% 0, 18px 0);
+        border-bottom: 1px solid rgba(255, 212, 80, 0.5);
+        box-shadow: var(--shadow), var(--glowW);
+
+      }
+
+      .cardTitle{
+        margin:0;
+        font-size: 24px;
+        text-transform: uppercase;
+        font-weight: 500;
+        
+        font-family: var(--mono);
+        color: rgba(255, 212, 80, 0.99);
+        text-shadow: 0 0 16px rgba(44,246,232,0.12);
+      }
+
+      .cardRow{
+        display:flex;
+        gap: 18px;
+        align-items: center;
+        padding: 12px;
+      }
+
+      .baseBlock{
+        position: relative;
+        width: 2.2em;
+        height: 32px;
+        padding: 2px 5px 6px 12px;
+        border: 1px solid rgba(44,246,232,0.14);
+        background:
+          linear-gradient(180deg, rgba(2,4,8,0.72), rgba(8,12,20,0.58));
+        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.55);
+        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+      }
+
+      .baseLabel{
+        position: absolute;
+        top: 0px;
+        left: 4px;
+        font-family: var(--mono);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 9px;
+
+        color: rgba(180,205,225,0.62);
+        background: rgba(2,4,8,0.85);
+        padding: 0 4px;
+        pointer-events: none;
+      }
+
+      .baseValue{
+        font-family: var(--mono);
+        font-size: 36px;
+        line-height: 1;
+        text-align: right;        
+        color: rgba(235,246,255,0.94);
+        padding-top: 4px;
+      }
+
+      .modBox{
+        position: relative;
+        flex: 1 1 auto;
+        padding-left: 0;
+        border-left: none;
+        display:flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .modLabel{
+        position: absolute;
+        top: -4px;
+        left: 14px;
+        font-family: var(--mono);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 9px;
+        color: rgba(255,212,80,0.88);
+        background: rgba(2,4,8,0.85);
+        padding: 0 4px;
+        pointer-events: none;
+      }
+
+      input.modInput[type="text"]{
+        width: 100%;
+        font-size: 24px;        
+        padding: 8px 10px 4px;
+        border-radius: var(--r0);
+        border: 1px solid rgba(255,212,80,0.22);
+        background: rgba(2,4,8,0.72);
+        color: rgba(235,246,255,0.92);
+        box-sizing:border-box;
+        font-family: var(--mono);
+      }
+
+      input.modInput[type="text"]:focus{
+        border-color: rgba(255,212,80,0.62);
+        box-shadow: 0 0 0 2px rgba(255,212,80,0.10);
+      }
+
+      @media (max-width: 520px){
+        .cardRow{ flex-wrap: wrap; }
+        input.modInput[type="text"]{ min-width: 0; width: 100%; }
+      }
+
+      .rollBtn{
+        flex: 0 0 auto;
+        padding: 12px 14px;
+        border: none;
+        color: rgba(5,7,12,0.95);
+        background: rgba(255,212,80,0.92);
+        box-shadow: 0 10px 26px rgba(0,0,0,0.45), 0 0 18px rgba(255,212,80,0.14);
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+      }
+
+      .rollBtn::before{ display:none; }
+
+      .rollBtn:hover{
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.55), var(--glowW);
+      }
+
+      .rollBtn:active{
+        transform: translateY(0px);
+        box-shadow: 0 8px 18px rgba(0,0,0,0.55);
+      }
+
+      .cardFooter{
+        padding: 0 12px 12px 12px;
+        display:flex;
+        justify-content:flex-end;
+      }
+
+
+      </style>
   </head>
   <body>
-    <p>
-      Redirecting to <a href="base_rolls.html">base_rolls.html</a>…
-    </p>
+<div class="wrap">
+      <header>
+        <div>
+          <h1>RED Winter Character Sheet Roller</h1>
+        </div>
+        <div class="panel panel--narrow">
+          <div class="muted text-sm">
+            Uses <a href="https://pdf-lib.js.org/" target="_blank" rel="noreferrer">pdf-lib</a> locally in your browser.
+            Nothing is uploaded.
+          </div>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="controls">
+          <div>
+            <label for="file">PDF file</label>
+            <input id="file" type="file" accept="application/pdf,.pdf" />
+          </div>
+          <div>
+            <label for="search">Filter (press `/` to focus here)</label>
+            <input id="search" type="text" placeholder="e.g. Athletics, Perception" />
+          </div>
+          <div class="row">
+              <span class="muted text-sm">Modifier prompt expects text like <span class="mono">+2</span> or <span class="mono">-1</span>.</span>
+          </div>
+
+        </div>
+
+        <div class="error" id="error" hidden></div>
+
+        <div id="list" class="list" hidden></div>
+
+      </section>
+    </div>
+
+    <div id="modalBackdrop" class="modalBackdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <h2 id="modalTitle" class="modalTitle">Modifier?</h2>
+        <p id="modalSub" class="modalSub"></p>
+        <div class="modalField">
+          <label for="modifierInput">Modifier (optional)</label>
+          <input id="modifierInput" type="text" placeholder="+2" autocomplete="off" />
+        </div>
+        <div class="modalActions">
+          <button id="cancelBtn" type="button">Cancel</button>
+          <button id="copyBtn" class="right" type="button">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script>
+      const fileInput = document.getElementById("file");
+      const searchInput = document.getElementById("search");
+      const errorEl = document.getElementById("error");
+      const listEl = document.getElementById("list");
+      const modalBackdrop = document.getElementById("modalBackdrop");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalSub = document.getElementById("modalSub");
+      const modifierInput = document.getElementById("modifierInput");
+      const cancelBtn = document.getElementById("cancelBtn");
+      const copyBtn = document.getElementById("copyBtn");
+
+      const BASE_PREFIX = "BASE ";
+      // When the PDF uses compressed/abbreviated field suffixes (e.g. "HumanPerception"),
+      // display the normal spaced name (e.g. "Human Perception"). Case-insensitive.
+      const BASE_NAME_MAP = {
+        AnimalHandling: "Animal Handling",
+        AVTech: "Air Vehicle Tech",
+        BasicTech: "Basic Tech",
+        Conceal: "Conceal/Reveal",
+        Contortion: "Contortionist",
+        Cybertech: "CyberTech",
+        DLV: "Drive Land Vehicle",
+        ElecSec: "Electronics/Security Tech",
+        FirstAid: "First Aid",
+        HeavyWeapons: "Heavy Weapons",
+        HumanPerception: "Human Perception",
+        Lang1: "(name of a language)",
+        LibrarySearch: "Library Search",
+        LipReading: "Lip Reading",
+        LVTech: "Land Vehicle Tech",
+        Martial: "Martial Arts",
+        Melee: "Melee Weapon",
+        PAV: "Pilot Air Vehicle",
+        PDSculpt: "Paint/Draw/Sculpt",
+        PersonalGrooming: "Personal Grooming",
+        PhotoFilm: "Photography/Film",
+        PickLock: "Pick Lock",
+        PickPocket: "Pick Pocket",
+        PSV: "Pilot Sea Vehicle",
+        RTD: "Resist Torture/Drugs",
+        ShoulderArms: "Shoulder Arms",
+        SVTech: "Sea Vehicle Tech",
+        WardrobeStyle: "Wardrobe & Style",
+        WeaponsTech: "Weaponstech",
+        Wilderness: "Wilderness Survival",
+      };
+      const BASE_NAME_MAP_LOWER = Object.fromEntries(
+        Object.entries(BASE_NAME_MAP).map(([k, v]) => [String(k).toLowerCase(), v])
+      );
+      let lastItems = [];
+      let pendingItem = null;
+      let pendingToast = null;
+
+      function setError(message) {
+        if (!message) {
+          errorEl.hidden = true;
+          errorEl.textContent = "";
+          return;
+        }
+        errorEl.hidden = false;
+        errorEl.textContent = message;
+      }
+
+      window.addEventListener("error", (e) => {
+        try {
+          setError(`JS error: ${e?.message ?? "Unknown error"}`);
+        } catch {}
+      });
+
+      window.addEventListener("unhandledrejection", (e) => {
+        try {
+          const reason = e?.reason;
+          const msg = String(reason?.stack || reason?.message || reason || "Unknown rejection");
+          setError(`Promise rejection: ${msg}`);
+        } catch {}
+      });
+
+      function normalizeValue(value) {
+        if (value === undefined || value === null) return "";
+        if (typeof value === "string") return value;
+        if (typeof value === "boolean") return value ? "true" : "false";
+        if (Array.isArray(value)) return value.join(", ");
+        try {
+          return JSON.stringify(value);
+        } catch {
+          return String(value);
+        }
+      }
+
+      function normalizeModPrefill(value) {
+        const text = String(normalizeValue(value)).trim();
+        if (!text) return "";
+        if (/^[-+]?0+(?:\\.0+)?$/.test(text)) return "";
+        return text.startsWith("+") ? text.slice(1) : text;
+      }
+
+      function normalizeModifierForRoll(text) {
+        const mod = String(text ?? "").trim();
+        if (!mod) return "";
+        if (mod.startsWith("+") || mod.startsWith("-")) return mod;
+        return `+${mod}`;
+      }
+
+      function openModal(item, toastEl) {
+        pendingItem = item;
+        pendingToast = toastEl;
+        modalTitle.textContent = `${item.displayName}`;
+        modalSub.textContent = `BASE: ${normalizeValue(item.rawValue)}`;
+        modifierInput.value = normalizeModifierForRoll(item.modText);
+        modalBackdrop.dataset.open = "true";
+        setTimeout(() => modifierInput.focus(), 0);
+      }
+
+      function closeModal() {
+        modalBackdrop.dataset.open = "false";
+        pendingItem = null;
+        pendingToast = null;
+      }
+
+      function getFieldValue(field) {
+        try {
+          if (typeof field.getText === "function") return field.getText() ?? "";
+        } catch {}
+        try {
+          if (typeof field.isChecked === "function") return field.isChecked();
+        } catch {}
+        try {
+          if (typeof field.getSelected === "function") return field.getSelected() ?? "";
+        } catch {}
+        return "";
+      }
+
+      function getPrettyBaseName(rawSuffix) {
+        const key = String(rawSuffix ?? "");
+        if (!key) return key;
+        return BASE_NAME_MAP[key] ?? BASE_NAME_MAP_LOWER[key.toLowerCase()] ?? key;
+      }
+
+      function normalizeFreeTextName(value) {
+        return String(normalizeValue(value)).replace(/\s+/g, " ").trim();
+      }
+
+      function getDynamicBaseName(rawSuffix, valueByFieldNameLower) {
+        const suffix = String(rawSuffix ?? "");
+        if (!suffix) return "";
+
+        let match = suffix.match(/^Lang(\d+)$/i);
+        if (match) {
+          const index = match[1];
+          const languageName = normalizeFreeTextName(valueByFieldNameLower?.[`lang${index}`]);
+          return languageName ? `Language: ${languageName}` : `Language ${index}`;
+        }
+
+        match = suffix.match(/^LocalExpert(\d+)$/i);
+        if (match) {
+          const index = match[1];
+          const areaName = normalizeFreeTextName(valueByFieldNameLower?.[`txt_localexpert${index}`]);
+          return areaName ? `Local Expert: ${areaName}` : `Local Expert ${index}`;
+        }
+
+        match = suffix.match(/^Science(\d+)$/i);
+        if (match) {
+          const index = match[1];
+          const scienceName = normalizeFreeTextName(valueByFieldNameLower?.[`txt_science${index}`]);
+          return scienceName ? `Science: ${scienceName}` : `Science ${index}`;
+        }
+
+        match = suffix.match(/^PlayInstrument(\d+)$/i);
+        if (match) {
+          const index = match[1];
+          const instrumentName = normalizeFreeTextName(
+            valueByFieldNameLower?.[`txt playinstrument${index}`] ?? valueByFieldNameLower?.[`txt_playinstrument${index}`]
+          );
+          return instrumentName ? `Play Instrument: ${instrumentName}` : `Play Instrument ${index}`;
+        }
+
+        return "";
+      }
+
+      function getDisplayBaseName(rawSuffix, valueByFieldNameLower) {
+        return getDynamicBaseName(rawSuffix, valueByFieldNameLower) || getPrettyBaseName(rawSuffix);
+      }
+
+      function render() {
+
+        const needle = searchInput.value.trim().toLowerCase();
+        const items = needle
+          ? lastItems.filter((it) => it.displayName.toLowerCase().includes(needle))
+          : lastItems;
+
+        // Always show the dummy card when no PDF is loaded or when there are no items
+        let displayItems = items;
+        if (items.length === 0 && lastItems.length === 0) {
+          displayItems = [];
+        }
+
+        // Add a test card for development purposes when no PDF fields are loaded
+        if (lastItems.length === 0) {
+          const testCard = {
+            name: "TEST_CARD",
+            displayName: "Test Card (Development)",
+            rawValue: 15,
+            modText: "+3"
+          };
+
+          // Always include the test card in development mode when no PDF fields exist
+          displayItems.push();
+        }
+
+        listEl.textContent = "";
+        listEl.hidden = displayItems.length === 0;
+
+        const frag = document.createDocumentFragment();
+
+        for (const item of displayItems) {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          // Geometric header bar
+          const header = document.createElement("div");
+          header.className = "cardHeader";
+
+          const title = document.createElement("h2");
+          title.className = "cardTitle";        
+          title.textContent = `./> ${item.displayName}  `;
+
+          header.appendChild(title);
+
+          // Row: BASE value + MOD field + ROLL button (button sits to the right of the text box)
+          const row = document.createElement("div");
+          row.className = "cardRow";
+
+          const baseBlock = document.createElement("div");
+          baseBlock.className = "baseBlock";
+
+          const baseLabel = document.createElement("div");
+          baseLabel.className = "baseLabel";
+          baseLabel.textContent = "BASE";
+
+          const baseValue = document.createElement("div");
+          baseValue.className = "baseValue";
+          baseValue.textContent = item.rawValue;
+
+          baseBlock.appendChild(baseLabel);
+          baseBlock.appendChild(baseValue);
+
+          const modBox = document.createElement("div");
+          modBox.className = "modBox";
+
+          const modLabel = document.createElement("span");
+          modLabel.className = "modLabel";
+          modLabel.textContent = "MODIFIERS TO BASE";
+
+          const modInput = document.createElement("input");
+          modInput.type = "text";
+          modInput.className = "modInput";
+          modInput.autocomplete = "off";
+          modInput.inputMode = "numeric";
+          modInput.placeholder = "";
+          modInput.value = item.modText || "";
+          modInput.addEventListener("input", () => {
+            item.modText = modInput.value.trim();
+          });
+
+          modBox.appendChild(modLabel);
+          modBox.appendChild(modInput);
+
+          const btn = document.createElement("button");
+          btn.className = "rollBtn";
+          btn.type = "button";
+          btn.textContent = "ROLL";
+          btn.dataset.baseFieldName = item.name;
+
+          const toast = document.createElement("div");
+          toast.className = "toast";
+
+          row.appendChild(baseBlock);
+          row.appendChild(modBox);
+          row.appendChild(btn);
+
+          const footer = document.createElement("div");
+          footer.className = "cardFooter";
+          footer.appendChild(toast);
+
+          card.appendChild(header);
+          card.appendChild(row);
+          card.appendChild(footer);
+
+          frag.appendChild(card);
+        }
+
+        listEl.appendChild(frag);
+      }
+
+      async function parsePdf(file) {
+        setError("");
+        listEl.textContent = "";
+        listEl.hidden = true;
+        lastItems = [];
+
+        if (!window.PDFLib?.PDFDocument) {
+          throw new Error("pdf-lib failed to load. Refresh the page and try again.");
+        }
+
+        const bytes = await file.arrayBuffer();
+        const pdfDoc = await PDFLib.PDFDocument.load(bytes, { ignoreEncryption: true });
+
+        let fields = [];
+        try {
+          const form = pdfDoc.getForm();
+          fields = form.getFields();
+        } catch {
+          fields = [];
+        }
+
+        const valueByFieldNameLower = {};
+        for (const field of fields) {
+          const fieldName = String(field.getName?.() ?? "");
+          if (!fieldName) continue;
+          valueByFieldNameLower[fieldName.toLowerCase()] = getFieldValue(field);
+        }
+
+
+        const items = [];
+        for (const field of fields) {
+          const name = String(field.getName?.() ?? "");
+          if (!name.startsWith(BASE_PREFIX)) continue;
+          const rawSuffix = name.slice(BASE_PREFIX.length);
+          const displayName = getDisplayBaseName(rawSuffix, valueByFieldNameLower);
+          const rawValue = getFieldValue(field);
+
+          const modFieldNameLower = (`MOD ${rawSuffix}`).toLowerCase();
+          const modRawValue = valueByFieldNameLower[modFieldNameLower];
+          const modText = normalizeModPrefill(modRawValue);
+
+          items.push({ name, displayName, rawValue, modText });
+        }
+
+        items.sort((a, b) => a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase()));
+
+        lastItems = items;
+        render();
+      }
+
+
+      listEl.addEventListener("click", (e) => {
+        const btn = e.target.closest?.("button.rollBtn");
+        if (!btn) return;
+        const baseFieldName = btn.dataset.baseFieldName;
+        if (!baseFieldName) return;
+
+        const item = lastItems.find((it) => it.name === baseFieldName);
+        if (!item) return;
+
+        const card = btn.closest(".card");
+        const toast = card ? card.querySelector(".toast") : null;
+        openModal(item, toast);
+      });
+
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files?.[0];
+        if (!file) return;
+        try {
+          await parsePdf(file);
+        } catch (e) {
+          setError(String(e?.stack || e?.message || e));
+        }
+      });
+
+      function buildRollText(item, modifierText) {
+        const mod = normalizeModifierForRoll(modifierText);
+        return `!r 1d10+${normalizeValue(item.rawValue)}${mod}  ${item.displayName}`;
+      }
+
+	async function copyRoll() {
+	  if (!pendingItem) return;
+
+	  modifierInput.value = normalizeModifierForRoll(modifierInput.value);
+	  const rollText = buildRollText(pendingItem, modifierInput.value);
+
+	  // Capture the current toast element to avoid races with closeModal()
+	  const toastEl = pendingToast;
+
+	  try {
+		await navigator.clipboard.writeText(rollText);
+
+		if (toastEl) {
+		  toastEl.textContent = "Copied to clipboard";
+		  clearTimeout(toastEl._t);
+		  toastEl._t = setTimeout(() => {
+			// Use the captured element, not global pendingToast
+			toastEl.textContent = "";
+		  }, 1100);
+		}
+
+		closeModal();
+	  } catch (e) {
+		closeModal();
+		window.alert(`Could not copy to clipboard.\n\n${rollText}`);
+	  }
+	}
+
+
+      modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === modalBackdrop) closeModal();
+      });
+      cancelBtn.addEventListener("click", closeModal);
+      copyBtn.addEventListener("click", copyRoll);
+      modifierInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") copyRoll();
+        if (e.key === "Escape") closeModal();
+      });
+
+      let renderTimer = null;
+      searchInput.addEventListener("input", () => {
+        window.clearTimeout(renderTimer);
+        renderTimer = window.setTimeout(() => {
+          window.requestAnimationFrame(render);
+        }, 60);
+      });
+
+      // Add keyboard shortcut for focusing filter input
+      document.addEventListener("keydown", (e) => {
+        // Focus the search input when '/' key is pressed
+        if (e.key === "/" && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+
+      render();
+    </script>
   </body>
 </html>
