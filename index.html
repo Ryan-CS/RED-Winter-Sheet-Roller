@@ -1211,6 +1211,22 @@
         return text.startsWith("+") ? text.slice(1) : text;
       }
 
+      function parseNumeric(value) {
+        const text = String(value ?? "").trim();
+        if (!text) return null;
+        if (!/^[-+]?\d+(?:\.\d+)?$/.test(text)) return null;
+        const num = Number(text);
+        return Number.isFinite(num) ? num : null;
+      }
+
+      function adjustBaseForMod(baseValue, modValue) {
+        const baseNum = parseNumeric(baseValue);
+        const modNum = parseNumeric(modValue);
+        if (baseNum === null || modNum === null || modNum === 0) return baseValue;
+        const adjusted = baseNum - modNum;
+        return Number.isFinite(adjusted) ? String(adjusted) : baseValue;
+      }
+
       function normalizeModifierForRoll(text) {
         const mod = String(text ?? "").trim();
         if (!mod) return "";
@@ -2121,10 +2137,11 @@
           const rawSuffix = name.replace(/^base\s+/i, "");
           const displayNameRaw = getDisplayBaseName(rawSuffix, valueByFieldNameLower);
           const displayName = cleanDisplayName(displayNameRaw);
-          const baseValue = normalizeValue(getFieldValue(field));
+          const baseRawValue = normalizeValue(getFieldValue(field));
           const modFieldNameLower = `${MOD_PREFIX}${rawSuffix}`.toLowerCase();
           const modRawValue = valueByFieldNameLower[modFieldNameLower];
           const modText = normalizeModPrefill(modRawValue);
+          const baseValue = adjustBaseForMod(baseRawValue, modText);
           const canonicalKey = guessCanonicalKey(displayName);
           const meta = canonicalMeta[canonicalKey];
 
