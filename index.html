@@ -1,737 +1,977 @@
+
 <!doctype html>
 <html lang="en">
   <head>
-      <!-- Page description (used by search engines & link previews) -->
-  <meta name="description" content="RED Winter Character Sheet Roller — a client-side tool that reads RED Winter PDF character sheets in your browser with pdf-lib, extracts form fields, and provides quick BASE + modifier roll UI. Nothing is uploaded; everything runs locally." />
-
-  <!-- Canonical / project link -->
-  <link rel="canonical" href="https://github.com/Ryan-CS/RED-Winter-Sheet-Roller" />
-
-  <!-- Open Graph (used by Discord, Facebook, Slack, etc.) -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="RED Winter Sheet Roller" />
-  <meta property="og:title" content="RED Winter Character Sheet Roller" />
-  <meta property="og:description" content="Client-side tool to read RED Winter PDF character sheets in your browser, extract form fields with pdf-lib, and quickly roll skills (BASE + modifiers). No uploads — runs locally." />
-  <meta property="og:url" content="https://github.com/Ryan-CS/RED-Winter-Sheet-Roller" />
-  <meta property="og:image" content="https://raw.githubusercontent.com/Ryan-CS/RED-Winter-Sheet-Roller/refs/heads/main/Webpreview.jpg" />
-  <meta property="og:image:alt" content="Preview of RED Winter Character Sheet Roller UI" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-
-  <!-- Twitter card (fallback / Twitter previews) -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="RED Winter Character Sheet Roller" />
-  <meta name="twitter:description" content="Client-side tool to read RED Winter PDF character sheets in your browser and quickly roll skills (BASE + modifiers). No uploads — runs locally." />
-  <meta name="twitter:image" content="https://raw.githubusercontent.com/Ryan-CS/RED-Winter-Sheet-Roller/refs/heads/main/Webpreview.jpg" />
-  <meta name="twitter:image:alt" content="Preview of RED Winter Character Sheet Roller UI" />
-
-  <!-- Legacy image hint -->
-  <link rel="image_src" href="https://raw.githubusercontent.com/Ryan-CS/RED-Winter-Sheet-Roller/refs/heads/main/Webpreview.jpg" />    
-	<title>RED Winter Character Sheet Roller</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RED Winter Character Sheet Roller</title>
     <style>
-      /* ---------- System Palette ---------- */
-      :root{
+      :root {
         color-scheme: dark;
-
-        /* base */
         --bg: #05070c;
         --bg2: #070b14;
         --panel: rgba(6, 10, 18, 0.78);
         --panel2: rgba(8, 14, 26, 0.62);
+        --panel-2: var(--panel2);
         --border: rgba(110, 255, 246, 0.18);
         --border2: rgba(255, 212, 80, 0.16);
-
-        /* text */
+        --border-strong: rgba(110, 255, 246, 0.38);
         --text: rgba(235, 246, 255, 0.92);
         --muted: rgba(180, 205, 225, 0.72);
-
-        /* accents */
-        --accent: #2cf6e8;     /* cyan/teal focus */
-        --warn: #ffd450;       /* amber actions */
-        --danger: #ff3b6a;     /* red faults */
-        --ok: #72ff4a;         /* toxic green success */
-
-        /* glows */
+        --ink: var(--text);
+        --ink-muted: var(--muted);
+        --accent: #2cf6e8;
+        --accent-2: #ffd450;
+        --accent-3: #ff3b6a;
+        --ok: #72ff4a;
         --glowA: 0 0 0.65rem rgba(44, 246, 232, 0.24), 0 0 1.4rem rgba(44, 246, 232, 0.10);
         --glowW: 0 0 0.65rem rgba(255, 212, 80, 0.20), 0 0 1.2rem rgba(255, 212, 80, 0.08);
         --glowD: 0 0 0.65rem rgba(255, 59, 106, 0.24), 0 0 1.2rem rgba(255, 59, 106, 0.10);
-        --shadow: 0 18px 42px rgba(0,0,0,0.62);
-
-        /* typography */
+        --shadow: 0 18px 42px rgba(0, 0, 0, 0.62);
         --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-
-        /* geometry */
-        --r0: 0px;
-        --r1: 2px;     /* slight chamfer feel */
-        --pad: 14px;
-
-        /* surface effects */
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
         --scanline: rgba(190, 255, 245, 0.03);
-        --noise: rgba(255,255,255,0.035);
+        --noise: rgba(255, 255, 255, 0.035);
+        --base-input: calc(5.5ch + 4px);
+        --roll-col: 64px;
+        --pin-col: 32px;
       }
 
-      /* Disable the light-theme overrides from the original file */
-      @media (prefers-color-scheme: light){
-        :root{ color-scheme: dark; }
+      * {
+        box-sizing: border-box;
       }
 
-      /* ---------- Background / HUD Layer ---------- */
-      html, body{
-        /* Do NOT lock to 100% height; it truncates backgrounds on long pages (mobile especially). */
+      html,
+      body {
         min-height: 100%;
         background: var(--bg);
       }
 
-      html{ height: auto; }
-      body{ min-height: 100vh; }
-
-      body{
-        margin:0;
-        color: var(--text);
-        font-family: var(--sans);
-        line-height:1.3;
-        background:
-          radial-gradient(1200px 520px at 12% 8%, rgba(44,246,232,0.12), transparent 60%),
-          radial-gradient(920px 620px at 88% 92%, rgba(255,212,80,0.10), transparent 58%),
-          linear-gradient(180deg, rgba(7,10,16,0.0), rgba(7,10,16,0.35)),
-          var(--bg);
-        overflow-x:hidden;
-        background-repeat:no-repeat;
+      html {
+        height: auto;
       }
 
-      /* Scanlines + subtle noise + faint grid */
-      body::before{
-        content:"";
-        position:fixed;
-        inset:0;
-        pointer-events:none;
-        z-index:-1; /* Move to behind content */
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--ink);
+        line-height: 1.3;
+        background:
+          radial-gradient(1200px 520px at 12% 8%, rgba(44, 246, 232, 0.12), transparent 60%),
+          radial-gradient(920px 620px at 88% 92%, rgba(255, 212, 80, 0.10), transparent 58%),
+          linear-gradient(180deg, rgba(7, 10, 16, 0.0), rgba(7, 10, 16, 0.35)),
+          var(--bg);
+        min-height: 100vh;
+        overflow-x: hidden;
+        background-repeat: no-repeat;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
         will-change: transform;
         transform: translateZ(0);
         background:
-          /* scanlines */
           repeating-linear-gradient(
             to bottom,
-            rgba(0,0,0,0.00),
-            rgba(0,0,0,0.00) 2px,
+            rgba(0, 0, 0, 0.00),
+            rgba(0, 0, 0, 0.00) 2px,
             var(--scanline) 3px,
-            rgba(0,0,0,0.00) 5px
+            rgba(0, 0, 0, 0.00) 5px
           ),
-          /* tiny noise */
           repeating-linear-gradient(
             90deg,
-            rgba(255,255,255,0.00),
-            rgba(255,255,255,0.00) 3px,
+            rgba(255, 255, 255, 0.00),
+            rgba(255, 255, 255, 0.00) 3px,
             var(--noise) 4px
           );
-        opacity:0.75;
+        opacity: 0.75;
         mix-blend-mode: overlay;
-        background-repeat: no-repeat; /* Prevent tiling */
+        background-repeat: no-repeat;
       }
 
-      body::after{
-        content:"";
-        position:fixed;
-        inset:0;
-        pointer-events:none;
-        z-index:-1; /* Move to behind content */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1;
         will-change: transform;
         transform: translateZ(0);
         background:
-          linear-gradient(rgba(44,246,232,0.06) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(44,246,232,0.05) 1px, transparent 1px);
+          linear-gradient(rgba(44, 246, 232, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(44, 246, 232, 0.05) 1px, transparent 1px);
         background-size: 28px 28px, 28px 28px;
-        opacity:0.14;
+        opacity: 0.14;
         filter: saturate(1.1);
-        background-repeat: no-repeat; /* Prevent tiling */
+        background-repeat: no-repeat;
       }
 
-      /* ensure app content sits above HUD effects */
-      .wrap, header, section, .modalBackdrop{ position:relative; z-index:1; }
-
-      /* ---------- Layout ---------- */
-      .wrap{
-        max-width: 1040px;
-        margin: 22px auto;
-        padding: 0 18px 44px;
+      .app {
+        max-width: 1674px;
+        margin: 24px auto 40px;
+        padding: 0 18px 32px;
       }
 
-      header{
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:16px;
-        margin-bottom:14px;
+      header {
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 16px;
+        align-items: end;
+        margin-bottom: 18px;
       }
 
-      h1{
-        margin:0 0 0 0;
-        font-size: 24px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        font-weight: 700;
-        color: rgba(225, 235, 238, 0.92);
-        text-shadow: 0 0 14px rgba(44,246,232,0.12);
-      }
-
-      label{
-        display:block;
-        font-size: 11px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: rgba(180,205,225,0.70);
-        margin-bottom: 7px;
-      }
-
-      .muted{ color: var(--muted); }
-
-      .text-sm{ font-size: 12px; }
-
-      .mono{
-        font-family: var(--mono);
-        font-size: 12px;
-      }
-
-      .panel{
-        background:
-          linear-gradient(180deg, rgba(12,18,30,0.68), rgba(6,10,18,0.78));
+      .title-block {
+        background: var(--panel);
         border: 1px solid var(--border);
-        border-radius: var(--r0);
-        padding: var(--pad);
         box-shadow: var(--shadow);
-        position:relative;
+        padding: 16px 18px;
+        position: relative;
       }
 
-      .panel--narrow{ max-width: 420px; }
-
-      .panel::before,
-      .panel::after{
-        content:"";
-        position:absolute;
-        width: 14px;
-        height: 14px;
-        border-top: 1px solid rgba(44,246,232,0.38);
-        border-left: 1px solid rgba(44,246,232,0.38);
-        top: -1px;
-        left: -1px;
-        opacity:0.9;
+      .title-block::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 12px;
+        width: 10px;
+        height: 70%;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(44, 246, 232, 0.4),
+          rgba(44, 246, 232, 0.4) 8px,
+          rgba(44, 246, 232, 0.1) 8px,
+          rgba(44, 246, 232, 0.1) 16px
+        );
       }
 
-      .panel::after{
-        top:auto;
-        left:auto;
-        right:-1px;
-        bottom:-1px;
-        border-top:none;
-        border-left:none;
-        border-right: 1px solid rgba(255,212,80,0.30);
-        border-bottom: 1px solid rgba(255,212,80,0.30);
-        width: 18px;
-        height: 18px;
-      }
-
-      .controls{
-        display:grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px 12px;
-        align-items:end;
-      }
-
-      @media (max-width: 820px){
-        .controls{ grid-template-columns: 1fr; }
-      }
-
-      input[type="file"],
-      input[type="text"]{
-        width:100%;
-        box-sizing:border-box;
-        border-radius: var(--r0);
-        border: 1px solid rgba(44,246,232,0.18);
-        padding: 10px 10px;
-        background:
-          linear-gradient(180deg, rgba(2,4,8,0.75), rgba(8,12,20,0.65));
-        color: var(--text);
-        outline:none;
-        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.55);
-      }
-
-      input[type="text"]{
+      .eyebrow {
         font-family: var(--mono);
-        letter-spacing:0.01em;
-      }
-
-      input::placeholder{
-        color: rgba(180,205,225,0.42);
-      }
-
-      input[type="file"]:focus,
-      input[type="text"]:focus{
-        border-color: rgba(44,246,232,0.62);
-        box-shadow:
-          inset 0 0 0 1px rgba(0,0,0,0.55),
-          0 0 0 2px rgba(44,246,232,0.12),
-          var(--glowA);
-      }
-
-      input[type="file"]::file-selector-button{
-        border-radius: var(--r0);
-        border: 1px solid rgba(255,212,80,0.22);
-        padding: 8px 10px;
-        margin-right: 10px;
-        background: rgba(12,18,30,0.72);
-        color: rgba(235,246,255,0.88);
-        font-family: var(--mono);
-        letter-spacing: 0.08em;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
-      }
-
-      input[type="file"]::file-selector-button:hover{
-        border-color: rgba(255,212,80,0.55);
-        box-shadow: var(--glowW);
-      }
-
-      .error{
-        color: rgba(255, 210, 220, 0.98);
-        font-size: 12px;
-        margin-top: 12px;
-        padding: 10px 12px;
-        border: 1px solid rgba(255,59,106,0.42);
-        background: rgba(20, 6, 10, 0.55);
-        box-shadow: var(--glowD);
-        white-space: pre-wrap;
-        font-family: var(--mono);
-      }
-
-      /* ---------- Cards / List ---------- */
-      .list{
-        display:grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-        margin-top: 14px;
-      }
-
-      @media (max-width: 820px){
-        .list{ grid-template-columns: 1fr; }
-      }
-
-      .card{
-        border: 1px solid rgba(44,246,232,0.16);
-        border-radius: var(--r0);
-        padding: 0px;
-        background:
-          linear-gradient(180deg, rgba(10,16,28,0.62), rgba(5,7,12,0.78));
-        position:relative;
-        overflow:hidden;
-        max-height: 6em;
-        clip-path: polygon(0 18px, 0 100%, 100% 100%, 100% 0, 18px 0);
-      }
-
-      .card::after{
-        content:"";
-        position:absolute;
-        inset: -1px;
-        pointer-events:none;
-        background:
-          linear-gradient(90deg, rgba(44,246,232,0.16), transparent 40%, rgba(255,212,80,0.10));
-        opacity:0.22;
-        mix-blend-mode: screen;
-      }
-
-
-      /* ---------- Buttons ---------- */
-
-      button{
-        border-radius: var(--r0);
-        border: 1px solid rgba(44,246,232,0.22);
-        padding: 10px 12px;
-        background:
-          linear-gradient(180deg, rgba(7,10,16,0.55), rgba(3,5,9,0.85));
-        color: rgba(235,246,255,0.90);
-        cursor:pointer;
-        font-family: var(--mono);
-        letter-spacing: 0.10em;
-        text-transform: uppercase;
-        position:relative;
-        transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease;
-        user-select:none;
-      }
-
-      button::before{
-        content:"";
-        position:absolute;
-        left:-1px; top:-1px;
-        width: 12px; height: 12px;
-        border-left: 1px solid rgba(44,246,232,0.55);
-        border-top: 1px solid rgba(44,246,232,0.55);
-        opacity:0.85;
-      }
-
-      button:hover{
-        border-color: rgba(44,246,232,0.62);
-        box-shadow: var(--glowA);
-        transform: translateY(-1px);
-        color: rgba(255,255,255,0.96);
-      }
-
-      button:active{
-        transform: translateY(0px);
-        box-shadow: 0 0 0.6rem rgba(44,246,232,0.18);
-      }
-
-      /* Make the "Copy" button feel armed */
-      #copyBtn{
-        border-color: rgba(255,212,80,0.30);
-      }
-
-      #copyBtn:hover{
-        border-color: rgba(255,212,80,0.70);
-        box-shadow: var(--glowW);
-      }
-
-      #cancelBtn{
-        border-color: rgba(255,59,106,0.22);
-      }
-
-      #cancelBtn:hover{
-        border-color: rgba(255,59,106,0.62);
-        box-shadow: var(--glowD);
-      }
-
-      /* ---------- Toast / Hint ---------- */
-      .toast{
-        margin-left:auto;
         font-size: 11px;
-        color: rgba(180,205,225,0.66);
-        font-family: var(--mono);
+        color: var(--ink-muted);
+      }
+
+      h1 {
+        margin: 6px 0 8px;
+        font-size: 28px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
       }
 
-      /* ---------- Modal: system interrupt ---------- */
-      .modalBackdrop{
-        position:fixed;
-        inset:0;
-        background: rgba(0,0,0,0.70);
-        display:none;
-        align-items:center;
-        justify-content:center;
+      .sub {
+        margin: 0;
+        color: var(--ink-muted);
+      }
+
+      .char-block {
+        background: var(--panel-2);
+        border: 1px solid var(--border);
+        padding: 14px 16px;
+        box-shadow: var(--shadow);
+      }
+
+      label {
+        display: block;
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin-bottom: 6px;
+        font-family: var(--mono);
+      }
+
+      input[type="text"],
+      input[type="number"],
+      input[type="file"],
+      textarea {
+        width: 100%;
+        border: 1px solid var(--border-strong);
+        border-radius: 4px;
+        padding: 8px 10px;
+        font-family: var(--mono);
+        background: var(--panel2);
+        color: var(--ink);
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      input[type="file"]:focus,
+      textarea:focus {
+        outline: 2px solid rgba(44, 246, 232, 0.25);
+        border-color: var(--accent);
+      }
+
+      button {
+        border: 1px solid var(--border-strong);
+        background: var(--panel);
+        padding: 8px 10px;
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        cursor: pointer;
+      }
+
+      .pinned {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 14px 16px;
+        margin-bottom: 18px;
+      }
+
+      .global-mod {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 12px 16px;
+        margin-bottom: 12px;
+      }
+
+      .global-mod-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 6px;
+      }
+
+      .pinned-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+      }
+
+      .pinned-title {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .pinned-list {
+        display: grid;
+        gap: 8px;
+        min-height: 32px;
+        flex: 1;
+        padding: 8px;
+        align-content: start;
+      }
+
+      .pinned-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .pinned-column {
+        border: 1px dashed var(--border2);
+        background: var(--panel2);
+        padding: 0;
+        min-height: 44px;
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .control-actions {
+        display: flex;
+        align-items: flex-end;
+      }
+      .columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .column {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        padding: 10px 10px 12px;
+        box-shadow: var(--shadow);
+        min-height: 120px;
+      }
+
+      .section {
+        margin-bottom: 12px;
+      }
+
+      .section-title {
+        background: rgba(44, 246, 232, 0.2);
+        color: var(--accent);
+        padding: 4px 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-family: var(--mono);
+      }
+
+      .section-title-row {
+        display: grid;
+        grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
+        align-items: center;
+        gap: 8px;
+      }
+
+      .section-head {
+        position: relative;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        color: rgba(140, 255, 255, 0.9);
+        font-weight: 700;
+      }
+
+      .section-head:not(.roll)::before {
+        content: "";
+        position: absolute;
+        left: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 78%;
+        background: rgba(140, 255, 255, 0.7);
+      }
+
+      .section-head.name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-left: 8px;
+        font-size: 12px;
+        letter-spacing: 0.16em;
+      }
+
+      .section-head.roll,
+      .section-head.base,
+      .section-head.mod,
+      .section-head.pin {
+        text-align: center;
+        padding-left: 8px;
+      }
+
+      .section-list {
+        padding: 8px 6px 2px;
+        display: grid;
+        gap: 6px;
+        min-height: 24px;
+        align-content: start;
+      }
+
+      .skill-row {
+        display: grid;
+        grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
+        align-items: center;
+        gap: 8px;
+        padding: 4px 6px;
+        border: 1px solid var(--border);
+        background: var(--panel2);
+        width: 100%;
+      }
+
+      .skill-row[draggable="true"] {
+        cursor: grab;
+      }
+
+      .skill-row.dragging {
+        opacity: 0.45;
+      }
+
+      .skill-row.group-child .skill-name {
+        padding-left: 16px;
+        position: relative;
+      }
+
+      .skill-row.group-child .skill-name::before {
+        content: ">";
+        position: absolute;
+        left: 2px;
+        color: var(--accent);
+      }
+
+      .skill-group-row {
+        display: grid;
+        grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
+        align-items: center;
+        gap: 8px;
+        padding: 4px 6px;
+        border: 1px solid var(--border);
+        background: rgba(44, 246, 232, 0.08);
+      }
+
+      .skill-group-label {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .skill-name {
+        font-size: 13px;
+        font-weight: 600;
+        min-width: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .skill-input {
+        text-align: center;
+        padding: 0 1px;
+        font-size: 12px;
+        line-height: 1.2;
+        height: 22px;
+      }
+
+      .mod-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .base-input {
+        width: var(--base-input);
+        min-width: var(--base-input);
+        max-width: var(--base-input);
+      }
+
+      .mod-input {
+        width: calc(var(--base-input) * 2);
+        min-width: calc(var(--base-input) * 2);
+        max-width: calc(var(--base-input) * 2);
+        text-align: center;
+        padding-right: 18px;
+      }
+
+      .mod-global {
+        position: absolute;
+        right: 6px;
+        font-size: 11px;
+        color: var(--accent);
+        opacity: 0.9;
+        pointer-events: none;
+        white-space: nowrap;
+        font-family: var(--mono);
+      }
+
+      .mod-global[data-empty="true"] {
+        display: none;
+      }
+
+      .roll-group {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .btn-roll {
+        background: #a1892b;
+        text-transform: none;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        padding: 2px 5px;
+        min-width: 2.2em;
+        color: #ffffff;
+        font-weight: 800;
+      }
+
+      .btn-roll:active {
+        background: #b59d3a;
+      }
+
+      .btn-multi {
+        background: var(--panel2);
+        text-transform: none;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        padding: 2px 5px;
+        min-width: 2.2em;
+        color: var(--ink);
+        font-weight: 800;
+      }
+
+      .btn-pin {
+        background: var(--panel2);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        padding: 2px 5px;
+        border: none;
+      }
+
+      .btn-pin.active {
+        background: var(--panel2);
+        color: var(--ink);
+      }
+
+      .flash {
+        animation: flash 420ms ease;
+      }
+
+      @keyframes flash {
+        0% {
+          box-shadow: 0 0 0 0 rgba(44, 246, 232, 0);
+        }
+        40% {
+          box-shadow: 0 0 0 2px rgba(44, 246, 232, 0.4);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(44, 246, 232, 0);
+        }
+      }
+
+      .fallback {
+        margin-top: 18px;
+        background: rgba(255, 59, 106, 0.12);
+        border: 1px solid var(--accent-3);
+        padding: 12px;
+      }
+
+      .fallback-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .error {
+        margin-top: 14px;
+        padding: 10px 12px;
+        border: 1px solid var(--accent-3);
+        background: rgba(255, 59, 106, 0.12);
+        color: var(--accent-3);
+        font-family: var(--mono);
+        white-space: pre-wrap;
+      }
+
+      .modalBackdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(30, 28, 24, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
         padding: 16px;
-        z-index: 50;
-        backdrop-filter: blur(2px);
+        z-index: 60;
       }
 
-      .modalBackdrop[data-open="true"]{ display:flex; }
+      .modalBackdrop[data-open="true"] {
+        display: flex;
+      }
 
-      .modal{
-        width: min(560px, 100%);
-        border-radius: var(--r0);
-        border: 1px solid rgba(255,212,80,0.26);
-        background:
-          linear-gradient(180deg, rgba(10,16,28,0.86), rgba(3,5,9,0.92));
-        box-shadow: var(--shadow), var(--glowW);
+      .modal {
+        width: min(520px, 92vw);
+        border-radius: 6px;
+        border: 1px solid var(--border-strong);
+        background: var(--panel);
+        box-shadow: var(--shadow);
         padding: 14px;
-        position:relative;
+        position: relative;
       }
 
-      .modal::before{
-        content:"MODIFER INPUT";
-        position:absolute;
+      .modal::before {
+        content: "MULTI ROLL";
+        position: absolute;
         top: -10px;
         left: 12px;
         padding: 2px 8px;
-        background: rgba(3,5,9,0.92);
-        border: 1px solid rgba(255,212,80,0.28);
-        color: rgba(255,212,80,0.90);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        color: var(--ink-muted);
         font-family: var(--mono);
         font-size: 10px;
         letter-spacing: 0.16em;
         text-transform: uppercase;
       }
 
-      .modalTitle{
+      .modalTitle {
         margin: 6px 0 0 0;
         font-size: 13px;
         letter-spacing: 0.16em;
         text-transform: uppercase;
-        font-weight: 800;
-        color: rgba(235,246,255,0.94);
+        font-weight: 700;
       }
 
-      .modalSub{
+      .modalSub {
         margin: 8px 0 0 0;
         font-size: 12px;
-        color: rgba(180,205,225,0.78);
+        color: var(--ink-muted);
         font-family: var(--mono);
       }
 
-      .modalActions{
+      .modalActions {
         margin-top: 12px;
-        display:flex;
+        display: flex;
         gap: 10px;
-        align-items:center;
-      }
-
-      .modalActions .right{ margin-left:auto; }
-
-      .modalField{ margin-top: 10px; }
-
-      /* Modifier input in modal */
-      #modifierInput{
-        font-family: var(--mono);
-      }
-
-      /* ---------- Links ---------- */
-      a{
-        color: var(--accent);
-        text-decoration:none;
-        border-bottom: 1px solid rgba(44,246,232,0.22);
-        padding-bottom: 1px;
-      }
-
-      a:hover{
-        border-bottom-color: rgba(44,246,232,0.62);
-        text-shadow: 0 0 14px rgba(44,246,232,0.18);
-      }
-
-      /* ---------- Small targeted tweaks ---------- */
-      .row .muted{
-        font-family: var(--mono);
-        letter-spacing: 0.04em;
-      }
-
-      header .panel{
-        border-color: rgba(44,246,232,0.16);
-        background: rgba(6,10,18,0.72);
-      }
-
-      header .panel .muted{
-        font-family: var(--mono);
-        letter-spacing: 0.04em;
-      }
-
-      /* ---------- Card Redesign: CP77 header + BASE/MOD/ROLL row ---------- */
-      .cardHeader{
-        position: relative;
-        padding: 0px 20px 0px 18px;
-        background-color: rgba(255, 212, 80, 0.2);
-        clip-path: polygon(0 18px, 0 100%, 100% 100%, 100% 0, 18px 0);
-        border-bottom: 1px solid rgba(255, 212, 80, 0.5);
-        box-shadow: var(--shadow), var(--glowW);
-
-      }
-
-      .cardTitle{
-        margin:0;
-        font-size: 24px;
-        text-transform: uppercase;
-        font-weight: 500;
-        
-        font-family: var(--mono);
-        color: rgba(255, 212, 80, 0.99);
-        text-shadow: 0 0 16px rgba(44,246,232,0.12);
-      }
-
-      .cardRow{
-        display:flex;
-        gap: 18px;
         align-items: center;
-        padding: 12px;
       }
 
-      .baseBlock{
-        position: relative;
-        width: 2.2em;
-        height: 32px;
-        padding: 2px 5px 6px 12px;
-        border: 1px solid rgba(44,246,232,0.14);
-        background:
-          linear-gradient(180deg, rgba(2,4,8,0.72), rgba(8,12,20,0.58));
-        box-shadow: inset 0 0 0 1px rgba(0,0,0,0.55);
-        clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+      .modalActions .right {
+        margin-left: auto;
       }
 
-      .baseLabel{
-        position: absolute;
-        top: 0px;
-        left: 4px;
-        font-family: var(--mono);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        font-size: 9px;
-
-        color: rgba(180,205,225,0.62);
-        background: rgba(2,4,8,0.85);
-        padding: 0 4px;
-        pointer-events: none;
+      .modalField {
+        margin-top: 10px;
       }
 
-      .baseValue{
-        font-family: var(--mono);
-        font-size: 36px;
-        line-height: 1;
-        text-align: right;        
-        color: rgba(235,246,255,0.94);
-        padding-top: 4px;
+      dialog {
+        border: 1px solid var(--border-strong);
+        padding: 16px;
+        box-shadow: var(--shadow);
+        background: var(--panel);
+        width: min(420px, 92vw);
       }
 
-      .modBox{
-        position: relative;
-        flex: 1 1 auto;
-        padding-left: 0;
-        border-left: none;
-        display:flex;
-        flex-direction: column;
-        gap: 0;
+      dialog::backdrop {
+        background: rgba(30, 28, 24, 0.5);
       }
 
-      .modLabel{
-        position: absolute;
-        top: -4px;
-        left: 14px;
-        font-family: var(--mono);
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        font-size: 9px;
-        color: rgba(255,212,80,0.88);
-        background: rgba(2,4,8,0.85);
-        padding: 0 4px;
-        pointer-events: none;
+      .dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 12px;
       }
 
-      input.modInput[type="text"]{
-        width: 100%;
-        font-size: 24px;        
-        padding: 8px 10px 4px;
-        border-radius: var(--r0);
-        border: 1px solid rgba(255,212,80,0.22);
-        background: rgba(2,4,8,0.72);
-        color: rgba(235,246,255,0.92);
-        box-sizing:border-box;
-        font-family: var(--mono);
+      @media (max-width: 980px) {
+        header {
+          grid-template-columns: 1fr;
+        }
+        .controls {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .columns {
+          grid-template-columns: 1fr;
+        }
+        .pinned-grid {
+          grid-template-columns: 1fr;
+        }
+        .skill-row {
+          grid-template-columns: auto 1fr auto auto auto;
+        }
       }
 
-      input.modInput[type="text"]:focus{
-        border-color: rgba(255,212,80,0.62);
-        box-shadow: 0 0 0 2px rgba(255,212,80,0.10);
+      @media (max-width: 640px) {
+        .controls {
+          grid-template-columns: 1fr;
+        }
+        .skill-row {
+          grid-template-columns: auto 1fr auto auto auto;
+          gap: 6px;
+        }
       }
-
-      @media (max-width: 520px){
-        .cardRow{ flex-wrap: wrap; }
-        input.modInput[type="text"]{ min-width: 0; width: 100%; }
-      }
-
-      .rollBtn{
-        flex: 0 0 auto;
-        padding: 12px 14px;
-        border: none;
-        color: rgba(5,7,12,0.95);
-        background: rgba(255,212,80,0.92);
-        box-shadow: 0 10px 26px rgba(0,0,0,0.45), 0 0 18px rgba(255,212,80,0.14);
-        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
-      }
-
-      .rollBtn::before{ display:none; }
-
-      .rollBtn:hover{
-        transform: translateY(-1px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.55), var(--glowW);
-      }
-
-      .rollBtn:active{
-        transform: translateY(0px);
-        box-shadow: 0 8px 18px rgba(0,0,0,0.55);
-      }
-
-      .cardFooter{
-        padding: 0 12px 12px 12px;
-        display:flex;
-        justify-content:flex-end;
-      }
-
-
-      </style>
+    </style>
   </head>
   <body>
-<div class="wrap">
+    <div class="app">
       <header>
-        <div>
-          <h1>RED Winter Character Sheet Roller</h1>
+        <div class="title-block">
+          <div class="eyebrow">RED Winter Sheet Roller</div>
+          <h1>Skill Roller</h1>
+          <p class="sub">Load a RED Winter character sheet PDF and copy roll commands fast.</p>
         </div>
-        <div class="panel panel--narrow">
-          <div class="muted text-sm">
-            Uses <a href="https://pdf-lib.js.org/" target="_blank" rel="noreferrer">pdf-lib</a> locally in your browser to using the <a href="CpEMK_BergFormv0977.pdf" target="_blank" rel="noreferrer">character sheet PDF</a> made by M.K. Bergins. Join <a href="https://discord.gg/JRctFrU5k5" target="_blank" rel="noreferrer">RED Winter</a> on Discord to play Cyberpunk RED with strangers!
-          </div>
+        <div class="char-block">
+          <label for="characterName">Character Name</label>
+          <input id="characterName" type="text" placeholder="From sheet or type here" />
         </div>
       </header>
 
-      <section class="panel">
-        <div class="controls">
-          <div>
-            <label for="file">PDF file</label>
-            <input id="file" type="file" accept="application/pdf,.pdf" />
-          </div>
-          <div>
-            <label for="search">Filter (press `/` to focus here)</label>
-            <input id="search" type="text" placeholder="e.g. Athletics, Perception" />
-          </div>
-          <div class="row">
-              <span class="muted text-sm">Modifier prompt expects text like <span class="mono">+2</span> or <span class="mono">-1</span>.</span>
-          </div>
-
+      <section class="global-mod">
+        <div class="global-mod-row">
+          <label for="globalModInput">Global Modifier</label>
+          <input id="globalModInput" type="text" placeholder="Applies to all skills" />
         </div>
+      </section>
 
-        <div class="error" id="error" hidden></div>
+      <section class="pinned">
+        <div class="pinned-head">
+          <div class="pinned-title">Pinned Skills Quick Bar</div>
+          <button id="addPinnedBtn" type="button">Add New</button>
+        </div>
+        <div class="pinned-grid">
+          <div class="pinned-column">
+            <div id="pinnedCol1" class="pinned-list" data-dropzone="pinned" data-column-id="col1"></div>
+          </div>
+          <div class="pinned-column">
+            <div id="pinnedCol2" class="pinned-list" data-dropzone="pinned" data-column-id="col2"></div>
+          </div>
+          <div class="pinned-column">
+            <div id="pinnedCol3" class="pinned-list" data-dropzone="pinned" data-column-id="col3"></div>
+          </div>
+        </div>
+      </section>
 
-        <div id="list" class="list" hidden></div>
+      <section class="controls">
+        <div class="control">
+          <label for="filterInput">Filter skills</label>
+          <input id="filterInput" type="text" placeholder="Search skills (press /)" />
+        </div>
+        <div class="control">
+          <label for="pdfInput">Load PDF</label>
+          <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
+        </div>
+        <div class="control">
+          <label for="loadStateInput">Load State</label>
+          <input id="loadStateInput" type="file" accept="application/json,.json" />
+        </div>
+        <div class="control control-actions">
+          <button id="saveStateBtn" type="button">Save State</button>
+        </div>
+      </section>
 
+      <div id="error" class="error" hidden></div>
+
+      <section class="columns" id="columns"></section>
+
+      <section id="clipboardFallback" class="fallback" hidden>
+        <div>Clipboard blocked. Copy the roll text below:</div>
+        <textarea id="fallbackText" rows="2" readonly></textarea>
+        <div class="fallback-actions">
+          <button id="fallbackSelect" type="button">Select Text</button>
+          <button id="fallbackClose" type="button">Close</button>
+        </div>
       </section>
     </div>
 
-    <div id="modalBackdrop" class="modalBackdrop">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <h2 id="modalTitle" class="modalTitle">Modifier?</h2>
-        <p id="modalSub" class="modalSub"></p>
+    <div id="rollCountBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rollCountTitle">
+        <h2 id="rollCountTitle" class="modalTitle">Multi-roll</h2>
+        <p id="rollCountSub" class="modalSub"></p>
         <div class="modalField">
-          <label for="modifierInput">Modifier (optional)</label>
-          <input id="modifierInput" type="text" placeholder="+2" autocomplete="off" />
+          <label for="rollCountInput">Number of rolls</label>
+          <input id="rollCountInput" type="number" min="1" step="1" value="2" />
         </div>
         <div class="modalActions">
-          <button id="cancelBtn" type="button">Cancel</button>
-          <button id="copyBtn" class="right" type="button">Copy</button>
+          <button id="rollCountCancel" type="button">Cancel</button>
+          <button id="rollCountCopy" class="right" type="button">Copy</button>
         </div>
       </div>
     </div>
 
+    <dialog id="addDialog">
+      <form method="dialog">
+        <div>
+          <label for="addName">Skill name</label>
+          <input id="addName" type="text" required />
+        </div>
+        <div>
+          <label for="addBase">BASE</label>
+          <input id="addBase" type="text" />
+        </div>
+        <div>
+          <label for="addMod">MOD</label>
+          <input id="addMod" type="text" />
+        </div>
+        <div class="dialog-actions">
+          <button id="addCancel" type="reset">Cancel</button>
+          <button id="addConfirm" type="submit">Add</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script id="canonical-skills" type="application/json">
+      {
+        "columns": [
+          {
+            "column": 1,
+            "sections": [
+              {
+                "name": "Awareness Skills",
+                "skills": [
+                  { "name": "Concentration", "stat": "WILL" },
+                  { "name": "Conceal/Reveal Object", "stat": "INT" },
+                  { "name": "Lip Reading", "stat": "INT" },
+                  { "name": "Perception", "stat": "INT" },
+                  { "name": "Tracking", "stat": "INT" }
+                ]
+              },
+              {
+                "name": "Body Skills",
+                "skills": [
+                  { "name": "Athletics", "stat": "DEX" },
+                  { "name": "Contortionist", "stat": "DEX" },
+                  { "name": "Dance", "stat": "DEX" },
+                  { "name": "Endurance", "stat": "WILL" },
+                  { "name": "Resist Torture/Drugs", "stat": "WILL" },
+                  { "name": "Stealth", "stat": "DEX" }
+                ]
+              },
+              {
+                "name": "Control Skills",
+                "skills": [
+                  { "name": "Drive Land Vehicle", "stat": "REF" },
+                  { "name": "Pilot Air Vehicle", "stat": "REF" },
+                  { "name": "Pilot Sea Vehicle", "stat": "REF" },
+                  { "name": "Riding", "stat": "REF" }
+                ]
+              },
+              {
+                "name": "Education Skills",
+                "skills": [
+                  { "name": "Accounting", "stat": "INT" },
+                  { "name": "Animal Handling", "stat": "INT" },
+                  { "name": "Bureaucracy", "stat": "INT" },
+                  { "name": "Business", "stat": "INT" },
+                  { "name": "Composition", "stat": "INT" },
+                  { "name": "Criminology", "stat": "INT" },
+                  { "name": "Cryptography", "stat": "INT" },
+                  { "name": "Deduction", "stat": "INT" },
+                  { "name": "Education", "stat": "INT" },
+                  { "name": "Gamble", "stat": "INT" }
+                ]
+              }
+            ]
+          },
+          {
+            "column": 2,
+            "sections": [
+              {
+                "name": "Education Skills (Advanced)",
+                "skills": [
+                  { "name": "Language", "stat": "INT" },
+                  { "name": "Library Search", "stat": "INT" },
+                  { "name": "Local Expert", "stat": "INT" },
+                  { "name": "Science", "stat": "INT" },
+                  { "name": "Tactics", "stat": "INT" },
+                  { "name": "Wilderness Survival", "stat": "INT" }
+                ]
+              },
+              {
+                "name": "Fighting Skills",
+                "skills": [
+                  { "name": "Brawling", "stat": "DEX" },
+                  { "name": "Evasion", "stat": "DEX" },
+                  { "name": "Martial Arts", "stat": "DEX" },
+                  { "name": "Melee Weapon", "stat": "DEX" }
+                ]
+              },
+              {
+                "name": "Performance Skills",
+                "skills": [
+                  { "name": "Acting", "stat": "COOL" },
+                  { "name": "Play Instrument", "stat": "TECH" }
+                ]
+              },
+              {
+                "name": "Ranged Weapon Skills",
+                "skills": [
+                  { "name": "Archery", "stat": "REF" },
+                  { "name": "Autofire", "stat": "REF" },
+                  { "name": "Handgun", "stat": "REF" }
+                ]
+              }
+            ]
+          },
+          {
+            "column": 3,
+            "sections": [
+              {
+                "name": "Ranged Weapon Skills (Advanced)",
+                "skills": [
+                  { "name": "Heavy Weapons", "stat": "REF" },
+                  { "name": "Shoulder Arms", "stat": "REF" }
+                ]
+              },
+              {
+                "name": "Social Skills",
+                "skills": [
+                  { "name": "Bribery", "stat": "COOL" },
+                  { "name": "Conversation", "stat": "EMP" },
+                  { "name": "Human Perception", "stat": "EMP" },
+                  { "name": "Interrogation", "stat": "COOL" },
+                  { "name": "Persuasion", "stat": "COOL" },
+                  { "name": "Personal Grooming", "stat": "COOL" },
+                  { "name": "Streetwise", "stat": "COOL" },
+                  { "name": "Trading", "stat": "COOL" },
+                  { "name": "Wardrobe & Style", "stat": "COOL" }
+                ]
+              },
+              {
+                "name": "Technique Skills",
+                "skills": [
+                  { "name": "Air Vehicle Tech", "stat": "TECH" },
+                  { "name": "Basic Tech", "stat": "TECH" },
+                  { "name": "Cybertech", "stat": "TECH" },
+                  { "name": "Demolitions", "stat": "TECH" },
+                  { "name": "Electronics/Security Tech", "stat": "TECH" },
+                  { "name": "First Aid", "stat": "TECH" },
+                  { "name": "Forgery", "stat": "TECH" },
+                  { "name": "Land Vehicle Tech", "stat": "TECH" },
+                  { "name": "Paint/Draw/Sculpt", "stat": "TECH" },
+                  { "name": "Paramedic", "stat": "TECH" },
+                  { "name": "Photography/Film", "stat": "TECH" },
+                  { "name": "Pick Lock", "stat": "TECH" },
+                  { "name": "Pick Pocket", "stat": "TECH" },
+                  { "name": "Sea Vehicle Tech", "stat": "TECH" },
+                  { "name": "Weapons Tech", "stat": "TECH" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    </script>
     <script>
-      const fileInput = document.getElementById("file");
-      const searchInput = document.getElementById("search");
+      const pdfInput = document.getElementById("pdfInput");
+      const filterInput = document.getElementById("filterInput");
+      const loadStateInput = document.getElementById("loadStateInput");
+      const saveStateBtn = document.getElementById("saveStateBtn");
       const errorEl = document.getElementById("error");
-      const listEl = document.getElementById("list");
-      const modalBackdrop = document.getElementById("modalBackdrop");
-      const modalTitle = document.getElementById("modalTitle");
-      const modalSub = document.getElementById("modalSub");
-      const modifierInput = document.getElementById("modifierInput");
-      const cancelBtn = document.getElementById("cancelBtn");
-      const copyBtn = document.getElementById("copyBtn");
+      const columnsEl = document.getElementById("columns");
+      const pinnedColumnEls = {
+        col1: document.getElementById("pinnedCol1"),
+        col2: document.getElementById("pinnedCol2"),
+        col3: document.getElementById("pinnedCol3")
+      };
+      const characterNameInput = document.getElementById("characterName");
+      const fallbackEl = document.getElementById("clipboardFallback");
+      const fallbackTextEl = document.getElementById("fallbackText");
+      const fallbackSelectBtn = document.getElementById("fallbackSelect");
+      const fallbackCloseBtn = document.getElementById("fallbackClose");
+      const rollCountBackdrop = document.getElementById("rollCountBackdrop");
+      const rollCountTitle = document.getElementById("rollCountTitle");
+      const rollCountSub = document.getElementById("rollCountSub");
+      const rollCountInput = document.getElementById("rollCountInput");
+      const rollCountCancel = document.getElementById("rollCountCancel");
+      const rollCountCopy = document.getElementById("rollCountCopy");
+      const addDialog = document.getElementById("addDialog");
+      const addName = document.getElementById("addName");
+      const addBase = document.getElementById("addBase");
+      const addMod = document.getElementById("addMod");
+      const addPinnedBtn = document.getElementById("addPinnedBtn");
+      const globalModInput = document.getElementById("globalModInput");
 
       const BASE_PREFIX = "BASE ";
-      // When the PDF uses compressed/abbreviated field suffixes (e.g. "HumanPerception"),
-      // display the normal spaced name (e.g. "Human Perception"). Case-insensitive.
-      const BASE_NAME_MAP = {
-        AnimalHandling: "Animal Handling",
-        AVTech: "Air Vehicle Tech",
-        BasicTech: "Basic Tech",
-        Conceal: "Conceal/Reveal",
+      const MOD_PREFIX = "MOD ";
+
+      const canonicalOrdering = JSON.parse(
+        document.getElementById("canonical-skills").textContent || '{"columns":[]}'
+      );
+
+        const BASE_NAME_MAP = {
+          AnimalHandling: "Animal Handling",
+          AVTech: "Air Vehicle Tech",
+          BasicTech: "Basic Tech",
+          Conceal: "Conceal/Reveal Object",
         Contortion: "Contortionist",
-        Cybertech: "CyberTech",
+        Cybertech: "Cybertech",
         DLV: "Drive Land Vehicle",
         ElecSec: "Electronics/Security Tech",
         FirstAid: "First Aid",
         HeavyWeapons: "Heavy Weapons",
         HumanPerception: "Human Perception",
-        Lang1: "(name of a language)",
+        Lang1: "Language",
         LibrarySearch: "Library Search",
         LipReading: "Lip Reading",
         LVTech: "Land Vehicle Tech",
@@ -744,19 +984,57 @@
         PickLock: "Pick Lock",
         PickPocket: "Pick Pocket",
         PSV: "Pilot Sea Vehicle",
-        RTD: "Resist Torture/Drugs",
-        ShoulderArms: "Shoulder Arms",
-        SVTech: "Sea Vehicle Tech",
-        WardrobeStyle: "Wardrobe & Style",
-        WeaponsTech: "Weaponstech",
-        Wilderness: "Wilderness Survival",
-      };
+          RTD: "Resist Torture/Drugs",
+          StreetSlang: "Language: Streetslang",
+          ShoulderArms: "Shoulder Arms",
+          SVTech: "Sea Vehicle Tech",
+          WardrobeStyle: "Wardrobe & Style",
+          WeaponsTech: "Weapons Tech",
+          Wilderness: "Wilderness Survival"
+        };
+
       const BASE_NAME_MAP_LOWER = Object.fromEntries(
         Object.entries(BASE_NAME_MAP).map(([k, v]) => [String(k).toLowerCase(), v])
       );
-      let lastItems = [];
-      let pendingItem = null;
-      let pendingToast = null;
+
+      const canonicalMeta = {};
+      const canonicalOrder = [];
+      const canonicalSectionOrder = [];
+
+      canonicalOrdering.columns.forEach((col, colIndex) => {
+        col.sections.forEach((section) => {
+          const sectionId = toId(section.name);
+          if (!canonicalSectionOrder.includes(sectionId)) {
+            canonicalSectionOrder.push(sectionId);
+          }
+          section.skills.forEach((skill) => {
+            const key = toKey(skill.name);
+            canonicalMeta[key] = {
+              key,
+              displayName: skill.name,
+              stat: skill.stat,
+              sectionId,
+              sectionName: section.name,
+              defaultColumn: `col${colIndex + 1}`,
+              order: canonicalOrder.length
+            };
+            canonicalOrder.push(key);
+          });
+        });
+      });
+
+      const state = {
+        characterName: "",
+        skills: {},
+        columnSkills: { col1: [], col2: [], col3: [] },
+        pinnedColumns: { col1: [], col2: [], col3: [] },
+        customCounter: 0,
+        globalMod: ""
+      };
+
+      let dragState = null;
+      let pendingMulti = null;
+      let suppressPinClick = false;
 
       function setError(message) {
         if (!message) {
@@ -767,21 +1045,6 @@
         errorEl.hidden = false;
         errorEl.textContent = message;
       }
-
-      window.addEventListener("error", (e) => {
-        try {
-          setError(`JS error: ${e?.message ?? "Unknown error"}`);
-        } catch {}
-      });
-
-      window.addEventListener("unhandledrejection", (e) => {
-        try {
-          const reason = e?.reason;
-          const msg = String(reason?.stack || reason?.message || reason || "Unknown rejection");
-          setError(`Promise rejection: ${msg}`);
-        } catch {}
-      });
-
       function normalizeValue(value) {
         if (value === undefined || value === null) return "";
         if (typeof value === "string") return value;
@@ -797,7 +1060,7 @@
       function normalizeModPrefill(value) {
         const text = String(normalizeValue(value)).trim();
         if (!text) return "";
-        if (/^[-+]?0+(?:\\.0+)?$/.test(text)) return "";
+        if (/^[-+]?0+(?:\.0+)?$/.test(text)) return "";
         return text.startsWith("+") ? text.slice(1) : text;
       }
 
@@ -808,20 +1071,58 @@
         return `+${mod}`;
       }
 
-      function openModal(item, toastEl) {
-        pendingItem = item;
-        pendingToast = toastEl;
-        modalTitle.textContent = `${item.displayName}`;
-        modalSub.textContent = `BASE: ${normalizeValue(item.rawValue)}`;
-        modifierInput.value = normalizeModifierForRoll(item.modText);
-        modalBackdrop.dataset.open = "true";
-        setTimeout(() => modifierInput.focus(), 0);
+      function buildCombinedModifier(skillMod, globalMod) {
+        const normalizedSkill = normalizeModifierForRoll(skillMod);
+        const normalizedGlobal = normalizeModifierForRoll(globalMod);
+        if (!normalizedSkill && !normalizedGlobal) return "";
+        if (!normalizedSkill) return normalizedGlobal;
+        if (!normalizedGlobal) return normalizedSkill;
+        return `${normalizedSkill}${normalizedGlobal}`;
       }
 
-      function closeModal() {
-        modalBackdrop.dataset.open = "false";
-        pendingItem = null;
-        pendingToast = null;
+      function toKey(name) {
+        return String(name || "")
+          .toLowerCase()
+          .replace(/\(x\d+\)/gi, "")
+          .replace(/\([^)]*\)$/, "")
+          .replace(/&/g, "and")
+          .replace(/\//g, " ")
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim()
+          .replace(/\s+/g, " ");
+      }
+
+      const GROUPED_CANONICAL_KEYS = new Set([
+        toKey("Language"),
+        toKey("Local Expert"),
+        toKey("Science"),
+        toKey("Play Instrument")
+      ]);
+
+      function toId(name) {
+        return String(name || "")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+
+      function cleanDisplayName(name) {
+        return String(name || "")
+          .replace(/\s*\(x\d+\)\s*/gi, "")
+          .replace(/\s*\((int|ref|dex|cool|tech|will|emp)\)\s*/gi, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+        function guessCanonicalKey(displayName) {
+          const normalized = toKey(displayName);
+          if (!normalized) return "";
+          if (normalized.replace(/\s+/g, "") === "streetslang") return toKey("Language");
+          if (normalized.startsWith("language")) return toKey("Language");
+          if (normalized.startsWith("local expert")) return toKey("Local Expert");
+          if (normalized.startsWith("science")) return toKey("Science");
+          if (normalized.startsWith("play instrument")) return toKey("Play Instrument");
+          return canonicalMeta[normalized] ? normalized : "";
       }
 
       function getFieldValue(field) {
@@ -888,123 +1189,740 @@
         return getDynamicBaseName(rawSuffix, valueByFieldNameLower) || getPrettyBaseName(rawSuffix);
       }
 
-      function render() {
+      function extractCharacterName(valueByFieldNameLower) {
+        const keys = Object.keys(valueByFieldNameLower || {});
+        const preferred = keys.find((key) => key.includes("character") && key.includes("name"));
+        if (preferred) return normalizeFreeTextName(valueByFieldNameLower[preferred]);
 
-        const needle = searchInput.value.trim().toLowerCase();
-        const items = needle
-          ? lastItems.filter((it) => it.displayName.toLowerCase().includes(needle))
-          : lastItems;
+        const fallback = keys.find((key) => key === "name" || key.endsWith("charactername") || key.endsWith("charname"));
+        if (fallback) return normalizeFreeTextName(valueByFieldNameLower[fallback]);
 
-        // Always show the dummy card when no PDF is loaded or when there are no items
-        let displayItems = items;
-        if (items.length === 0 && lastItems.length === 0) {
-          displayItems = [];
-        }
-
-        // Add a test card for development purposes when no PDF fields are loaded
-        if (lastItems.length === 0) {
-          const testCard = {
-            name: "TEST_CARD",
-            displayName: "Test Card (Development)",
-            rawValue: 15,
-            modText: "+3"
-          };
-
-          // Always include the test card in development mode when no PDF fields exist
-          displayItems.push();
-        }
-
-        listEl.textContent = "";
-        listEl.hidden = displayItems.length === 0;
-
-        const frag = document.createDocumentFragment();
-
-        for (const item of displayItems) {
-          const card = document.createElement("div");
-          card.className = "card";
-
-          // Geometric header bar
-          const header = document.createElement("div");
-          header.className = "cardHeader";
-
-          const title = document.createElement("h2");
-          title.className = "cardTitle";        
-          title.textContent = `./> ${item.displayName}  `;
-
-          header.appendChild(title);
-
-          // Row: BASE value + MOD field + ROLL button (button sits to the right of the text box)
-          const row = document.createElement("div");
-          row.className = "cardRow";
-
-          const baseBlock = document.createElement("div");
-          baseBlock.className = "baseBlock";
-
-          const baseLabel = document.createElement("div");
-          baseLabel.className = "baseLabel";
-          baseLabel.textContent = "BASE";
-
-          const baseValue = document.createElement("div");
-          baseValue.className = "baseValue";
-          baseValue.textContent = item.rawValue;
-
-          baseBlock.appendChild(baseLabel);
-          baseBlock.appendChild(baseValue);
-
-          const modBox = document.createElement("div");
-          modBox.className = "modBox";
-
-          const modLabel = document.createElement("span");
-          modLabel.className = "modLabel";
-          modLabel.textContent = "MODIFIERS TO BASE";
-
-          const modInput = document.createElement("input");
-          modInput.type = "text";
-          modInput.className = "modInput";
-          modInput.autocomplete = "off";
-          modInput.inputMode = "numeric";
-          modInput.placeholder = "";
-          modInput.value = item.modText || "";
-          modInput.addEventListener("input", () => {
-            item.modText = modInput.value.trim();
-          });
-
-          modBox.appendChild(modLabel);
-          modBox.appendChild(modInput);
-
-          const btn = document.createElement("button");
-          btn.className = "rollBtn";
-          btn.type = "button";
-          btn.textContent = "ROLL";
-          btn.dataset.baseFieldName = item.name;
-
-          const toast = document.createElement("div");
-          toast.className = "toast";
-
-          row.appendChild(baseBlock);
-          row.appendChild(modBox);
-          row.appendChild(btn);
-
-          const footer = document.createElement("div");
-          footer.className = "cardFooter";
-          footer.appendChild(toast);
-
-          card.appendChild(header);
-          card.appendChild(row);
-          card.appendChild(footer);
-
-          frag.appendChild(card);
-        }
-
-        listEl.appendChild(frag);
+        return "";
       }
 
+      function setCharacterName(name) {
+        state.characterName = name || "";
+        characterNameInput.value = state.characterName;
+      }
+
+      function formatNameWithStat(name, stat) {
+        const base = String(name || "").trim();
+        const trimmedStat = String(stat || "").trim();
+        if (!trimmedStat) return base;
+        const suffix = ` (${trimmedStat})`;
+        if (base.toUpperCase().endsWith(suffix.toUpperCase())) return base;
+        return `${base}${suffix}`;
+      }
+
+      function formatSkillLabel(skill) {
+        return formatNameWithStat(skill.displayName, skill.stat);
+      }
+
+      function groupedPrefixForKey(canonicalKey) {
+        const key = String(canonicalKey || "");
+        if (key === toKey("Language")) return "Language";
+        if (key === toKey("Local Expert")) return "Local Expert";
+        if (key === toKey("Science")) return "Science";
+        if (key === toKey("Play Instrument")) return "Play Instrument";
+        return "";
+      }
+
+      function getGroupedChildLabel(skill) {
+        if (!skill || !GROUPED_CANONICAL_KEYS.has(skill.canonicalKey)) return "";
+        const prefix = groupedPrefixForKey(skill.canonicalKey);
+        if (!prefix) return "";
+        const raw = String(skill.displayName || "").trim();
+        const colonPattern = new RegExp(`^${prefix}\\s*:`, "i");
+        if (colonPattern.test(raw)) {
+          const trimmed = raw.replace(colonPattern, "").trim();
+          return trimmed || raw;
+        }
+        const spacePattern = new RegExp(`^${prefix}\\s+`, "i");
+        if (spacePattern.test(raw)) {
+          const trimmed = raw.replace(spacePattern, "").trim();
+          return trimmed || raw;
+        }
+        return raw;
+      }
+
+      function formatGroupHeaderLabel(canonicalKey) {
+        const meta = canonicalMeta[canonicalKey];
+        if (!meta) return groupedPrefixForKey(canonicalKey) || "Group";
+        return formatNameWithStat(meta.displayName, meta.stat);
+      }
+
+      function buildRollText(skill, isMulti, rollCount) {
+        const base = String(skill.base || "").trim() || "0";
+        const mod = buildCombinedModifier(skill.mod, state.globalMod);
+        const skillName = skill.displayName;
+        if (isMulti) {
+          return `!rr ${rollCount} 1d10+${base}${mod} ${skillName}`;
+        }
+        return `!r 1d10+${base}${mod} ${skillName}`;
+      }
+
+      function openRollCountModal(skill, flashEl) {
+        pendingMulti = { skill, flashEl };
+        rollCountTitle.textContent = formatSkillLabel(skill);
+        rollCountSub.textContent = "Enter the number of rolls.";
+        rollCountInput.value = "2";
+        rollCountBackdrop.dataset.open = "true";
+        setTimeout(() => {
+          rollCountInput.focus();
+          rollCountInput.select();
+        }, 0);
+      }
+
+      function closeRollCountModal() {
+        rollCountBackdrop.dataset.open = "false";
+        pendingMulti = null;
+      }
+
+      async function submitRollCount() {
+        if (!pendingMulti) return;
+        const count = Number(rollCountInput.value);
+        if (!Number.isInteger(count) || count <= 0) {
+          rollCountSub.textContent = "Enter a whole number greater than 0.";
+          rollCountInput.focus();
+          return;
+        }
+        const text = buildRollText(pendingMulti.skill, true, count);
+        await copyRollText(text, pendingMulti.flashEl);
+        closeRollCountModal();
+      }
+
+      async function copyRollText(text, flashEl) {
+        try {
+          await navigator.clipboard.writeText(text);
+          if (flashEl) {
+            flashEl.classList.remove("flash");
+            void flashEl.offsetWidth;
+            flashEl.classList.add("flash");
+          }
+          return true;
+        } catch {
+          fallbackTextEl.value = text;
+          fallbackEl.hidden = false;
+          fallbackTextEl.focus();
+          fallbackTextEl.select();
+          return false;
+        }
+      }
+
+      function allPinnedIds() {
+        return [...state.pinnedColumns.col1, ...state.pinnedColumns.col2, ...state.pinnedColumns.col3];
+      }
+
+      function isPinned(skillId) {
+        return allPinnedIds().includes(skillId);
+      }
+
+      function getPinnedColumn(skillId) {
+        if (state.pinnedColumns.col1.includes(skillId)) return "col1";
+        if (state.pinnedColumns.col2.includes(skillId)) return "col2";
+        if (state.pinnedColumns.col3.includes(skillId)) return "col3";
+        return "";
+      }
+
+      function removePinned(skillId) {
+        Object.keys(state.pinnedColumns).forEach((col) => {
+          state.pinnedColumns[col] = state.pinnedColumns[col].filter((id) => id !== skillId);
+        });
+      }
+
+      function addPinned(skillId, columnId = "col1") {
+        removePinned(skillId);
+        const list = state.pinnedColumns[columnId] || state.pinnedColumns.col1;
+        list.push(skillId);
+      }
+
+      function ensurePinnedColumns() {
+        if (!state.pinnedColumns || typeof state.pinnedColumns !== "object") {
+          state.pinnedColumns = { col1: [], col2: [], col3: [] };
+          return;
+        }
+        ["col1", "col2", "col3"].forEach((col) => {
+          if (!Array.isArray(state.pinnedColumns[col])) state.pinnedColumns[col] = [];
+        });
+      }
+
+      function prunePinnedColumns() {
+        ensurePinnedColumns();
+        Object.keys(state.pinnedColumns).forEach((col) => {
+          state.pinnedColumns[col] = state.pinnedColumns[col].filter((id) => state.skills[id]);
+        });
+      }
+
+      function addSkill(skill) {
+        state.skills[skill.id] = skill;
+      }
+
+      function removeSkill(skillId) {
+        delete state.skills[skillId];
+        Object.keys(state.columnSkills).forEach((col) => {
+          state.columnSkills[col] = state.columnSkills[col].filter((id) => id !== skillId);
+        });
+        removePinned(skillId);
+      }
+
+      function ensureSkillInColumn(skillId, columnId) {
+        if (!state.columnSkills[columnId].includes(skillId)) {
+          state.columnSkills[columnId].push(skillId);
+        }
+      }
+
+      function defaultColumnForSkill(skill) {
+        if (skill.canonicalKey && canonicalMeta[skill.canonicalKey]) {
+          return canonicalMeta[skill.canonicalKey].defaultColumn;
+        }
+        return "col3";
+      }
+
+      function sectionForSkill(skill) {
+        if (skill.canonicalKey && canonicalMeta[skill.canonicalKey]) {
+          return canonicalMeta[skill.canonicalKey].sectionId;
+        }
+        return "unmapped";
+      }
+
+      function sectionNameForSkill(skill) {
+        if (skill.canonicalKey && canonicalMeta[skill.canonicalKey]) {
+          return canonicalMeta[skill.canonicalKey].sectionName;
+        }
+        return "Unmapped";
+      }
+
+      function displaySectionName(name) {
+        return name.replace(/\s*\(advanced\)\s*/i, "").trim();
+      }
+
+      function buildDefaultLayout() {
+        state.columnSkills = { col1: [], col2: [], col3: [] };
+        const byCanonical = {};
+        const unmapped = [];
+
+        Object.values(state.skills).forEach((skill) => {
+          if (skill.source === "custom") return;
+          if (skill.canonicalKey && canonicalMeta[skill.canonicalKey]) {
+            byCanonical[skill.canonicalKey] = byCanonical[skill.canonicalKey] || [];
+            byCanonical[skill.canonicalKey].push(skill.id);
+          } else {
+            unmapped.push(skill.id);
+          }
+        });
+
+        canonicalOrder.forEach((key) => {
+          const ids = byCanonical[key] || [];
+          ids.forEach((id) => {
+            const col = defaultColumnForSkill(state.skills[id]);
+            state.columnSkills[col].push(id);
+          });
+        });
+
+        unmapped.forEach((id) => {
+          state.columnSkills.col3.push(id);
+        });
+      }
+
+      function render() {
+        const needle = filterInput.value.trim().toLowerCase();
+        const visibleSkillIds = new Set();
+
+        Object.values(state.skills).forEach((skill) => {
+          if (needle && !skill.displayName.toLowerCase().includes(needle)) return;
+          visibleSkillIds.add(skill.id);
+        });
+
+        renderPinned();
+        renderColumns(visibleSkillIds);
+      }
+
+      function renderPinned() {
+        Object.values(pinnedColumnEls).forEach((list) => {
+          list.textContent = "";
+        });
+
+        const pinnedIds = allPinnedIds();
+        if (pinnedIds.length === 0) {
+          const empty = document.createElement("div");
+          empty.textContent = "No pinned skills yet.";
+          empty.style.fontSize = "11px";
+          empty.style.color = "var(--ink-muted)";
+          empty.style.fontFamily = "var(--mono)";
+          pinnedColumnEls.col1.appendChild(empty);
+          return;
+        }
+
+        Object.entries(state.pinnedColumns).forEach(([columnId, ids]) => {
+          ids.forEach((skillId) => {
+            const skill = state.skills[skillId];
+            if (!skill) return;
+            const row = buildSkillRow(skill, true, columnId);
+            pinnedColumnEls[columnId].appendChild(row);
+          });
+        });
+      }
+
+      function renderColumns(visibleSkillIds) {
+        columnsEl.textContent = "";
+
+        const columns = ["col1", "col2", "col3"];
+        const sectionOrder = [...canonicalSectionOrder, "unmapped"];
+
+        columns.forEach((columnId) => {
+          const col = document.createElement("div");
+          col.className = "column";
+          col.dataset.columnId = columnId;
+
+          sectionOrder.forEach((sectionId) => {
+            const skillsInSection = state.columnSkills[columnId].filter((id) => {
+              const skill = state.skills[id];
+              if (!skill) return false;
+              if (!visibleSkillIds.has(id)) return false;
+              return sectionForSkill(skill) === sectionId;
+            });
+
+            if (skillsInSection.length === 0) return;
+
+            const section = document.createElement("div");
+            section.className = "section";
+
+            const title = document.createElement("div");
+            title.className = "section-title";
+
+            const titleRow = document.createElement("div");
+            titleRow.className = "section-title-row";
+
+            const rollHead = document.createElement("div");
+            rollHead.className = "section-head roll";
+            rollHead.textContent = "ROLL";
+
+            const nameHead = document.createElement("div");
+            nameHead.className = "section-head name";
+            nameHead.textContent =
+              sectionId === "unmapped"
+                ? "Unmapped"
+                : displaySectionName(sectionNameForSkill(state.skills[skillsInSection[0]]));
+
+            const baseHead = document.createElement("div");
+            baseHead.className = "section-head base";
+            baseHead.textContent = "BASE";
+
+            const modHead = document.createElement("div");
+            modHead.className = "section-head mod";
+            modHead.textContent = "MOD";
+
+            const pinHead = document.createElement("div");
+            pinHead.className = "section-head pin";
+            pinHead.textContent = "PIN";
+
+            titleRow.appendChild(rollHead);
+            titleRow.appendChild(nameHead);
+            titleRow.appendChild(baseHead);
+            titleRow.appendChild(modHead);
+            titleRow.appendChild(pinHead);
+            title.appendChild(titleRow);
+
+            const list = document.createElement("div");
+            list.className = "section-list";
+            list.dataset.dropzone = "column";
+            list.dataset.columnId = columnId;
+            list.dataset.sectionId = sectionId;
+
+            const groupHeaders = new Set();
+            skillsInSection.forEach((skillId) => {
+              const skill = state.skills[skillId];
+              if (!skill) return;
+              if (GROUPED_CANONICAL_KEYS.has(skill.canonicalKey) && !groupHeaders.has(skill.canonicalKey)) {
+                const groupRow = document.createElement("div");
+                groupRow.className = "skill-group-row";
+                const rollCell = document.createElement("div");
+                const nameCell = document.createElement("div");
+                nameCell.className = "skill-group-label";
+                nameCell.textContent = formatGroupHeaderLabel(skill.canonicalKey);
+                const baseCell = document.createElement("div");
+                const modCell = document.createElement("div");
+                const pinCell = document.createElement("div");
+                groupRow.appendChild(rollCell);
+                groupRow.appendChild(nameCell);
+                groupRow.appendChild(baseCell);
+                groupRow.appendChild(modCell);
+                groupRow.appendChild(pinCell);
+                list.appendChild(groupRow);
+                groupHeaders.add(skill.canonicalKey);
+              }
+              const groupedLabel = getGroupedChildLabel(skill);
+              const row = buildSkillRow(skill, false, "", {
+                nameOverride: groupedLabel || "",
+                isGroupChild: Boolean(groupedLabel)
+              });
+              list.appendChild(row);
+            });
+
+            section.appendChild(title);
+            section.appendChild(list);
+            col.appendChild(section);
+          });
+
+          columnsEl.appendChild(col);
+        });
+      }
+      function buildSkillRow(skill, isPinnedRow, pinnedColumnId, options) {
+        const config = options || {};
+        const row = document.createElement("div");
+        row.className = "skill-row";
+        row.dataset.skillId = skill.id;
+        row.dataset.source = isPinnedRow ? "pinned" : "column";
+        const resolvedPinnedColumn = pinnedColumnId || getPinnedColumn(skill.id);
+        if (resolvedPinnedColumn) {
+          row.dataset.pinnedColumnId = resolvedPinnedColumn;
+        }
+
+        const rollGroup = document.createElement("div");
+        rollGroup.className = "roll-group";
+
+        const rollBtn = document.createElement("button");
+        rollBtn.className = "btn-roll";
+        rollBtn.type = "button";
+        rollBtn.textContent = "!r";
+
+        const multiBtn = document.createElement("button");
+        multiBtn.className = "btn-multi";
+        multiBtn.type = "button";
+        multiBtn.textContent = "!rr";
+
+        rollGroup.appendChild(rollBtn);
+        rollGroup.appendChild(multiBtn);
+
+        const nameEl = document.createElement("div");
+        nameEl.className = "skill-name";
+        nameEl.textContent = config.nameOverride ? config.nameOverride : formatSkillLabel(skill);
+        if (config.isGroupChild) {
+          row.classList.add("group-child");
+        }
+
+        const baseInput = document.createElement("input");
+        baseInput.type = "text";
+        baseInput.className = "skill-input base-input";
+        baseInput.value = skill.base || "";
+        baseInput.addEventListener("input", () => {
+          skill.base = baseInput.value;
+        });
+
+        const modInput = document.createElement("input");
+        modInput.type = "text";
+        modInput.className = "skill-input mod-input";
+        modInput.value = skill.mod || "";
+        modInput.addEventListener("input", () => {
+          skill.mod = modInput.value;
+        });
+        modInput.addEventListener("keydown", async (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          const text = buildRollText(skill, false);
+          await copyRollText(text, row);
+        });
+
+        const modWrap = document.createElement("div");
+        modWrap.className = "mod-wrap";
+
+        const modGlobal = document.createElement("span");
+        modGlobal.className = "mod-global";
+        modGlobal.textContent = state.globalMod.trim();
+        modGlobal.dataset.empty = state.globalMod.trim() ? "false" : "true";
+
+        const pinBtn = document.createElement("button");
+        pinBtn.className = "btn-pin";
+        pinBtn.type = "button";
+        pinBtn.textContent = "[ ]";
+        pinBtn.draggable = true;
+        pinBtn.setAttribute("draggable", "true");
+        if (isPinned(skill.id)) {
+          pinBtn.classList.add("active");
+          pinBtn.textContent = "[■]";
+        }
+
+        rollBtn.addEventListener("click", async () => {
+          const text = buildRollText(skill, false);
+          await copyRollText(text, row);
+        });
+
+        multiBtn.addEventListener("click", () => {
+          openRollCountModal(skill, row);
+        });
+
+        pinBtn.addEventListener("click", () => {
+          if (suppressPinClick) return;
+          const isPinnedNow = isPinned(skill.id);
+          if (isPinnedNow) {
+            removePinned(skill.id);
+            if (skill.source === "custom") {
+              removeSkill(skill.id);
+            }
+          } else {
+            addPinned(skill.id, "col1");
+          }
+          pinBtn.textContent = isPinned(skill.id) ? "[■]" : "[ ]";
+          render();
+        });
+
+        const startPinDrag = (event) => {
+          if (dragState) return;
+          suppressPinClick = true;
+          dragState = {
+            skillId: skill.id,
+            source: isPinned(skill.id) ? "pinned" : "pin",
+            pinnedColumnId: row.dataset.pinnedColumnId || getPinnedColumn(skill.id) || ""
+          };
+          row.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+          try {
+            event.dataTransfer.setData("text/plain", skill.id);
+          } catch {}
+        };
+
+        const endPinDrag = () => {
+          row.classList.remove("dragging");
+          setTimeout(() => {
+            dragState = null;
+            suppressPinClick = false;
+          }, 0);
+        };
+
+        pinBtn.addEventListener("dragstart", startPinDrag);
+        pinBtn.addEventListener("dragend", endPinDrag);
+
+        row.appendChild(rollGroup);
+        row.appendChild(nameEl);
+        row.appendChild(baseInput);
+        modWrap.appendChild(modInput);
+        modWrap.appendChild(modGlobal);
+        row.appendChild(modWrap);
+        row.appendChild(pinBtn);
+
+        return row;
+      }
+
+      function handlePinnedDrop(columnId, targetSkillId) {
+        if (!dragState) return;
+        if (dragState.source !== "pinned" && dragState.source !== "pin") return;
+
+        const targetList = state.pinnedColumns[columnId];
+        if (!targetList) return;
+        if (dragState.source === "pinned") {
+          const fromColumn = dragState.pinnedColumnId || "col1";
+          const sourceList = state.pinnedColumns[fromColumn];
+          if (!sourceList) return;
+          const currentIndex = sourceList.indexOf(dragState.skillId);
+          if (currentIndex === -1) return;
+          sourceList.splice(currentIndex, 1);
+        } else {
+          removePinned(dragState.skillId);
+        }
+
+        let insertIndex = targetList.length;
+        if (targetSkillId) {
+          const targetIndex = targetList.indexOf(targetSkillId);
+          if (targetIndex !== -1) insertIndex = targetIndex;
+        }
+        targetList.splice(insertIndex, 0, dragState.skillId);
+        render();
+      }
+
+      function handlePinnedDropFromColumn(columnId, targetSkillId) {
+        if (!dragState || dragState.source !== "column") return;
+        const targetList = state.pinnedColumns[columnId];
+        if (!targetList) return;
+        let insertIndex = targetList.length;
+        if (targetSkillId) {
+          const targetIndex = targetList.indexOf(targetSkillId);
+          if (targetIndex !== -1) insertIndex = targetIndex;
+        }
+        targetList.splice(insertIndex, 0, dragState.skillId);
+        render();
+      }
+
+      function handleColumnDrop(columnId, sectionId, targetSkillId) {
+        if (!dragState) return;
+        if (dragState.source !== "column") return;
+
+        const skillId = dragState.skillId;
+        const currentColumn = Object.keys(state.columnSkills).find((col) => state.columnSkills[col].includes(skillId));
+        if (!currentColumn) return;
+
+        state.columnSkills[currentColumn] = state.columnSkills[currentColumn].filter((id) => id !== skillId);
+
+        const targetList = state.columnSkills[columnId];
+        let insertIndex = targetList.length;
+
+        if (targetSkillId) {
+          const targetIndex = targetList.indexOf(targetSkillId);
+          if (targetIndex !== -1) {
+            insertIndex = targetIndex;
+          }
+        } else if (sectionId) {
+          const sectionIds = targetList.filter((id) => {
+            const skill = state.skills[id];
+            return sectionForSkill(skill) === sectionId;
+          });
+          if (sectionIds.length > 0) {
+            const lastSectionId = sectionIds[sectionIds.length - 1];
+            const lastIndex = targetList.indexOf(lastSectionId);
+            if (lastIndex !== -1) insertIndex = lastIndex + 1;
+          }
+        }
+
+        targetList.splice(insertIndex, 0, skillId);
+        render();
+      }
+
+      document.querySelectorAll(".pinned-column").forEach((column) => {
+        column.addEventListener("dragover", (event) => {
+          event.preventDefault();
+        });
+
+        column.addEventListener("drop", (event) => {
+          event.preventDefault();
+          let recoveredDrag = false;
+          if (!dragState) {
+            const draggedId = event.dataTransfer.getData("text/plain");
+            if (draggedId && state.skills[draggedId]) {
+              dragState = {
+                skillId: draggedId,
+                source: isPinned(draggedId) ? "pinned" : "pin",
+                pinnedColumnId: getPinnedColumn(draggedId) || ""
+              };
+              recoveredDrag = true;
+            }
+          }
+          if (!dragState) return;
+          const targetRow = event.target.closest(".skill-row");
+          const list = column.querySelector(".pinned-list");
+          const columnId = list ? list.dataset.columnId : "";
+          const targetSkillId = targetRow ? targetRow.dataset.skillId : "";
+          if (!columnId) return;
+          if (dragState.source === "column") {
+            handlePinnedDropFromColumn(columnId, targetSkillId);
+          } else {
+            handlePinnedDrop(columnId, targetSkillId);
+          }
+          if (recoveredDrag) {
+            dragState = null;
+          }
+        });
+      });
+
+      columnsEl.addEventListener("dragover", (event) => {
+        const zone = event.target.closest(".section-list");
+        if (!zone) return;
+        event.preventDefault();
+      });
+
+      columnsEl.addEventListener("drop", (event) => {
+        const zone = event.target.closest(".section-list");
+        if (!zone) return;
+        event.preventDefault();
+        const targetRow = event.target.closest(".skill-row");
+        const columnId = zone.dataset.columnId;
+        const sectionId = zone.dataset.sectionId;
+        const targetSkillId = targetRow ? targetRow.dataset.skillId : "";
+        handleColumnDrop(columnId, sectionId, targetSkillId);
+      });
+
+      addPinnedBtn.addEventListener("click", () => {
+        addName.value = "";
+        addBase.value = "";
+        addMod.value = "";
+        addDialog.showModal();
+      });
+
+      addDialog.addEventListener("close", () => {
+        if (addDialog.returnValue !== "") return;
+      });
+
+      addDialog.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const name = cleanDisplayName(addName.value);
+        if (!name) return;
+        const id = `custom-${Date.now()}-${state.customCounter++}`;
+        const canonicalKey = guessCanonicalKey(name);
+        const meta = canonicalMeta[canonicalKey];
+        addSkill({
+          id,
+          displayName: name,
+          base: addBase.value.trim(),
+          mod: addMod.value.trim(),
+          canonicalKey: canonicalKey || "",
+          stat: meta ? meta.stat : "",
+          source: "custom"
+        });
+        addPinned(id, "col1");
+        addDialog.close();
+        render();
+      });
+
+      addDialog.addEventListener("reset", (event) => {
+        event.preventDefault();
+        addDialog.close();
+      });
+
+      rollCountBackdrop.addEventListener("click", (event) => {
+        if (event.target === rollCountBackdrop) {
+          closeRollCountModal();
+        }
+      });
+
+      rollCountCancel.addEventListener("click", closeRollCountModal);
+      rollCountCopy.addEventListener("click", submitRollCount);
+      rollCountInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") submitRollCount();
+        if (event.key === "Escape") closeRollCountModal();
+      });
+      rollCountInput.addEventListener("focus", () => {
+        rollCountInput.select();
+      });
+
+      fallbackSelectBtn.addEventListener("click", () => {
+        fallbackTextEl.focus();
+        fallbackTextEl.select();
+      });
+
+      fallbackCloseBtn.addEventListener("click", () => {
+        fallbackEl.hidden = true;
+      });
+
+      filterInput.addEventListener("input", () => {
+        render();
+      });
+
+      globalModInput.addEventListener("input", () => {
+        state.globalMod = globalModInput.value.trim();
+        document.querySelectorAll(".mod-global").forEach((el) => {
+          el.textContent = state.globalMod;
+          el.dataset.empty = state.globalMod ? "false" : "true";
+        });
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
+        const target = event.target;
+        if (
+          target &&
+          (target.closest("input, textarea, select, [contenteditable=\"true\"]") ||
+            target.isContentEditable)
+        ) {
+          return;
+        }
+        event.preventDefault();
+        filterInput.focus();
+        filterInput.select();
+      });
+
+      characterNameInput.addEventListener("input", () => {
+        state.characterName = characterNameInput.value.trim();
+      });
       async function parsePdf(file) {
         setError("");
-        listEl.textContent = "";
-        listEl.hidden = true;
-        lastItems = [];
-
         if (!window.PDFLib?.PDFDocument) {
           throw new Error("pdf-lib failed to load. Refresh the page and try again.");
         }
@@ -1021,121 +1939,210 @@
         }
 
         const valueByFieldNameLower = {};
-        for (const field of fields) {
+        fields.forEach((field) => {
           const fieldName = String(field.getName?.() ?? "");
-          if (!fieldName) continue;
+          if (!fieldName) return;
           valueByFieldNameLower[fieldName.toLowerCase()] = getFieldValue(field);
-        }
+        });
 
+        const characterName = extractCharacterName(valueByFieldNameLower);
+        if (characterName) setCharacterName(characterName);
 
-        const items = [];
-        for (const field of fields) {
+        const parsedSkills = [];
+        fields.forEach((field) => {
           const name = String(field.getName?.() ?? "");
-          if (!name.startsWith(BASE_PREFIX)) continue;
-          const rawSuffix = name.slice(BASE_PREFIX.length);
-          const displayName = getDisplayBaseName(rawSuffix, valueByFieldNameLower);
-          const rawValue = getFieldValue(field);
+          if (!name) return;
+          if (!name.toLowerCase().startsWith(BASE_PREFIX.toLowerCase())) return;
 
-          const modFieldNameLower = (`MOD ${rawSuffix}`).toLowerCase();
+          const rawSuffix = name.replace(/^base\s+/i, "");
+          const displayNameRaw = getDisplayBaseName(rawSuffix, valueByFieldNameLower);
+          const displayName = cleanDisplayName(displayNameRaw);
+          const baseValue = normalizeValue(getFieldValue(field));
+          const modFieldNameLower = `${MOD_PREFIX}${rawSuffix}`.toLowerCase();
           const modRawValue = valueByFieldNameLower[modFieldNameLower];
           const modText = normalizeModPrefill(modRawValue);
+          const canonicalKey = guessCanonicalKey(displayName);
+          const meta = canonicalMeta[canonicalKey];
 
-          items.push({ name, displayName, rawValue, modText });
-        }
+          parsedSkills.push({
+            id: name,
+            displayName,
+            base: baseValue,
+            mod: modText,
+            canonicalKey: canonicalKey || "",
+            stat: meta ? meta.stat : "",
+            source: "pdf"
+          });
+        });
 
-        items.sort((a, b) => a.displayName.toLowerCase().localeCompare(b.displayName.toLowerCase()));
+        const customSkills = Object.values(state.skills).filter((skill) => skill.source === "custom");
+        state.skills = {};
+        parsedSkills.forEach((skill) => addSkill(skill));
+        customSkills.forEach((skill) => addSkill(skill));
 
-        lastItems = items;
+        buildDefaultLayout();
+
+        prunePinnedColumns();
         render();
       }
 
-
-      listEl.addEventListener("click", (e) => {
-        const btn = e.target.closest?.("button.rollBtn");
-        if (!btn) return;
-        const baseFieldName = btn.dataset.baseFieldName;
-        if (!baseFieldName) return;
-
-        const item = lastItems.find((it) => it.name === baseFieldName);
-        if (!item) return;
-
-        const card = btn.closest(".card");
-        const toast = card ? card.querySelector(".toast") : null;
-        openModal(item, toast);
-      });
-
-      fileInput.addEventListener("change", async () => {
-        const file = fileInput.files?.[0];
+      pdfInput.addEventListener("change", async () => {
+        const file = pdfInput.files?.[0];
         if (!file) return;
         try {
           await parsePdf(file);
-        } catch (e) {
-          setError(String(e?.stack || e?.message || e));
+        } catch (error) {
+          setError(String(error?.stack || error?.message || error));
         }
       });
+      async function saveState() {
+        const payload = {
+          version: 1,
+          characterName: state.characterName,
+          skills: Object.values(state.skills).map((skill) => ({
+            id: skill.id,
+            displayName: skill.displayName,
+            base: skill.base,
+            mod: skill.mod,
+            canonicalKey: skill.canonicalKey,
+            stat: skill.stat,
+            source: skill.source
+          })),
+          pinnedColumns: state.pinnedColumns,
+          columnSkills: state.columnSkills,
+          canonicalMeta: Object.values(canonicalMeta).map((meta) => ({
+            key: meta.key,
+            displayName: meta.displayName,
+            stat: meta.stat
+          }))
+        };
 
-      function buildRollText(item, modifierText) {
-        const mod = normalizeModifierForRoll(modifierText);
-        return `!r 1d10+${normalizeValue(item.rawValue)}${mod}  ${item.displayName}`;
+        const json = JSON.stringify(payload, null, 2);
+        const suggested = buildSuggestedFileName();
+
+        if (window.showSaveFilePicker) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: suggested,
+            types: [
+              {
+                description: "JSON",
+                accept: { "application/json": [".json"] }
+              }
+            ]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(json);
+          await writable.close();
+          return;
+        }
+
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = suggested;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
       }
 
-	async function copyRoll() {
-	  if (!pendingItem) return;
+      function buildSuggestedFileName() {
+        const base = (state.characterName || "red-winter").trim();
+        const safe = base
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "");
+        return `${safe || "red-winter"}-skills.json`;
+      }
 
-	  modifierInput.value = normalizeModifierForRoll(modifierInput.value);
-	  const rollText = buildRollText(pendingItem, modifierInput.value);
-
-	  // Capture the current toast element to avoid races with closeModal()
-	  const toastEl = pendingToast;
-
-	  try {
-		await navigator.clipboard.writeText(rollText);
-
-		if (toastEl) {
-		  toastEl.textContent = "Copied to clipboard";
-		  clearTimeout(toastEl._t);
-		  toastEl._t = setTimeout(() => {
-			// Use the captured element, not global pendingToast
-			toastEl.textContent = "";
-		  }, 1100);
-		}
-
-		closeModal();
-	  } catch (e) {
-		closeModal();
-		window.alert(`Could not copy to clipboard.\n\n${rollText}`);
-	  }
-	}
-
-
-      modalBackdrop.addEventListener("click", (e) => {
-        if (e.target === modalBackdrop) closeModal();
-      });
-      cancelBtn.addEventListener("click", closeModal);
-      copyBtn.addEventListener("click", copyRoll);
-      modifierInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") copyRoll();
-        if (e.key === "Escape") closeModal();
-      });
-
-      let renderTimer = null;
-      searchInput.addEventListener("input", () => {
-        window.clearTimeout(renderTimer);
-        renderTimer = window.setTimeout(() => {
-          window.requestAnimationFrame(render);
-        }, 60);
-      });
-
-      // Add keyboard shortcut for focusing filter input
-      document.addEventListener("keydown", (e) => {
-        // Focus the search input when '/' key is pressed
-        if (e.key === "/" && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-          e.preventDefault();
-          searchInput.focus();
+      saveStateBtn.addEventListener("click", async () => {
+        try {
+          await saveState();
+        } catch (error) {
+          setError(String(error?.stack || error?.message || error));
         }
+      });
+
+      loadStateInput.addEventListener("change", async () => {
+        const file = loadStateInput.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const data = JSON.parse(text);
+          restoreState(data);
+          render();
+        } catch (error) {
+          setError(String(error?.stack || error?.message || error));
+        }
+      });
+
+      function restoreState(data) {
+        if (!data || typeof data !== "object") return;
+        setCharacterName(data.characterName || "");
+        state.skills = {};
+
+        (data.skills || []).forEach((skill) => {
+          addSkill({
+            id: skill.id,
+            displayName: skill.displayName,
+            base: skill.base,
+            mod: skill.mod,
+            canonicalKey: skill.canonicalKey || "",
+            stat: skill.stat || "",
+            source: skill.source || "pdf"
+          });
+        });
+
+        state.columnSkills = data.columnSkills || { col1: [], col2: [], col3: [] };
+        if (data.pinnedColumns) {
+          state.pinnedColumns = {
+            col1: [...(data.pinnedColumns.col1 || [])],
+            col2: [...(data.pinnedColumns.col2 || [])],
+            col3: [...(data.pinnedColumns.col3 || [])]
+          };
+        } else {
+          state.pinnedColumns = {
+            col1: [...(data.pinned || [])],
+            col2: [],
+            col3: []
+          };
+        }
+        prunePinnedColumns();
+
+        const assigned = new Set([
+          ...state.columnSkills.col1,
+          ...state.columnSkills.col2,
+          ...state.columnSkills.col3
+        ]);
+
+        Object.values(state.skills).forEach((skill) => {
+          if (skill.source === "custom") return;
+          if (assigned.has(skill.id)) return;
+          const column = defaultColumnForSkill(skill);
+          state.columnSkills[column].push(skill.id);
+        });
+      }
+
+      window.addEventListener("error", (e) => {
+        try {
+          setError(`JS error: ${e?.message ?? "Unknown error"}`);
+        } catch {}
+      });
+
+      window.addEventListener("unhandledrejection", (e) => {
+        try {
+          const reason = e?.reason;
+          const msg = String(reason?.stack || reason?.message || reason || "Unknown rejection");
+          setError(`Promise rejection: ${msg}`);
+        } catch {}
       });
 
       render();
     </script>
   </body>
 </html>
+
+
+
+
