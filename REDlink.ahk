@@ -345,8 +345,7 @@ RL_SendToDiscord(baseCmd, channelName) {
                     RL_Restore()
                     return
                 }
-                WinGetTitle, title, A
-                if (!RL_ChannelMatchesTitle(channelName, title)) {
+                if (!RL_WaitForChannelTitle(channelName, 1500, title)) {
                     TrayTip, REDlink, % "Not sending: Discord not in channel.`nChannel: " . channelName . "`nTitle: " . title, 3, 17
                     RL_Restore()
                     return
@@ -437,9 +436,27 @@ RL_QuickSwitchToChannel(channelName) {
     if (query = "")
         return false
     SendInput, ^k
+	sleep, 100
     SendInput, %query%
-    SendInput, {Enter}
-    return true
+    sleep, 250
+	SendInput, {Enter}
+	sleep, 250
+	return true
+}
+
+RL_WaitForChannelTitle(channelName, timeoutMs, ByRef lastTitle) {
+    startTick := A_TickCount
+    lastTitle := ""
+    Loop {
+        WinGetTitle, title, A
+        lastTitle := title
+        if (RL_ChannelMatchesTitle(channelName, title))
+            return true
+        if (A_TickCount - startTick > timeoutMs)
+            break
+        Sleep, 75
+    }
+    return false
 }
 
 
