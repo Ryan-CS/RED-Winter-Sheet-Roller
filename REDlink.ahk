@@ -5,6 +5,7 @@
 ; Trigger contract:
 ;   Clipboard starts with: "[REDlink] "
 ;   Everything after that is the BASE COMMAND (opaque text)
+;   Optional: "channel:<name>||<command>"
 ;
 ; Discord safety:
 ;   Will only send if the active Discord window title
@@ -53,6 +54,8 @@ global RL_LogFile := A_ScriptDir . "\\redlink-debug.log"
 
 ; Sentinel prefix
 global RL_Prefix := "[REDlink] "
+global RL_ChannelPrefix := "channel:"
+global RL_ChannelSeparator := "||"
 
 
 
@@ -283,21 +286,27 @@ RL_HandleClipboardText(curText) {
         return
     RL_LastFireTick := now
 
-    ; Extract opaque base command
-    baseCmd := SubStr(curText, StrLen(RL_Prefix) + 1)
+    ; Extract payload (optional channel + base command)
+    payload := SubStr(curText, StrLen(RL_Prefix) + 1)
+    if (payload = "")
+        return
+
+    channelName := ""
+    baseCmd := ""
+    RL_ParsePayload(payload, baseCmd, channelName)
     if (baseCmd = "")
         return
 
     ; mark activity on valid command
     RL_LastCommandTick := A_TickCount
 
-    RL_SendToDiscord(baseCmd)
+    RL_SendToDiscord(baseCmd, channelName)
 }
 
 ; -------------------------
 ; SEND ROUTINE
 ; -------------------------
-RL_SendToDiscord(baseCmd) {
+RL_SendToDiscord(baseCmd, channelName) {
     global RL_DiscordWinTitle, RL_RequireChannelMatch
     global RL_ReturnFocus, RL_PrevWinID
     global RL_LastClip, RL_Sending, RL_PasteDelayMs
@@ -326,11 +335,24 @@ RL_SendToDiscord(baseCmd) {
         return
     }
 
-    ; Verify channel name pattern: game<digits> dice
+    ; Verify channel name pattern: configured channel name, fallback to game<digits> dice
     if (RL_RequireChannelMatch) {
         WinGetTitle, title, A
-        if !RegExMatch(title, "i)game\d+[-\s]+dice") {
-
+        if (channelName != "") {
+            if (!RL_ChannelMatchesTitle(channelName, title)) {
+                if (!RL_QuickSwitchToChannel(channelName)) {
+                    TrayTip, REDlink, % "Not sending: could not quickswitch.`nChannel: " . channelName, 3, 17
+                    RL_Restore()
+                    return
+                }
+                WinGetTitle, title, A
+                if (!RL_ChannelMatchesTitle(channelName, title)) {
+                    TrayTip, REDlink, % "Not sending: Discord not in channel.`nChannel: " . channelName . "`nTitle: " . title, 3, 17
+                    RL_Restore()
+                    return
+                }
+            }
+        } else if !RegExMatch(title, "i)game\d+[-\s]+dice") {
             TrayTip, REDlink, % "Not sending: Discord not in a game# dice channel.`nTitle: " . title, 3, 17
             RL_Restore()
             return
@@ -355,6 +377,69 @@ RL_Restore() {
 
 
     RL_Sending := false
+}
+
+; -------------------------
+; CHANNEL PARSING & MATCHING
+; -------------------------
+RL_ParsePayload(payload, ByRef baseCmd, ByRef channelName) {
+    global RL_ChannelPrefix, RL_ChannelSeparator
+    baseCmd := payload
+    channelName := ""
+    prefixLen := StrLen(RL_ChannelPrefix)
+    if (SubStr(payload, 1, prefixLen) = RL_ChannelPrefix) {
+        sepPos := InStr(payload, RL_ChannelSeparator)
+        if (sepPos) {
+            channelName := SubStr(payload, prefixLen + 1, sepPos - (prefixLen + 1))
+            baseCmd := SubStr(payload, sepPos + StrLen(RL_ChannelSeparator))
+        } else {
+            channelName := SubStr(payload, prefixLen + 1)
+            baseCmd := ""
+        }
+    }
+    channelName := Trim(channelName)
+    baseCmd := Trim(baseCmd)
+}
+
+RL_ChannelMatchesTitle(channelName, title) {
+    words := RL_GetChannelWords(channelName)
+    if (!IsObject(words) || words.MaxIndex() = "")
+        return false
+    pattern := "i)"
+    for index, word in words {
+        pattern .= ".*" . RL_EscapeRegex(word)
+    }
+    pattern .= ".*"
+    return RegExMatch(title, pattern) ? true : false
+}
+
+RL_GetChannelWords(channelName) {
+    cleaned := RegExReplace(channelName, "[^A-Za-z0-9]+", " ")
+    cleaned := Trim(RegExReplace(cleaned, "\s+", " "))
+    if (cleaned = "")
+        return []
+    return StrSplit(cleaned, " ")
+}
+
+RL_EscapeRegex(text) {
+    static chars := "\.^$|?*+()[]{}"
+    Loop, Parse, chars
+        text := StrReplace(text, A_LoopField, "\" . A_LoopField)
+    return text
+}
+
+RL_BuildQuickswitchQuery(channelName) {
+    return Trim(channelName)
+}
+
+RL_QuickSwitchToChannel(channelName) {
+    query := RL_BuildQuickswitchQuery(channelName)
+    if (query = "")
+        return false
+    SendInput, ^k
+    SendInput, %query%
+    SendInput, {Enter}
+    return true
 }
 
 

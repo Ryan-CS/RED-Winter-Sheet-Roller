@@ -178,6 +178,21 @@
         border-color: var(--border);
       }
 
+      .redlink-input {
+        width: 20ch;
+        max-width: 20ch;
+        padding: 4px 8px;
+        font-size: 11px;
+        text-transform: none;
+        letter-spacing: 0.08em;
+      }
+
+      .redlink-set {
+        padding: 4px 10px;
+        font-size: 11px;
+        min-width: 46px;
+      }
+
       header {
         display: grid;
         grid-template-columns: 1.3fr 0.7fr;
@@ -824,6 +839,14 @@
         <button class="redlink-toggle" id="redlinkToggle" type="button" aria-pressed="false">
           <span id="redlinkToggleText">OFF</span>
         </button>
+        <input
+          id="redlinkChannelInput"
+          class="redlink-input"
+          type="text"
+          placeholder="game1-dice"
+          aria-label="REDlink channel name"
+        />
+        <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
       </div>
       <header>
         <div class="title-block">
@@ -898,6 +921,10 @@
       <div class="startup-modal" role="dialog" aria-modal="true" aria-labelledby="startupTitle">
         <h2 id="startupTitle" class="startup-title">Load your sheet</h2>
         <p class="startup-copy">Choose a PDF or a saved state file to begin, or continue without loading.</p>
+        <div id="startupRedlinkChannel" class="modalField" hidden>
+          <label for="startupRedlinkChannelInput">REDlink channel name</label>
+          <input id="startupRedlinkChannelInput" type="text" placeholder="game1-dice" />
+        </div>
         <div class="startup-actions">
           <button id="startupLoadPdf" type="button">Load PDF</button>
           <button id="startupLoadState" type="button">Load Saved State</button>
@@ -1112,12 +1139,16 @@
       const startupLoadPdf = document.getElementById("startupLoadPdf");
       const startupLoadState = document.getElementById("startupLoadState");
       const startupSkip = document.getElementById("startupSkip");
+      const startupRedlinkChannel = document.getElementById("startupRedlinkChannel");
+      const startupRedlinkChannelInput = document.getElementById("startupRedlinkChannelInput");
       const addDialog = document.getElementById("addDialog");
       const addName = document.getElementById("addName");
       const addBase = document.getElementById("addBase");
       const addMod = document.getElementById("addMod");
       const redlinkToggle = document.getElementById("redlinkToggle");
       const redlinkToggleText = document.getElementById("redlinkToggleText");
+      const redlinkChannelInput = document.getElementById("redlinkChannelInput");
+      const redlinkChannelSet = document.getElementById("redlinkChannelSet");
       const addPinnedBtn = document.getElementById("addPinnedBtn");
       const globalModInput = document.getElementById("globalModInput");
 
@@ -1209,10 +1240,13 @@
         globalMod: ""
       };
       const REDLINK_STORAGE_KEY = "redlink.enabled";
+      const REDLINK_CHANNEL_KEY = "redlink.channel";
       const REDLINK_PREFIX = "[REDlink] ";
       const REDLINK_FLASH_MS = 180;
       const REDLINK_DIM_MS = 180;
       let redlinkEnabled = false;
+      let redlinkChannelName = "";
+      let redlinkHelperActive = false;
 
       let dragState = null;
       let pendingMulti = null;
@@ -1244,7 +1278,9 @@
 
       function initRedlinkState() {
         const params = new URLSearchParams(window.location.search);
-        if (params.get("redlink") === "true") {
+        redlinkHelperActive = params.get("redlink") === "true";
+        updateRedlinkHelperUI();
+        if (redlinkHelperActive) {
           setRedlinkEnabled(true, true);
           return;
         }
@@ -1252,9 +1288,44 @@
         setRedlinkEnabled(stored === "true", false);
       }
 
+      function updateRedlinkHelperUI() {
+        if (!startupRedlinkChannel) return;
+        startupRedlinkChannel.hidden = !redlinkHelperActive;
+        if (redlinkHelperActive && startupRedlinkChannelInput) {
+          startupRedlinkChannelInput.value = redlinkChannelName;
+        }
+      }
+
+      function setRedlinkChannel(name, persist = true) {
+        redlinkChannelName = String(name || "");
+        if (redlinkChannelInput) {
+          redlinkChannelInput.value = redlinkChannelName;
+        }
+        if (startupRedlinkChannelInput) {
+          startupRedlinkChannelInput.value = redlinkChannelName;
+        }
+        if (persist) {
+          if (redlinkChannelName.trim()) {
+            localStorage.setItem(REDLINK_CHANNEL_KEY, redlinkChannelName);
+          } else {
+            localStorage.removeItem(REDLINK_CHANNEL_KEY);
+          }
+        }
+      }
+
+      function initRedlinkChannel() {
+        const stored = localStorage.getItem(REDLINK_CHANNEL_KEY) || "";
+        setRedlinkChannel(stored, false);
+      }
+
+      function buildRedlinkPayload(baseCommand) {
+        if (!redlinkChannelName.trim()) return baseCommand;
+        return `channel:${redlinkChannelName}||${baseCommand}`;
+      }
+
       function getClipboardText(baseCommand) {
         if (redlinkEnabled) {
-          return `${REDLINK_PREFIX}${baseCommand}`;
+          return `${REDLINK_PREFIX}${buildRedlinkPayload(baseCommand)}`;
         }
         return baseCommand;
       }
@@ -2285,6 +2356,36 @@
         setRedlinkEnabled(!redlinkEnabled, true);
       });
 
+      function commitRedlinkChannel() {
+        if (!redlinkChannelInput) return;
+        setRedlinkChannel(redlinkChannelInput.value, true);
+      }
+
+      redlinkChannelSet.addEventListener("click", commitRedlinkChannel);
+
+      redlinkChannelInput.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        commitRedlinkChannel();
+        redlinkChannelInput.blur();
+      });
+
+      if (startupRedlinkChannelInput) {
+        startupRedlinkChannelInput.addEventListener("input", () => {
+          setRedlinkChannel(startupRedlinkChannelInput.value, false);
+        });
+
+        startupRedlinkChannelInput.addEventListener("change", () => {
+          setRedlinkChannel(startupRedlinkChannelInput.value, true);
+        });
+
+        startupRedlinkChannelInput.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          setRedlinkChannel(startupRedlinkChannelInput.value, true);
+        });
+      }
+
       filterInput.addEventListener("input", () => {
         render();
       });
@@ -2538,6 +2639,7 @@
       });
 
       initRedlinkState();
+      initRedlinkChannel();
       render();
       setStartupPromptOpen(true);
     </script>
