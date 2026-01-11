@@ -589,6 +589,22 @@
         border: none;
       }
 
+      .btn-add-sub {
+        background: rgba(44, 246, 232, 0.16);
+        color: var(--accent);
+        border: 1px solid var(--border-strong);
+        font-size: 10px;
+        letter-spacing: 0.06em;
+        padding: 2px 6px;
+        min-width: 22px;
+        line-height: 1.1;
+      }
+
+      .btn-add-sub:hover {
+        box-shadow: var(--glowA);
+        filter: brightness(1.1);
+      }
+
       .btn-pin.active {
         background: var(--panel2);
         color: var(--ink);
@@ -701,6 +717,56 @@
 
       .modalField {
         margin-top: 10px;
+      }
+
+      .startup-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 12, 16, 0.72);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 70;
+      }
+
+      .startup-backdrop[data-open="true"] {
+        display: flex;
+      }
+
+      .startup-modal {
+        width: min(520px, 94vw);
+        border-radius: 8px;
+        border: 1px solid var(--border-strong);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        padding: 18px;
+        position: relative;
+      }
+
+      .startup-title {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+
+      .startup-copy {
+        margin: 0;
+        color: var(--ink-muted);
+        font-size: 12px;
+        font-family: var(--mono);
+      }
+
+      .startup-actions {
+        margin-top: 14px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .startup-actions button {
+        width: 100%;
       }
 
       dialog {
@@ -826,6 +892,18 @@
           <button id="fallbackClose" type="button">Close</button>
         </div>
       </section>
+    </div>
+
+    <div id="startupBackdrop" class="startup-backdrop" data-open="true">
+      <div class="startup-modal" role="dialog" aria-modal="true" aria-labelledby="startupTitle">
+        <h2 id="startupTitle" class="startup-title">Load your sheet</h2>
+        <p class="startup-copy">Choose a PDF or a saved state file to begin, or continue without loading.</p>
+        <div class="startup-actions">
+          <button id="startupLoadPdf" type="button">Load PDF</button>
+          <button id="startupLoadState" type="button">Load Saved State</button>
+          <button id="startupSkip" type="button">Continue without loading</button>
+        </div>
+      </div>
     </div>
 
     <div id="rollCountBackdrop" class="modalBackdrop" data-open="false">
@@ -1030,6 +1108,10 @@
       const rollCountInput = document.getElementById("rollCountInput");
       const rollCountCancel = document.getElementById("rollCountCancel");
       const rollCountCopy = document.getElementById("rollCountCopy");
+      const startupBackdrop = document.getElementById("startupBackdrop");
+      const startupLoadPdf = document.getElementById("startupLoadPdf");
+      const startupLoadState = document.getElementById("startupLoadState");
+      const startupSkip = document.getElementById("startupSkip");
       const addDialog = document.getElementById("addDialog");
       const addName = document.getElementById("addName");
       const addBase = document.getElementById("addBase");
@@ -1045,6 +1127,14 @@
       const canonicalOrdering = JSON.parse(
         document.getElementById("canonical-skills").textContent || '{"columns":[]}'
       );
+
+      function setStartupPromptOpen(isOpen) {
+        if (!startupBackdrop) return;
+        startupBackdrop.dataset.open = isOpen ? "true" : "false";
+        if (isOpen) {
+          startupLoadPdf?.focus();
+        }
+      }
 
         const BASE_NAME_MAP = {
           AnimalHandling: "Animal Handling",
@@ -1126,6 +1216,7 @@
 
       let dragState = null;
       let pendingMulti = null;
+      let pendingAddContext = { mode: "pinned" };
       let suppressPinClick = false;
 
       function updateRedlinkToggleUI() {
@@ -1319,21 +1410,26 @@
         if (match) {
           const index = match[1];
           const languageName = normalizeFreeTextName(valueByFieldNameLower?.[`lang${index}`]);
-          return languageName ? `Language: ${languageName}` : `Language ${index}`;
+          // If the "(Click)" free-text field is blank, don't create a placeholder skill.
+          return languageName ? `Language: ${languageName}` : "";
         }
 
         match = suffix.match(/^LocalExpert(\d+)$/i);
         if (match) {
           const index = match[1];
           const areaName = normalizeFreeTextName(valueByFieldNameLower?.[`txt_localexpert${index}`]);
-          return areaName ? `Local Expert: ${areaName}` : `Local Expert ${index}`;
+          return areaName ? `Local Expert: ${areaName}` : "";
         }
 
         match = suffix.match(/^Science(\d+)$/i);
         if (match) {
           const index = match[1];
-          const scienceName = normalizeFreeTextName(valueByFieldNameLower?.[`txt_science${index}`]);
-          return scienceName ? `Science: ${scienceName}` : `Science ${index}`;
+          // Field naming differs across sheet versions (underscores vs spaces).
+          // Try both so blank Science "(Click)" fields don't fall back to "Science1", "Science2", etc.
+          const scienceName = normalizeFreeTextName(
+            valueByFieldNameLower?.[`txt_science${index}`] ?? valueByFieldNameLower?.[`txt science${index}`]
+          );
+          return scienceName ? `Science: ${scienceName}` : "";
         }
 
         match = suffix.match(/^PlayInstrument(\d+)$/i);
@@ -1342,14 +1438,19 @@
           const instrumentName = normalizeFreeTextName(
             valueByFieldNameLower?.[`txt playinstrument${index}`] ?? valueByFieldNameLower?.[`txt_playinstrument${index}`]
           );
-          return instrumentName ? `Play Instrument: ${instrumentName}` : `Play Instrument ${index}`;
+          return instrumentName ? `Play Instrument: ${instrumentName}` : "";
         }
 
         return "";
       }
 
       function getDisplayBaseName(rawSuffix, valueByFieldNameLower) {
-        return getDynamicBaseName(rawSuffix, valueByFieldNameLower) || getPrettyBaseName(rawSuffix);
+        const suffix = String(rawSuffix ?? "");
+        const dynamic = getDynamicBaseName(suffix, valueByFieldNameLower);
+        // For dynamic subgroup placeholders, do NOT fall back to the raw suffix when blank.
+        // That fallback is what produces entries like "Science1"/"Science2" when the (Click) name is empty.
+        if (!dynamic && /^(Lang|LocalExpert|Science|PlayInstrument)\d+$/i.test(suffix)) return "";
+        return dynamic || getPrettyBaseName(suffix);
       }
 
       function extractCharacterName(valueByFieldNameLower) {
@@ -1412,6 +1513,49 @@
         const meta = canonicalMeta[canonicalKey];
         if (!meta) return groupedPrefixForKey(canonicalKey) || "Group";
         return formatNameWithStat(meta.displayName, meta.stat);
+      }
+
+      function buildGroupedDisplayName(canonicalKey, rawInput) {
+        const prefix = groupedPrefixForKey(canonicalKey);
+        const cleaned = cleanDisplayName(rawInput);
+        if (!prefix || !cleaned) return "";
+        const withoutPrefix = cleaned.replace(new RegExp(`^${prefix}\\s*:\\s*`, "i"), "").trim();
+        if (!withoutPrefix) return "";
+        return `${prefix}: ${withoutPrefix}`;
+      }
+
+      function insertSkillIdIntoColumn(columnId, sectionId, canonicalKey, newSkillId) {
+        const list = state.columnSkills[columnId];
+        if (!Array.isArray(list)) return;
+        // Remove if already present to prevent duplicates.
+        state.columnSkills[columnId] = list.filter((id) => id !== newSkillId);
+        const updated = state.columnSkills[columnId];
+
+        let insertAt = -1;
+        // Prefer placing after the last skill in the same grouped canonical key.
+        for (let i = updated.length - 1; i >= 0; i--) {
+          const skill = state.skills[updated[i]];
+          if (!skill) continue;
+          if (sectionForSkill(skill) !== sectionId) continue;
+          if (skill.canonicalKey === canonicalKey) {
+            insertAt = i + 1;
+            break;
+          }
+        }
+        // Fallback: place at the end of the section.
+        if (insertAt === -1) {
+          for (let i = updated.length - 1; i >= 0; i--) {
+            const skill = state.skills[updated[i]];
+            if (!skill) continue;
+            if (sectionForSkill(skill) === sectionId) {
+              insertAt = i + 1;
+              break;
+            }
+          }
+        }
+        // Final fallback: append.
+        if (insertAt === -1) insertAt = updated.length;
+        updated.splice(insertAt, 0, newSkillId);
       }
 
       function buildRollText(skill, isMulti, rollCount) {
@@ -1694,9 +1838,18 @@
             list.dataset.sectionId = sectionId;
 
             const groupHeaders = new Set();
+            
             skillsInSection.forEach((skillId) => {
               const skill = state.skills[skillId];
               if (!skill) return;
+
+              // Grouped skills use a header + named sub-skills. Suppress the canonical container row
+              // (e.g., 'Science', 'Language', 'Local Expert', 'Play Instrument') so empty groups don’t render.
+              if (GROUPED_CANONICAL_KEYS.has(skill.canonicalKey)) {
+                const canonicalName = (canonicalMeta[skill.canonicalKey] && canonicalMeta[skill.canonicalKey].displayName) || '';
+                const isContainer = canonicalName && cleanDisplayName(skill.displayName) === cleanDisplayName(canonicalName);
+                if (isContainer) return;
+              }
               if (GROUPED_CANONICAL_KEYS.has(skill.canonicalKey) && !groupHeaders.has(skill.canonicalKey)) {
                 const groupRow = document.createElement("div");
                 groupRow.className = "skill-group-row";
@@ -1707,6 +1860,28 @@
                 const baseCell = document.createElement("div");
                 const modCell = document.createElement("div");
                 const pinCell = document.createElement("div");
+
+                // Allow adding new sub-skills (Language, Local Expert, Science, Play Instrument).
+                const addBtn = document.createElement("button");
+                addBtn.type = "button";
+                addBtn.className = "btn-add-sub";
+                addBtn.textContent = "+";
+                addBtn.title = `Add ${groupedPrefixForKey(skill.canonicalKey) || ""}`.trim();
+                addBtn.addEventListener("click", () => {
+                  pendingAddContext = {
+                    mode: "group",
+                    canonicalKey: skill.canonicalKey,
+                    columnId,
+                    sectionId
+                  };
+                  addName.value = "";
+                  addBase.value = "";
+                  addMod.value = "";
+                  addName.placeholder = `New ${groupedPrefixForKey(skill.canonicalKey)}...`;
+                  addDialog.showModal();
+                });
+                pinCell.appendChild(addBtn);
+
                 groupRow.appendChild(rollCell);
                 groupRow.appendChild(nameCell);
                 groupRow.appendChild(baseCell);
@@ -2006,9 +2181,11 @@
       });
 
       addPinnedBtn.addEventListener("click", () => {
+        pendingAddContext = { mode: "pinned" };
         addName.value = "";
         addBase.value = "";
         addMod.value = "";
+        addName.placeholder = "";
         addDialog.showModal();
       });
 
@@ -2018,6 +2195,30 @@
 
       addDialog.addEventListener("submit", (event) => {
         event.preventDefault();
+        if (pendingAddContext?.mode === "group") {
+          const canonicalKey = String(pendingAddContext.canonicalKey || "");
+          const displayName = buildGroupedDisplayName(canonicalKey, addName.value);
+          if (!displayName) return;
+          const id = `custom-${Date.now()}-${state.customCounter++}`;
+          const meta = canonicalMeta[canonicalKey];
+          addSkill({
+            id,
+            displayName,
+            base: addBase.value.trim(),
+            mod: addMod.value.trim(),
+            canonicalKey,
+            stat: meta ? meta.stat : "",
+            source: "custom"
+          });
+          const columnId = pendingAddContext.columnId || "col3";
+          const sectionId = pendingAddContext.sectionId || sectionForSkill(state.skills[id]);
+          insertSkillIdIntoColumn(columnId, sectionId, canonicalKey, id);
+          addDialog.close();
+          pendingAddContext = { mode: "pinned" };
+          render();
+          return;
+        }
+
         const name = cleanDisplayName(addName.value);
         if (!name) return;
         const id = `custom-${Date.now()}-${state.customCounter++}`;
@@ -2039,6 +2240,7 @@
 
       addDialog.addEventListener("reset", (event) => {
         event.preventDefault();
+        pendingAddContext = { mode: "pinned" };
         addDialog.close();
       });
 
@@ -2065,6 +2267,18 @@
 
       fallbackCloseBtn.addEventListener("click", () => {
         fallbackEl.hidden = true;
+      });
+
+      startupLoadPdf.addEventListener("click", () => {
+        pdfInput.click();
+      });
+
+      startupLoadState.addEventListener("click", () => {
+        loadStateInput.click();
+      });
+
+      startupSkip.addEventListener("click", () => {
+        setStartupPromptOpen(false);
       });
 
       redlinkToggle.addEventListener("click", () => {
@@ -2137,6 +2351,8 @@
           const rawSuffix = name.replace(/^base\s+/i, "");
           const displayNameRaw = getDisplayBaseName(rawSuffix, valueByFieldNameLower);
           const displayName = cleanDisplayName(displayNameRaw);
+          // If a field resolves to an empty name (notably the "(Click)" sub-skills), skip it entirely.
+          if (!displayName) return;
           const baseRawValue = normalizeValue(getFieldValue(field));
           const modFieldNameLower = `${MOD_PREFIX}${rawSuffix}`.toLowerCase();
           const modRawValue = valueByFieldNameLower[modFieldNameLower];
@@ -2170,6 +2386,7 @@
       pdfInput.addEventListener("change", async () => {
         const file = pdfInput.files?.[0];
         if (!file) return;
+        setStartupPromptOpen(false);
         try {
           await parsePdf(file);
         } catch (error) {
@@ -2248,6 +2465,7 @@
       loadStateInput.addEventListener("change", async () => {
         const file = loadStateInput.files?.[0];
         if (!file) return;
+        setStartupPromptOpen(false);
         try {
           const text = await file.text();
           const data = JSON.parse(text);
@@ -2321,6 +2539,7 @@
 
       initRedlinkState();
       render();
+      setStartupPromptOpen(true);
     </script>
   </body>
 </html>
