@@ -13,7 +13,7 @@
 ; =========================
 global RL_SheetURL := "https://ryan-cs.github.io/RED-Winter-Sheet-Roller/?redlink=true"
 #NoEnv
-#SingleInstance Force
+#SingleInstance Ignore
 #Persistent
 SetBatchLines, -1
 SendMode, Input
@@ -54,6 +54,16 @@ global RL_LogFile := A_ScriptDir . "\\redlink-debug.log"
 ; Sentinel prefix
 global RL_Prefix := "[REDlink] "
 
+
+
+; -------------------------
+; INACTIVITY TIMEOUT
+; -------------------------
+; Auto-exit after 4 hours without receiving a [REDlink] command
+global RL_InactivityTimeoutMs := 4 * 60 * 60 * 1000  ; 4h in ms
+global RL_LastCommandTick := A_TickCount
+global RL_InactivityCheckIntervalMs := 60000         ; check every 60s
+
 ; -------------------------
 ; STATE
 ; -------------------------
@@ -82,6 +92,7 @@ Menu, Tray, Default, Open Sheet
 RL_LastClipText := Clipboard
 RL_LastClip := ClipboardAll
 SetTimer, RL_ClipboardPoller, % RL_ClipPollIntervalMs
+SetTimer, RL_InactivityWatchdog, % RL_InactivityCheckIntervalMs
 
 return   ; <-- force auto-execute to end here
 
@@ -134,14 +145,13 @@ RL_Toggle() {
     global RL_Enabled
     RL_Enabled := !RL_Enabled
     RL_UpdateTrayTip()
-    SoundBeep, % (RL_Enabled ? 880 : 440), 80
+
 }
 
 RL_ToggleChannelCheck() {
     global RL_RequireChannelMatch
     RL_RequireChannelMatch := !RL_RequireChannelMatch
     RL_UpdateTrayTip()
-    SoundBeep, % (RL_RequireChannelMatch ? 820 : 520), 80
 }
 
 RL_OpenSheet() {
@@ -253,6 +263,7 @@ return
 RL_HandleClipboardText(curText) {
     global RL_Enabled, RL_Prefix, RL_LastClip
     global RL_LastFireTick, RL_DebounceMs
+    global RL_LastCommandTick
 
     RL_DebugTip("Clipboard change seen")
 
@@ -277,6 +288,9 @@ RL_HandleClipboardText(curText) {
     if (baseCmd = "")
         return
 
+    ; mark activity on valid command
+    RL_LastCommandTick := A_TickCount
+
     RL_SendToDiscord(baseCmd)
 }
 
@@ -300,7 +314,6 @@ RL_SendToDiscord(baseCmd) {
     if (discordID) {
         WinActivate, ahk_id %discordID%
     } else {
-        SoundBeep, 600, 120
         RL_Restore()
         return
     }
@@ -309,7 +322,6 @@ RL_SendToDiscord(baseCmd) {
     WinGetTitle, activeTitle, A
     RL_DebugTip("Active: " . activeTitle)
     if !WinActive("ahk_id " . discordID) {
-        SoundBeep, 600, 120
         RL_Restore()
         return
     }
@@ -318,8 +330,8 @@ RL_SendToDiscord(baseCmd) {
     if (RL_RequireChannelMatch) {
         WinGetTitle, title, A
         if !RegExMatch(title, "i)game\d+[-\s]+dice") {
-            SoundBeep, 500, 140
-        ;    TrayTip, REDlink, % "Not sending: Discord not in a game# dice channel.`nTitle: " . title, 3, 17
+
+            TrayTip, REDlink, % "Not sending: Discord not in a game# dice channel.`nTitle: " . title, 3, 17
             RL_Restore()
             return
         }
@@ -327,7 +339,9 @@ RL_SendToDiscord(baseCmd) {
 
     SendInput, ^v
     Sleep, % RL_PasteDelayMs
-    SendInput, {Enter}
+	
+;   SendInput, {Enter}    <==== Do not use this line unless you know what it is.
+
     Sleep, % (RL_PasteDelayMs + 40)
 
     RL_Restore()
@@ -342,3 +356,15 @@ RL_Restore() {
 
     RL_Sending := false
 }
+
+
+; -------------------------
+; INACTIVITY WATCHDOG
+; -------------------------
+RL_InactivityWatchdog:
+    global RL_LastCommandTick, RL_InactivityTimeoutMs
+    if (A_TickCount - RL_LastCommandTick >= RL_InactivityTimeoutMs) {
+        RL_Log("Inactivity timeout reached; exiting.")
+        ExitApp
+    }
+return
