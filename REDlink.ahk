@@ -436,11 +436,15 @@ RL_QuickSwitchToChannel(channelName) {
     if (query = "")
         return false
     SendInput, ^k
-	sleep, 100
-    SendInput, %query%
-    sleep, 250
-	SendInput, {Enter}
 	sleep, 250
+    SendInput, %query%
+    sleep, 100
+	SendInput, {Enter}
+	sleep, 750
+	SendInput, {Enter}
+	sleep, 50
+	SendInput, {backspace}
+	sleep, 50
 	return true
 }
 
