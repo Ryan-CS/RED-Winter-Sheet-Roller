@@ -14,7 +14,7 @@
 ; =========================
 global RL_SheetURL := "https://ryan-cs.github.io/RED-Winter-Sheet-Roller/?redlink=true"
 #NoEnv
-#SingleInstance Ignore
+#SingleInstance Force
 #Persistent
 SetBatchLines, -1
 SendMode, Input
@@ -22,6 +22,8 @@ SetTitleMatchMode, 2
 TrayTip, REDlink Debug, % "Startup OK (" . A_ScriptName . ")", 2, 17
 global RL_SheetURL
 Run, % RL_SheetURL
+global RL_VERSION := "999.0.0-test"
+
 
 RL_Log("Startup OK: " . A_ScriptName)
 
