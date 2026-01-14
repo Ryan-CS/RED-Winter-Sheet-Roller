@@ -47,7 +47,8 @@ global RL_VERSION := "999.0.0-test"
 
 
 ; Remote sources
-global RL_UPDATE_RAW_URL := "https://raw.githubusercontent.com/Ryan-CS/RED-Winter-Sheet-Roller/update-test/REDlink.ahk"
+global RL_UPDATE_RAW_URL := "https://raw.githubusercontent.com/Ryan-CS/RED-Winter-Sheet-Roller/refs/heads/update-test/REDlink.ahk"
+
 global RL_AHK_ZIP_URL    := "https://www.autohotkey.com/download/ahk.zip"
 
 ; Where to stage update artifacts
