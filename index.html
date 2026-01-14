@@ -144,8 +144,19 @@
       .redlink-bar {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
         margin-bottom: 12px;
+      }
+
+      .utility-bar {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, auto));
+        gap: 10px;
+        align-items: end;
+        justify-content: flex-end;
+        flex: 1;
       }
 
       .redlink-controls {
@@ -158,6 +169,21 @@
         letter-spacing: 0.16em;
         font-size: 11px;
         color: var(--ink-muted);
+      }
+
+      .inline-control {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 190px;
+      }
+
+      .inline-character {
+        min-width: 240px;
+      }
+
+      .inline-save {
+        min-width: 140px;
       }
 
       .home-badge-link {
@@ -551,7 +577,7 @@
 
       .controls {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 12px;
         margin-bottom: 18px;
       }
@@ -1202,32 +1228,39 @@
           <img src="https://raw.githubusercontent.com/Ryan-CS/RED-Winter-Sheet-Roller/main/REDashhomebadge.png" alt="RED Winter home badge" />
           <span>redwinter.net</span>
         </a>
-        <div class="redlink-controls">
-          <span class="redlink-label">REDlink</span>
-          <button class="redlink-toggle" id="redlinkToggle" type="button" aria-pressed="false">
-            <span id="redlinkToggleText">OFF</span>
-          </button>
-          <input
-            id="redlinkChannelInput"
-            class="redlink-input"
-            type="text"
-            placeholder="game1-dice"
-            aria-label="REDlink channel name"
-          />
-          <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
+        <div class="utility-bar">
+          <div class="redlink-controls">
+            <span class="redlink-label">REDlink</span>
+            <button class="redlink-toggle" id="redlinkToggle" type="button" aria-pressed="false">
+              <span id="redlinkToggleText">OFF</span>
+            </button>
+            <input
+              id="redlinkChannelInput"
+              class="redlink-input"
+              type="text"
+              placeholder="game1-dice"
+              aria-label="REDlink channel name"
+            />
+            <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
+          </div>
+          <div class="inline-control inline-character">
+            <label for="characterName">Character Name</label>
+            <input id="characterName" type="text" placeholder="From sheet or type here" />
+          </div>
+          <div class="inline-control">
+            <label for="pdfInput">Load PDF</label>
+            <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
+          </div>
+          <div class="inline-control">
+            <label for="loadStateInput">Load State</label>
+            <input id="loadStateInput" type="file" accept="application/json,.json" />
+          </div>
+          <div class="inline-control inline-save">
+            <label for="saveStateBtn">Save State</label>
+            <button id="saveStateBtn" type="button">Save State</button>
+          </div>
         </div>
       </div>
-      <header>
-        <div class="title-block">
-          <div class="eyebrow">RED Winter Sheet Roller</div>
-          <h1>Skill Roller</h1>
-          <p class="sub">Load a RED Winter character sheet PDF and copy roll commands fast.</p>
-        </div>
-        <div class="char-block">
-          <label for="characterName">Character Name</label>
-          <input id="characterName" type="text" placeholder="From sheet or type here" />
-        </div>
-      </header>
 
       <section class="global-mod">
         <div class="global-mod-row">
@@ -1313,17 +1346,6 @@
         <div class="control">
           <label for="filterInput">Filter skills</label>
           <input id="filterInput" type="text" placeholder="Search skills (press /)" />
-        </div>
-        <div class="control">
-          <label for="pdfInput">Load PDF</label>
-          <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
-        </div>
-        <div class="control">
-          <label for="loadStateInput">Load State</label>
-          <input id="loadStateInput" type="file" accept="application/json,.json" />
-        </div>
-        <div class="control control-actions">
-          <button id="saveStateBtn" type="button">Save State</button>
         </div>
       </section>
 
