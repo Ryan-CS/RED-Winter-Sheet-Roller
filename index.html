@@ -3666,12 +3666,31 @@
       }
 
       function extractWeaponNames(fields) {
-        const names = [];
+        const weaponNameFields = [
+          "WeaponTxt1",
+          "WeaponTxt6",
+          "WeaponTxt11",
+          "WeaponTxt16",
+          "WeaponTxt21",
+          "WeaponTxt26",
+          "WeaponTxt31",
+          "WeaponTxt35"
+        ];
+        const normalizeFieldKey = (name) => String(name || "").replace(/\s+/g, "").toLowerCase();
+        const fieldsByName = new Map();
         fields.forEach((field) => {
-          const fieldName = String(field.getName?.() ?? "");
-          if (!fieldName || !fieldName.toLowerCase().startsWith("weapon")) return;
+          const rawName = String(field.getName?.() ?? "").trim();
+          if (!rawName) return;
+          fieldsByName.set(normalizeFieldKey(rawName), field);
+        });
+        const names = [];
+        weaponNameFields.forEach((fieldName) => {
+          const field = fieldsByName.get(normalizeFieldKey(fieldName));
+          if (!field) return;
           const value = normalizeFreeTextName(getFieldValue(field));
-          if (value) names.push(value);
+          if (!value) return;
+          if (/^weapon name\s*\d+$/i.test(value)) return;
+          names.push(value);
         });
         return names;
       }
@@ -5815,13 +5834,31 @@
 
         const valueByFieldNameLower = {};
         fields.forEach((field) => {
-          const fieldName = String(field.getName?.() ?? "");
+          const fieldName = String(field.getName?.() ?? "").trim();
           if (!fieldName) return;
           valueByFieldNameLower[fieldName.toLowerCase()] = getFieldValue(field);
         });
 
         const characterName = extractCharacterName(valueByFieldNameLower);
         if (characterName) setCharacterName(characterName);
+        const hpTotalValue = String(normalizeValue(valueByFieldNameLower["hpmax"])).trim();
+        if (hpTotalValue !== "") state.hpTotal = hpTotalValue;
+        const hpCurrentValue = String(normalizeValue(valueByFieldNameLower["hpcurr"])).trim();
+        if (hpCurrentValue !== "") state.hpCurrent = hpCurrentValue;
+        const bodySpValue = String(normalizeValue(valueByFieldNameLower["spbody"])).trim();
+        if (bodySpValue !== "") {
+          state.bodySpTotal = bodySpValue;
+          state.bodySpCurrent = bodySpValue;
+        }
+        const headSpValue = String(normalizeValue(valueByFieldNameLower["sphead"])).trim();
+        if (headSpValue !== "") {
+          state.headSpTotal = headSpValue;
+          state.headSpCurrent = headSpValue;
+        }
+        const luckTotalValue = String(normalizeValue(valueByFieldNameLower["luck"])).trim();
+        const luckPoolValue = String(normalizeValue(valueByFieldNameLower["luck-c"])).trim();
+        if (luckTotalValue !== "") setLuckTotal(luckTotalValue, luckPoolValue === "");
+        if (luckPoolValue !== "") setLuckPool(luckPoolValue);
         const weaponNames = extractWeaponNames(fields);
 
         const parsedSkills = [];
@@ -5872,6 +5909,7 @@
         });
 
         addWeaponsFromNames(weaponNames);
+        syncStatusInputs();
         render();
       }
 
