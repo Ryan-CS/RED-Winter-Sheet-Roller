@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta name="description" content="RED Winter Character Sheet Roller - Load your RED Winter character sheet(made by M.K. Bergins), click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
+      <meta name="description" content="RED Winter Character Sheet Roller - Load your M.K. Bergins Cyberpunk RED Winter character sheet, click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
 
   <!-- Canonical / project link -->
   <link rel="canonical" href="https://github.com/Ryan-CS/RED-Winter-Sheet-Roller" />
@@ -13,7 +13,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="RED Winter Sheet Roller" />
   <meta property="og:title" content="RED Winter Character Sheet Roller" />
-  <meta property="og:description" content="Load your M.K. Bergins RED Winter character sheet, click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
+  <meta property="og:description" content="Load your M.K. Bergins Cyberpunk RED Winter character sheet, click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
   <meta property="og:url" content="https://github.com/Ryan-CS/RED-Winter-Sheet-Roller" />
   <meta property="og:image" content="https://ryan-cs.github.io/RED-Winter-Sheet-Roller/Webpreview.jpg" />
   <meta property="og:image:alt" content="Preview of RED Winter Character Sheet Roller UI" />
@@ -23,7 +23,7 @@
   <!-- Twitter card (fallback / Twitter previews) -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="RED Winter Character Sheet Roller" />
-  <meta name="twitter:description" content="Load your M.K. Bergins RED Winter character sheet, click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
+  <meta name="twitter:description" content="Load your M.K. Bergins Cyberpunk RED Winter character sheet, click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
   <meta name="twitter:image" content="https://ryan-cs.github.io/RED-Winter-Sheet-Roller/Webpreview.jpg" />
   <meta name="twitter:image:alt" content="Preview of RED Winter Character Sheet Roller UI" />
 
@@ -344,6 +344,600 @@
         box-shadow: var(--shadow);
       }
 
+      .status-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+
+      .weapons-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+
+      .status-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        gap: 16px;
+        align-items: start;
+        margin-bottom: 12px;
+      }
+
+      .status-grid {
+        display: grid;
+        /* Two-column layout inside Character Status: core stats on the left, critical injuries on the right */
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: start;
+      }
+
+      .status-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+
+        align-content: start;
+        align-items: start;
+        margin-bottom: 12px;
+      }
+      .status-name {
+        margin-top: 15px;
+
+      } 
+      .status-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 16px;
+        align-items: start;
+      }
+
+      .status-core {
+        display: grid;
+        gap: 12px;
+      }
+
+      .status-mods {
+        
+        padding-top: 12px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .status-mods .global-mod-row {
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        justify-items: start;
+      }
+
+      .status-mods .global-mod-field {
+        max-width: 280px;
+        width: 100%;
+      }
+
+      .status-mods .luck-section {
+        justify-self: start;
+        max-width: 280px;
+        width: 100%;
+      }
+
+      .status-mods .luck-box {
+        width: 100%;
+      }
+
+      .status-log {
+        border: none;
+        background: transparent;
+
+        padding-top: 20px;
+        display: flex;
+
+        
+      }
+
+      .status-log button {
+        justify-self: end;
+      }
+
+      .status-log-preview {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+
+      .status-hp {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 6px;
+        align-items: end;
+        width: fit-content;
+      }
+
+      .status-hp-with-fire {
+        display: flex;
+        gap: 24px;
+        align-items: flex-end;
+      }
+
+      .hp-label {
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        line-height: 1;
+        text-align: center;
+      }
+
+      .hp-starting {
+        display: grid;
+        gap: 0;
+        justify-items: start;
+      }
+
+      .hp-starting-label {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        line-height: 1;
+      }
+
+      .hp-current {
+        display: grid;
+        justify-items: center;
+        gap: 2px;
+      }
+
+      .small-input {
+        width: 3ch;
+        min-width: 3ch;
+        max-width: 3ch;
+        height: 20px;
+        padding: 0;
+        text-align: center;
+        font-size: 14px;
+        border: 1px solid var(--border-strong);
+        background: var(--panel2);
+        color: var(--ink);
+        font-family: var(--mono);
+        align-self: start;
+      }
+
+      .big-input {
+        width: 3.2ch;
+        min-width: 3.2ch;
+        max-width: 3.2ch;
+        height: 40px;
+        padding: 0;
+        font-size: 30px;
+        line-height: 1;
+        text-align: center;
+        border: 0;
+        box-shadow: 0 0 0 1px var(--border-strong);
+        background: var(--panel2);
+        color: var(--ink);
+        font-family: var(--mono);
+        align-self: end;
+      }
+
+      .status-sp-layout {
+        display: grid;
+        grid-template-columns: max-content max-content max-content max-content max-content 1fr;
+        grid-template-rows: min-content auto auto;
+        column-gap: 0;
+        row-gap: 0;
+        align-items: start;
+      }
+
+      .sp-block {
+        grid-column: 1;
+        grid-row: 1 / span 3;
+        display: grid;
+        grid-template-columns: max-content max-content;
+        grid-template-rows: min-content auto auto;
+        column-gap: 6px;
+        row-gap: 0;
+        align-items: start;
+        width: fit-content;
+      }
+
+      .sp-block .sp-header {
+        grid-column: 2;
+        grid-row: 1;
+        justify-self: center;
+        font-family: var(--mono);
+        font-size: 18px;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+      }
+
+      .sp-block .sp-header-pad {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      .sp-block .small-input {
+        align-self: end;
+      }
+
+      .scale-label {
+        grid-row: 1;
+        align-self: end;
+        justify-self: center;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        line-height: 1;
+        margin: -6px;
+      }
+
+      .damage-location-label {
+        grid-column: 2;
+        font-family: var(--mono);
+        font-size: 8px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        justify-self: center;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 2px;
+      }
+
+      .wedge-btn {
+        border: 0;
+        margin-left: 0;
+        display: block;
+        padding: 0;
+        height: 40px;
+        width: 20px;
+        background: rgba(42, 234, 221, 1);
+        cursor: pointer;
+        transition: opacity 120ms ease, filter 120ms ease, transform 120ms ease;
+        justify-self: start;
+        align-self: end;
+      }
+
+      .wedge-btn.full {
+        opacity: 0.33;
+      }
+
+      .wedge-btn.half {
+        opacity: 0.66;
+        margin-left: 6px;
+        clip-path: polygon(0 0, 100% 33%, 100% 100%, 0 100%);
+      }
+
+      .wedge-btn.bypass {
+        opacity: 1;
+        margin-left: 6px;
+        width: 31px;
+        clip-path: polygon(0 45%, 100% 100%, 0 100%);
+      }
+
+      .wedge-btn:hover {
+        filter: brightness(1.1);
+      }
+
+      .wedge-btn:active {
+        transform: scale(0.98);
+      }
+
+      .status-damage-panel {
+        display: grid;
+        grid-template-rows: auto 1fr;
+        gap: 0;
+        align-content: start;
+        padding-left: 0;
+        min-width: 180px;
+      }
+
+      .status-damage-group {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .damage-toggles {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-start;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+      }
+
+      .damage-toggle {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .damage-toggle input {
+        margin: 0;
+        cursor: pointer;
+      }
+
+      .damage-field {
+        display: grid;
+        gap: 3px;
+        max-width: 70px;
+      }
+
+      .damage-legend {
+        font-family: var(--mono);
+        font-size: 12px;
+        margin: 0 0 -30px 10px;
+        z-index: 40;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        line-height: 3;
+      }
+
+      .damage-input {
+        width: 100%;
+        height: 60px;
+        padding: 0 8px;
+        text-align: center;
+        font-size: 45px;
+        line-height: 1;
+        border: 1px solid var(--border-strong);
+        background: var(--panel2);
+        color: var(--ink);
+        font-family: var(--mono);
+      }
+
+      .status-fire {
+        display: grid;
+        gap: 0px;
+        align-content: start;
+        justify-items: start;
+        --fire-scale: 0.18;
+        --fire-readout-scale: 0.5;
+        --fire-panel: rgba(7, 15, 20, 0.65);
+        --fire-border: rgba(40, 230, 223, 0.35);
+        --fire-well: calc(224px * var(--fire-scale));
+        --fire-seg: calc(var(--fire-well) / 4);
+        --fire-travel: calc(var(--fire-well) + 8px - var(--fire-seg));
+        --fire-mild: #d8ca04;
+        --fire-strong: #f08204;
+        --fire-deadly: #ff0000;
+      }
+
+      .fire-title {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+
+
+        
+        flex-shrink: 0;
+      }
+
+      .fire-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .fire-readout-stack {
+        display: grid;
+        gap: 4px;
+        align-items: start;
+      }
+
+      .fire-slider-area {
+        position: relative;
+        width: calc(86px * var(--fire-scale));
+        height: calc(252px * var(--fire-scale));
+        padding: calc(14px * var(--fire-scale));
+        background: var(--fire-panel);
+        border: 0px solid var(--fire-border);
+        border-radius: calc(12px * var(--fire-scale));
+        box-sizing: border-box;
+      }
+
+      .fire-segments {
+        position: absolute;
+        inset: calc(14px * var(--fire-scale));
+        height: var(--fire-well);
+        display: grid;
+        grid-template-rows: repeat(4, 1fr);
+        pointer-events: none;
+        border: 1px solid rgba(40, 230, 224, 0.384);
+        overflow: hidden;
+      }
+
+      .fire-seg.s1 {
+        background: rgba(40, 230, 223, 0.48);
+      }
+
+      .fire-seg.s2 {
+        background: rgba(40, 230, 223, 0.38);
+      }
+
+      .fire-seg.s3 {
+        background: rgba(40, 230, 223, 0.28);
+      }
+
+      .fire-seg.s4 {
+        background: transparent;
+      }
+
+      .fire-seg:not(:last-child) {
+        border-bottom: 1px solid rgba(40, 230, 223, 0.28);
+      }
+
+      .fire-slider {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(-90deg);
+        width: var(--fire-travel);
+        height: calc(80px * var(--fire-scale));
+        
+        appearance: none;
+        -webkit-appearance: none;
+        background: transparent;
+      }
+
+      .fire-slider::-webkit-slider-runnable-track {
+        height: calc(10px * var(--fire-scale));
+        background: rgba(245, 245, 245, 0);
+        border-radius: 999px;
+      }
+
+      .fire-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: calc(30px * var(--fire-scale));
+        height: calc(50px * var(--fire-scale));
+        border-radius: 50%;
+        background: rgba(2, 255, 255, 0.973);
+        border: 1px solid rgba(0, 0, 0, 0.65);
+        margin-top: calc(-30px * var(--fire-scale));
+        
+      }
+
+      .fire-slider::-moz-range-track {
+        height: calc(50px * var(--fire-scale));
+        background: rgba(0, 0, 0, 0);
+
+
+
+      }
+
+      .fire-slider::-moz-range-thumb {
+        width: calc(30px * var(--fire-scale));
+        height: calc(50px * var(--fire-scale));
+        margin-top: calc(-40px * var(--fire-scale));
+        background: rgba(9, 212, 226, 0.95);
+        border: 1px solid rgb(88, 175, 168);
+        border-radius: 50%;
+      }
+
+      .fire-labels {
+        display: grid;
+        margin-left: 0px;
+        z-index: 11;
+
+      
+        grid-template-rows: repeat(4, 1fr);
+        height: var(--fire-well);
+        user-select: none;
+      }
+
+
+      .fire-label {
+        font-family: var(--mono);
+        font-size: 8px;
+        margin-left: 14px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+
+      }
+
+      .fire-label.empty {
+        visibility: hidden;
+      }
+
+      .fire-readout {
+        min-width: calc(80px * var(--fire-readout-scale));
+        height: calc(56px * var(--fire-readout-scale));
+        padding: 0 calc(2px * var(--fire-readout-scale));
+
+        border: 1px solid rgba(40, 230, 223, 0.25);
+        background: rgba(0, 0, 0, 0.55);
+
+        font-size: calc(50px * var(--fire-readout-scale));
+        
+    
+        font-family: var(--mono);
+        font-weight: 900;
+        letter-spacing: 0.05em;
+      }
+
+      .fire-readout.mild {
+        
+        background: var(--fire-mild);
+
+        color: #000000;
+      }
+
+      .fire-readout.strong {
+        background: var(--fire-strong);
+        color: #fdff70;
+      }
+
+      .fire-readout.deadly {
+        background: var(--fire-deadly);
+        color: #ffffff;
+      }
+
+      .fire-minus5 {
+        padding: 6px 8px;
+        font-size: 10px;
+        align-self: center;
+      }
+
+      @media (max-width: 980px) {
+        .status-controls {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .status-sp-layout {
+          grid-template-columns: max-content max-content max-content max-content max-content;
+          grid-template-rows: min-content auto auto auto;
+          column-gap: 6px;
+          row-gap: 0;
+          align-items: start;
+        }
+
+        .status-damage-group {
+          grid-column: 1 / -1 !important;
+          grid-row: 4 !important;
+          padding-left: 0;
+          margin-top: 0px;
+        }
+
+        .damage-location-label {
+          writing-mode: horizontal-tb;
+          transform: none;
+          justify-self: start;
+        }
+
+        .status-hp-with-fire {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .fire-wrap {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
       label {
         display: block;
         font-size: 11px;
@@ -354,13 +948,13 @@
         font-family: var(--mono);
       }
 
-      input[type="text"],
+      input[type="text"]:not(.small-input):not(.big-input):not(.damage-input),
       input[type="number"],
       input[type="file"],
       textarea {
         width: 100%;
         border: 1px solid var(--border-strong);
-        border-radius: 4px;
+        border-radius: 0;
         padding: 8px 10px;
         font-family: var(--mono);
         background: var(--panel2);
@@ -408,6 +1002,17 @@
         align-items: end;
       }
 
+      .status-title {
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+
+        font-size: 11px;
+
+        color: var(--ink-muted);
+
+      }
+
       .global-mod-field {
         display: grid;
         gap: 6px;
@@ -420,7 +1025,7 @@
 
       .luck-box {
         border: 1px solid var(--border-strong);
-        border-radius: 4px;
+        border-radius: 0;
         padding: 4px 8px 6px;
         margin: 0;
         background: rgba(0, 0, 0, 0.08);
@@ -644,6 +1249,7 @@
         align-items: center;
         gap: 8px;
         padding-left: 8px;
+        
         font-size: 12px;
         letter-spacing: 0.16em;
       }
@@ -891,6 +1497,28 @@
         --btn-hover-current: var(--btn-hover-alpha);
       }
 
+      .btn-mini {
+        padding: 4px 8px;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+      }
+
+      .btn-warn {
+        background: rgba(255, 212, 80, 0.12);
+        border-color: rgba(255, 212, 80, 0.38);
+        color: var(--accent-2);
+      }
+
+      .btn-danger {
+        background: rgba(255, 59, 106, 0.14);
+        border-color: rgba(255, 59, 106, 0.65);
+        color: var(--accent-3);
+      }
+
+      .btn-danger:hover {
+        box-shadow: var(--glowD);
+      }
+
       .btn-multi {
         background: var(--panel2);
         text-transform: none;
@@ -1048,7 +1676,7 @@
 
       .modal {
         width: min(520px, 92vw);
-        border-radius: 6px;
+        border-radius: 0;
         border: 1px solid var(--border-strong);
         background: var(--panel);
         box-shadow: var(--shadow);
@@ -1057,7 +1685,7 @@
       }
 
       .modal::before {
-        content: "MULTI ROLL";
+        content: attr(data-label);
         position: absolute;
         top: -10px;
         left: 12px;
@@ -1101,6 +1729,353 @@
         margin-top: 10px;
       }
 
+      .log-modal {
+        width: min(720px, 92vw);
+      }
+
+      .crit-modal {
+        width: min(980px, 95vw);
+      }
+
+      .crit-modal-grid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .crit-col {
+        border: 1px solid var(--border);
+        background: var(--panel2);
+        padding: 10px;
+      }
+
+      .crit-col-title {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        margin: 0 0 8px 0;
+      }
+
+      .crit-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+
+      .crit-table th,
+      .crit-table td {
+        border: 1px solid var(--border);
+        padding: 6px 8px;
+        text-align: left;
+      }
+
+      .crit-table th {
+        color: var(--ink-muted);
+        background: rgba(44, 246, 232, 0.08);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-size: 10px;
+      }
+
+      .crit-row {
+        cursor: pointer;
+        transition: filter 120ms ease, box-shadow 120ms ease;
+      }
+
+      .crit-row:hover {
+        filter: brightness(1.08);
+        box-shadow: var(--glowA);
+      }
+
+      .status-critical {
+        margin-top: 12px;
+		margin-left: -150px;
+        border: 1px solid var(--border);
+
+        background: var(--panel2);
+        padding: 10px;
+      }
+
+      .status-critical-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .status-critical-head .status-title {
+        margin: 0;
+      }
+
+      .crit-list {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-height: 24px;
+      }
+
+      .crit-item {
+        border: 1px solid var(--border);
+        background: rgba(6, 10, 18, 0.65);
+        padding: 8px 10px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .crit-item-title {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        font-family: var(--mono);
+      }
+
+      .crit-item-title strong {
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+
+      .crit-item-meta {
+        color: var(--ink-muted);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .crit-item-body {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink);
+        white-space: pre-wrap;
+      }
+
+      .crit-item-actions {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .crit-remove {
+        background: rgba(255, 59, 106, 0.18);
+        color: var(--accent-3);
+        border: 1px solid rgba(255, 59, 106, 0.6);
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .crit-remove:hover {
+        box-shadow: var(--glowD);
+        filter: brightness(1.05);
+      }
+
+      .weapons {
+        margin-top: 14px;
+        border-top: 1px solid var(--border);
+        padding-top: 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .weapons-panel .weapons {
+        margin-top: 0;
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .pill-title {
+        background: rgba(44, 246, 232, 0.2);
+        color: var(--accent);
+        padding: 4px 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-family: var(--mono);
+        font-size: 11px;
+      }
+
+      .pill-inline {
+        display: inline-block;
+      }
+
+      .weapons-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .weapons-head .right {
+        margin-left: auto;
+      }
+
+      .weapons-list {
+        display: grid;
+        gap: 8px;
+        align-content: start;
+        min-height: 24px;
+      }
+
+      .weapon-card {
+        border: 1px solid var(--border);
+        background: var(--panel2);
+        padding: 10px;
+        display: grid;
+        gap: 8px;
+      }
+
+      .weapon-row {
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) minmax(180px, 240px) minmax(150px, 220px) auto;
+        gap: 10px;
+        align-items: end;
+      }
+
+      .weapon-name {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .weapon-meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+
+      .ammo-counts {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .ammo-counts input {
+        text-align: center;
+        padding: 4px 6px;
+      }
+
+      .weapon-actions {
+        display: inline-flex;
+        gap: 8px;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .attack-table {
+        border-top: 1px solid var(--border);
+        padding-top: 8px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .attack-row {
+        display: grid;
+        grid-template-columns: 58px 58px minmax(160px, 1fr) minmax(160px, 220px) 120px minmax(180px, 260px);
+        gap: 8px;
+        align-items: center;
+        padding: 4px 0;
+      }
+
+      .attack-row-head {
+        color: var(--ink-muted);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding-bottom: 2px;
+      }
+
+      .attack-name {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.06em;
+      }
+
+      .attack-meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--ink-muted);
+      }
+
+      .mods-input {
+        height: 28px;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+
+      .weapon-select {
+        width: 100%;
+        border: 1px solid var(--border-strong);
+        border-radius: 0;
+        padding: 8px 10px;
+        font-family: var(--mono);
+        background: var(--panel2);
+        color: var(--ink);
+      }
+
+      .empty-state {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-muted);
+        padding: 6px 2px;
+      }
+
+      .weapon-mode-line {
+        border: 1px solid var(--border);
+        background: rgba(6, 10, 18, 0.55);
+        padding: 8px 10px;
+        font-family: var(--mono);
+        font-size: 11px;
+        display: grid;
+        gap: 6px;
+      }
+
+      .weapon-mode-list {
+        display: grid;
+        gap: 6px;
+      }
+
+      .weapon-mode-meta {
+        color: var(--ink-muted);
+      }
+
+      .weapon-mode-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      @media (max-width: 980px) {
+        .crit-modal-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .log-entries {
+        margin-top: 10px;
+        max-height: min(52vh, 420px);
+        overflow-y: auto;
+        display: grid;
+        gap: 8px;
+        padding-right: 6px;
+      }
+
+      .log-entry {
+        border: 1px solid var(--border);
+        background: var(--panel2);
+        padding: 8px 10px;
+        font-family: var(--mono);
+        font-size: 11px;
+        white-space: pre-wrap;
+      }
+
       .startup-backdrop {
         position: fixed;
         inset: 0;
@@ -1118,7 +2093,7 @@
 
       .startup-modal {
         width: min(520px, 94vw);
-        border-radius: 8px;
+        border-radius: 0;
         border: 1px solid var(--border-strong);
         background: var(--panel);
         box-shadow: var(--shadow);
@@ -1188,6 +2163,12 @@
         .controls {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        .status-row {
+          grid-template-columns: 1fr;
+        }
+        .status-grid {
+          grid-template-columns: 1fr;
+        }
         .columns {
           grid-template-columns: 1fr;
         }
@@ -1243,10 +2224,6 @@
             />
             <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
           </div>
-          <div class="inline-control inline-character">
-            <label for="characterName">Character Name</label>
-            <input id="characterName" type="text" placeholder="From sheet or type here" />
-          </div>
           <div class="inline-control">
             <label for="pdfInput">Load PDF</label>
             <input id="pdfInput" type="file" accept="application/pdf,.pdf" />
@@ -1262,67 +2239,274 @@
         </div>
       </div>
 
-      <section class="global-mod">
-        <div class="global-mod-row">
-          <div class="global-mod-field">
-            <label for="globalModInput">Global Modifier</label>
-            <input id="globalModInput" type="text" placeholder="Applies to all skills" />
+      <div class="status-row">
+        <section class="status-panel">
+          <div class="status-title">Character Status</div>
+          <div class="status-meta">
+            <div class="status-name">
+              <label for="characterName">Name</label>
+              <input id="characterName" type="text" placeholder="From sheet or type here" />
+            </div>
+            <div class="status-log">
+              <button id="logOpenBtn" type="button">Log</button>
+              <div id="logPreview" class="status-log-preview" aria-live="polite"></div>
+            </div>
           </div>
-          <div class="luck-section">
-            <fieldset class="luck-box">
-              <legend>Luck</legend>
-              <div class="luck-grid">
-                <div class="luck-col">
-                  <label for="luckNextInput">Use</label>
-                  <div class="luck-use">
-                    <button id="luckPlus" class="luck-btn" type="button" aria-label="Add luck to next roll">+</button>
-                    <input
-                      id="luckNextInput"
-                      class="luck-input luck-digit"
-                      type="text"
-                      inputmode="numeric"
-                      aria-label="Luck to add on the next roll"
-                    />
-                    <button
-                      id="luckMinus"
-                      class="luck-btn"
-                      type="button"
-                      aria-label="Remove luck from next roll"
-                    >
-                      -
-                    </button>
+          <div class="status-grid">
+            <div class="status-controls">
+              <div class="status-core">
+                <div class="status-hp-with-fire">
+                  <div class="status-hp" aria-label="Hit points">
+                    <div class="hp-starting">
+                      <div class="hp-starting-label">Max</div>
+                      <input
+                        id="hpTotal"
+                        class="small-input"
+                        type="text"
+                        inputmode="numeric"
+                        aria-label="HP max"
+                      />
+                    </div>
+                    <div class="hp-current">
+                      <div class="hp-label">HP</div>
+                      <input
+                        id="hpCurrent"
+                        class="big-input"
+                        type="text"
+                        inputmode="numeric"
+                        aria-label="HP current"
+                      />
+                    </div>
+                  </div>
+                  <div class="status-fire" aria-label="Fire severity">
+                    <div class="fire-wrap">
+                      <div class="fire-readout-stack">
+                        <div class="fire-title">On Fire</div>
+                        <button class="fire-readout" id="readoutBtn" type="button" aria-label="Fire penalty"></button>
+                      </div>
+                      <div class="fire-slider-area">
+                        <div class="fire-segments">
+                          <div class="fire-seg s1"></div>
+                          <div class="fire-seg s2"></div>
+                          <div class="fire-seg s3"></div>
+                          <div class="fire-seg s4"></div>
+                        </div>
+                        <input
+                          class="fire-slider"
+                          id="fireSlider"
+                          type="range"
+                          min="0"
+                          max="3"
+                          step="1"
+                          value="0"
+                          aria-label="Fire severity"
+                        />
+                        <div class="fire-labels">
+                          <div class="fire-label">Deadly</div>
+                          <div class="fire-label">Strong</div>
+                          <div class="fire-label">Mild</div>
+                          <div class="fire-label empty"></div>
+                        </div>
+                      </div>
+                      <button id="hpMinus5Btn" class="fire-minus5" type="button">-5 HP</button>
+                    </div>
                   </div>
                 </div>
-                <div class="luck-col">
-                  <label for="luckPoolInput">Current</label>
-                  <div id="luckPoolDisplay" class="luck-pool" aria-live="polite">
-                    <span id="luckAfter" class="luck-after">0</span>
-                    <span class="luck-sep">-></span>
+                <div class="status-sp-layout" aria-label="Armor and damage controls">
+                  <div class="sp-block" aria-label="SP values">
+                    <div class="sp-header-pad" aria-hidden="true"></div>
+                    <div class="sp-header">SP</div>
                     <input
-                      id="luckPoolInput"
-                      class="luck-pool-input luck-digit"
+                      id="headSpTotal"
+                      class="small-input"
                       type="text"
                       inputmode="numeric"
-                      aria-label="Current luck pool"
+                      aria-label="Head SP max"
+                    />
+                    <input
+                      id="headSpCurrent"
+                      class="big-input"
+                      type="text"
+                      inputmode="numeric"
+                      aria-label="Head SP current"
+                    />
+                    <input
+                      id="bodySpTotal"
+                      class="small-input"
+                      type="text"
+                      inputmode="numeric"
+                      aria-label="Body SP max"
+                    />
+                    <input
+                      id="bodySpCurrent"
+                      class="big-input"
+                      type="text"
+                      inputmode="numeric"
+                      aria-label="Body SP current"
                     />
                   </div>
+                  <div class="scale-label" style="grid-column:3;">Full</div>
+                  <div class="scale-label" style="grid-column:4;">Half</div>
+                  <div class="scale-label" style="grid-column:5;">Bypass</div>
+                  <div class="damage-location-label" style="grid-row:2;">Head</div>
+                  <button
+                    class="wedge-btn full"
+                    type="button"
+                    style="grid-column:3;grid-row:2;"
+                    aria-label="Head full damage"
+                    title="Full"
+                  ></button>
+                  <button
+                    class="wedge-btn half"
+                    type="button"
+                    style="grid-column:4;grid-row:2;"
+                    aria-label="Head half damage"
+                    title="Half"
+                  ></button>
+                  <button
+                    class="wedge-btn bypass"
+                    type="button"
+                    style="grid-column:5;grid-row:2;"
+                    aria-label="Head bypass armor"
+                    title="Bypass"
+                  ></button>
+                  <div class="damage-location-label" style="grid-row:3;">Body</div>
+                  <button
+                    class="wedge-btn full"
+                    type="button"
+                    style="grid-column:3;grid-row:3;"
+                    aria-label="Body full damage"
+                    title="Full"
+                  ></button>
+                  <button
+                    class="wedge-btn half"
+                    type="button"
+                    style="grid-column:4;grid-row:3;"
+                    aria-label="Body half damage"
+                    title="Half"
+                  ></button>
+                  <button
+                    class="wedge-btn bypass"
+                    type="button"
+                    style="grid-column:5;grid-row:3;"
+                    aria-label="Body bypass armor"
+                    title="Bypass"
+                  ></button>
+                  <div class="status-damage-group" style="grid-column:6;grid-row:2 / span 2;">
+                    <div class="status-damage-panel" aria-label="Damage entry">
+                      <div class="damage-toggles">
+                        <label class="damage-toggle">
+                          <span>Crit</span>
+                          <input id="damageCrit" type="checkbox" aria-label="Critical injury" />
+                        </label>
+                        <label class="damage-toggle">
+                          <span>AP</span>
+                          <input id="damageAp" type="checkbox" aria-label="Armor piercing" />
+                        </label>
+                      </div>
+                      <div class="damage-field">
+                        <div class="damage-legend">Damage</div>
+                        <input
+                          id="damageValue"
+                          class="damage-input"
+                          type="text"
+                          inputmode="numeric"
+                          placeholder="0"
+                          aria-label="Damage amount"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="luck-outof">out of</div>
-                <div class="luck-col">
-                  <label for="luckTotalInput">Total</label>
-                  <input
-                    id="luckTotalInput"
-                    class="luck-input luck-digit"
-                    type="text"
-                    inputmode="numeric"
-                    aria-label="Total luck"
-                  />
+
+              </div>
+              <div class="status-mods" aria-label="Situational modifiers">
+                <div class="status-title">Modifiers</div>
+                <div class="global-mod-row">
+
+                  <div class="luck-section">
+                    <fieldset class="luck-box">
+                      <legend>Luck</legend>
+                      <div class="luck-grid">
+                        <div class="luck-col">
+                          <label for="luckNextInput">Use</label>
+                          <div class="luck-use">
+                            <button id="luckPlus" class="luck-btn" type="button" aria-label="Add luck to next roll">+</button>
+                            <input
+                              id="luckNextInput"
+                              class="luck-input luck-digit"
+                              type="text"
+                              inputmode="numeric"
+                              aria-label="Luck to add on the next roll"
+                            />
+                            <button
+                              id="luckMinus"
+                              class="luck-btn"
+                              type="button"
+                              aria-label="Remove luck from next roll"
+                            >
+                              -
+                            </button>
+                          </div>
+                        </div>
+                        <div class="luck-col">
+                          <label for="luckPoolInput">Remaining</label>
+                          <div id="luckPoolDisplay" class="luck-pool" aria-live="polite">
+                            <span id="luckAfter" class="luck-after">0</span>
+                            <span class="luck-sep">-></span>
+                            <input
+                              id="luckPoolInput"
+                              class="luck-pool-input luck-digit"
+                              type="text"
+                              inputmode="numeric"
+                              aria-label="Remaining luck pool"
+                            />
+                          </div>
+                        </div>
+                        <div class="luck-outof">out of</div>
+                        <div class="luck-col">
+                          <label for="luckTotalInput">Starting</label>
+                          <input
+                            id="luckTotalInput"
+                            class="luck-input luck-digit"
+                            type="text"
+                            inputmode="numeric"
+                            aria-label="Starting luck"
+                          />
+                        </div>
+                      </div>
+                    </fieldset>
+                  </div>
+                    <div class="global-mod-field">
+                    <label for="globalModInput">Global Modifier</label>
+                    <input id="globalModInput" type="text" placeholder="Applies to all skills" />
+                  </div>
                 </div>
               </div>
-            </fieldset>
+            </div>
+
+            <div class="status-critical" aria-label="Current critical injuries">
+              <div class="status-critical-head">
+                <div class="status-title">Critical Injuries</div>
+                <button id="critOpenBtn" type="button">Add</button>
+              </div>
+              <div id="critList" class="crit-list" aria-live="polite"></div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+
+        <section class="weapons-panel" aria-label="Weapons panel">
+          <div class="weapons" aria-label="Weapons">
+            <div class="weapons-head">
+              <div class="status-title">Weapons</div>
+              <div class="right">
+                <button id="addWeaponBtn" type="button">Add Weapon</button>
+              </div>
+            </div>
+            <div id="weaponsList" class="weapons-list" aria-live="polite"></div>
+          </div>
+        </section>
+      </div>
 
       <section class="pinned">
         <div class="pinned-head">
@@ -1380,7 +2564,7 @@
     </div>
 
     <div id="rollCountBackdrop" class="modalBackdrop" data-open="false">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rollCountTitle">
+      <div class="modal" data-label="Multi Roll" role="dialog" aria-modal="true" aria-labelledby="rollCountTitle">
         <h2 id="rollCountTitle" class="modalTitle">Multi-roll</h2>
         <p id="rollCountSub" class="modalSub"></p>
         <div class="modalField">
@@ -1390,6 +2574,143 @@
         <div class="modalActions">
           <button id="rollCountCancel" type="button">Cancel</button>
           <button id="rollCountCopy" class="right" type="button">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="logBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal log-modal" data-label="Log" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+        <h2 id="logTitle" class="modalTitle">Log</h2>
+        <p id="logEmpty" class="modalSub">No log entries yet.</p>
+        <div id="logEntries" class="log-entries" aria-live="polite"></div>
+        <div class="modalActions">
+          <button id="logSaveBtn" type="button">Save Log</button>
+          <button id="logClearBtn" type="button">Clear</button>
+          <button id="logCloseBtn" class="right" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="critBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal crit-modal" data-label="Critical Injuries" role="dialog" aria-modal="true" aria-labelledby="critTitle">
+        <h2 id="critTitle" class="modalTitle">Critical Injuries</h2>
+        <p class="modalSub">Select an injury to add it to the character status.</p>
+        <div class="crit-modal-grid" aria-label="Critical injuries tables">
+          <div class="crit-col">
+            <h3 class="crit-col-title">Critical Injuries to the Body</h3>
+            <table class="crit-table" aria-label="Critical injuries to the body">
+              <thead>
+                <tr>
+                  <th style="width: 6ch;">Roll</th>
+                  <th>Injury</th>
+                </tr>
+              </thead>
+              <tbody id="critBodyTable"></tbody>
+            </table>
+          </div>
+          <div class="crit-col">
+            <h3 class="crit-col-title">Critical Injuries to the Head</h3>
+            <table class="crit-table" aria-label="Critical injuries to the head">
+              <thead>
+                <tr>
+                  <th style="width: 6ch;">Roll</th>
+                  <th>Injury</th>
+                </tr>
+              </thead>
+              <tbody id="critHeadTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modalActions">
+          <button id="critCloseBtn" class="right" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="weaponBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" data-label="Weapon" role="dialog" aria-modal="true" aria-labelledby="weaponModalTitle">
+        <h2 id="weaponModalTitle" class="modalTitle">Add Weapon</h2>
+        <p class="modalSub">Define the weapon, its ammo tracking, and one or more attack modes.</p>
+
+        <div class="modalField">
+          <label for="weaponNameInput">Weapon name</label>
+          <input id="weaponNameInput" type="text" placeholder="V. Heavy Pistol" />
+        </div>
+
+        <div class="modalGrid2">
+          <div class="modalField">
+            <label for="ammoNameInput">Ammo name</label>
+            <input id="ammoNameInput" type="text" placeholder="Heavy pistol" />
+          </div>
+          <div class="modalField">
+            <label for="ammoMaxInput">Max ammo</label>
+            <input id="ammoMaxInput" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
+
+        <div class="modalGrid2">
+          <div class="modalField">
+            <label for="ammoCurInput">Current ammo</label>
+            <input id="ammoCurInput" type="number" min="0" step="1" value="0" />
+          </div>
+          <div class="modalField">
+            <label>Attack modes</label>
+            <button id="addAttackBtn" type="button">Add Attack</button>
+          </div>
+        </div>
+
+        <div class="modalField">
+          <div class="pill-title pill-inline">Modes Preview</div>
+          <div id="weaponModesPreview" class="empty-state">No attack modes yet. Use "Add Attack".</div>
+        </div>
+
+        <div class="modalActions">
+          <button id="weaponCancel" type="button">Cancel</button>
+          <button id="weaponSave" class="right" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="attackBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" data-label="Attack Mode" role="dialog" aria-modal="true" aria-labelledby="attackModalTitle">
+        <h2 id="attackModalTitle" class="modalTitle">Add Attack</h2>
+        <p class="modalSub">Add one attack mode. You can add multiple modes to the same weapon.</p>
+
+        <div class="modalField">
+          <label for="attackNameInput">Attack name</label>
+          <input id="attackNameInput" type="text" placeholder="Single Shot" />
+        </div>
+
+        <div class="modalGrid2">
+          <div class="modalField">
+            <label for="attackSkillInput">Skill</label>
+            <select id="attackSkillInput" class="weapon-select"></select>
+          </div>
+          <div class="modalField">
+            <label for="attackAmmoUseInput">Ammo used / attack</label>
+            <input id="attackAmmoUseInput" type="number" min="0" step="1" value="1" />
+          </div>
+        </div>
+
+        <div class="modalField">
+          <label for="attackModsInput">Attack modifiers (optional)</label>
+          <input id="attackModsInput" type="text" placeholder="+1 (scope), -2 (smoke)" />
+        </div>
+
+        <div class="modalActions">
+          <button id="attackCancel" type="button">Cancel</button>
+          <button id="attackAdd" class="right" type="button">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="deleteWeaponBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" data-label="Confirm" role="dialog" aria-modal="true" aria-labelledby="deleteWeaponTitle">
+        <h2 id="deleteWeaponTitle" class="modalTitle">Permanently Deletes Weapon</h2>
+        <p class="modalSub" id="deleteWeaponSub">This cannot be undone.</p>
+        <div class="modalActions">
+          <button id="deleteWeaponCancel" type="button">Cancel</button>
+          <button id="deleteWeaponConfirm" class="right btn-danger" type="button">Delete</button>
         </div>
       </div>
     </div>
@@ -1565,6 +2886,169 @@
         ]
       }
     </script>
+    <script id="critical-injuries" type="application/json">
+{
+  "body": [
+    {
+      "roll": 2,
+      "injury": "Dismembered Arm",
+      "injuryEffect": "The dismembered arm is gone. You drop any items in that arm’s hand immediately. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV17"
+    },
+    {
+      "roll": 3,
+      "injury": "Dismembered Hand",
+      "injuryEffect": "The dismembered hand is gone. You drop any items in that hand immediately. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV17"
+    },
+    {
+      "roll": 4,
+      "injury": "Collapsed Lung",
+      "injuryEffect": "-2 to MOVE (minimum 1). Base Death Save Penalty is increased by 1.",
+      "quickFix": "Paramedic DV15",
+      "treatment": "Surgery DV15"
+    },
+    {
+      "roll": 5,
+      "injury": "Broken Ribs",
+      "injuryEffect": "At the end of every Turn where you move further than 4m/yds on foot, you re-suffer this Critical Injury’s Bonus Damage directly to your Hit Points.",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Paramedic DV15 or Surgery DV13"
+    },
+    {
+      "roll": 6,
+      "injury": "Broken Arm",
+      "injuryEffect": "The broken arm cannot be used. You drop any items in that arm’s hand immediately.",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Paramedic DV15 or Surgery DV13"
+    },
+    {
+      "roll": 7,
+      "injury": "Foreign Object",
+      "injuryEffect": "At the end of every Turn where you move further than 4m/yds on foot, you re-suffer this Critical Injury’s Bonus Damage directly to your Hit Points.",
+      "quickFix": "First Aid or Paramedic DV13",
+      "treatment": "Quick Fix removes Injury Effect permanently"
+    },
+    {
+      "roll": 8,
+      "injury": "Broken Leg",
+      "injuryEffect": "-4 to MOVE (minimum 1).",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Paramedic DV15 or Surgery DV13"
+    },
+    {
+      "roll": 9,
+      "injury": "Torn Muscle",
+      "injuryEffect": "-2 to Melee Attacks.",
+      "quickFix": "First Aid or Paramedic DV13",
+      "treatment": "Quick Fix removes Injury Effect permanently"
+    },
+    {
+      "roll": 10,
+      "injury": "Spinal Injury",
+      "injuryEffect": "Next Turn, you cannot take an Action, but you can still take a Move Action. Base Death Save Penalty is increased by 1.",
+      "quickFix": "Paramedic DV15",
+      "treatment": "Surgery DV15"
+    },
+    {
+      "roll": 11,
+      "injury": "Crushed Fingers",
+      "injuryEffect": "-4 to all Actions involving that hand.",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Surgery DV15"
+    },
+    {
+      "roll": 12,
+      "injury": "Dismembered Leg",
+      "injuryEffect": "The dismembered leg is gone. -6 to MOVE (minimum 1). You cannot dodge attacks. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV17"
+    }
+  ],
+  "head": [
+    {
+      "roll": 2,
+      "injury": "Lost Eye",
+      "injuryEffect": "The lost eye is gone. -4 to Ranged Attacks & Perception Checks involving vision. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV17"
+    },
+    {
+      "roll": 3,
+      "injury": "Brain Injury",
+      "injuryEffect": "-2 to all Actions. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV17"
+    },
+    {
+      "roll": 4,
+      "injury": "Damaged Eye",
+      "injuryEffect": "-2 to Ranged Attacks & Perception Checks involving vision.",
+      "quickFix": "Paramedic DV15",
+      "treatment": "Surgery DV13"
+    },
+    {
+      "roll": 5,
+      "injury": "Concussion",
+      "injuryEffect": "-2 to all Actions.",
+      "quickFix": "First Aid or Paramedic DV13",
+      "treatment": "Quick Fix removes Injury Effect permanently"
+    },
+    {
+      "roll": 6,
+      "injury": "Broken Jaw",
+      "injuryEffect": "-4 to all Actions involving speech.",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Paramedic or Surgery DV13"
+    },
+    {
+      "roll": 7,
+      "injury": "Foreign Object",
+      "injuryEffect": "At the end of every Turn where you move further than 4m/yds on foot, you re-suffer this Critical Injury’s Bonus Damage directly to your Hit Points.",
+      "quickFix": "First Aid or Paramedic DV13",
+      "treatment": "Quick Fix removes Injury Effect permanently"
+    },
+    {
+      "roll": 8,
+      "injury": "Whiplash",
+      "injuryEffect": "Base Death Save Penalty is increased by 1.",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Paramedic or Surgery DV13"
+    },
+    {
+      "roll": 9,
+      "injury": "Cracked Skull",
+      "injuryEffect": "Aimed Shots to your head multiply the damage that gets through your SP by 3 instead of 2. Base Death Save Penalty is increased by 1.",
+      "quickFix": "Paramedic DV15",
+      "treatment": "Paramedic or Surgery DV15"
+    },
+    {
+      "roll": 10,
+      "injury": "Damaged Ear",
+      "injuryEffect": "Whenever you move further than 4m/yds on foot in a Turn, you cannot take a Move Action on your next Turn. Additionally, you take a -2 to Perception Checks involving hearing.",
+      "quickFix": "Paramedic DV13",
+      "treatment": "Surgery DV13"
+    },
+    {
+      "roll": 11,
+      "injury": "Crushed Windpipe",
+      "injuryEffect": "You cannot speak. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV15"
+    },
+    {
+      "roll": 12,
+      "injury": "Lost Ear",
+      "injuryEffect": "The lost ear is gone. Whenever you move further than 4m/yds on foot in a Turn, you cannot take a Move Action on your next Turn. Additionally, you take a -4 to Perception Checks involving hearing. Base Death Save Penalty is increased by 1.",
+      "quickFix": "N/A",
+      "treatment": "Surgery DV17"
+    }
+  ]
+}
+    </script>
+
     <script>
       const pdfInput = document.getElementById("pdfInput");
       const filterInput = document.getElementById("filterInput");
@@ -1578,6 +3062,17 @@
         col3: document.getElementById("pinnedCol3")
       };
       const characterNameInput = document.getElementById("characterName");
+      const hpTotalInput = document.getElementById("hpTotal");
+      const hpCurrentInput = document.getElementById("hpCurrent");
+      const bodySpTotalInput = document.getElementById("bodySpTotal");
+      const bodySpCurrentInput = document.getElementById("bodySpCurrent");
+      const headSpTotalInput = document.getElementById("headSpTotal");
+      const headSpCurrentInput = document.getElementById("headSpCurrent");
+      const damageValueInput = document.getElementById("damageValue");
+      const damageCritInput = document.getElementById("damageCrit");
+      const damageApInput = document.getElementById("damageAp");
+      const fireSliderInput = document.getElementById("fireSlider");
+      const fireReadoutBtn = document.getElementById("readoutBtn");
       const fallbackEl = document.getElementById("clipboardFallback");
       const fallbackTextEl = document.getElementById("fallbackText");
       const fallbackSelectBtn = document.getElementById("fallbackSelect");
@@ -1588,6 +3083,45 @@
       const rollCountInput = document.getElementById("rollCountInput");
       const rollCountCancel = document.getElementById("rollCountCancel");
       const rollCountCopy = document.getElementById("rollCountCopy");
+      const logBackdrop = document.getElementById("logBackdrop");
+        const logOpenBtn = document.getElementById("logOpenBtn");
+        const logCloseBtn = document.getElementById("logCloseBtn");
+        const logSaveBtn = document.getElementById("logSaveBtn");
+        const logClearBtn = document.getElementById("logClearBtn");
+        const logEntries = document.getElementById("logEntries");
+        const logEmpty = document.getElementById("logEmpty");
+        const logPreview = document.getElementById("logPreview");
+      const critOpenBtn = document.getElementById("critOpenBtn");
+      const hpMinus5Btn = document.getElementById("hpMinus5Btn");
+      const critList = document.getElementById("critList");
+      const critBackdrop = document.getElementById("critBackdrop");
+      const critCloseBtn = document.getElementById("critCloseBtn");
+      const critBodyTable = document.getElementById("critBodyTable");
+      const critHeadTable = document.getElementById("critHeadTable");
+      const addWeaponBtn = document.getElementById("addWeaponBtn");
+      const weaponsList = document.getElementById("weaponsList");
+      const weaponBackdrop = document.getElementById("weaponBackdrop");
+      const weaponModalTitle = document.getElementById("weaponModalTitle");
+      const weaponNameInput = document.getElementById("weaponNameInput");
+      const ammoNameInput = document.getElementById("ammoNameInput");
+      const ammoMaxInput = document.getElementById("ammoMaxInput");
+      const ammoCurInput = document.getElementById("ammoCurInput");
+      const addAttackBtn = document.getElementById("addAttackBtn");
+      const weaponModesPreview = document.getElementById("weaponModesPreview");
+      const weaponCancel = document.getElementById("weaponCancel");
+      const weaponSave = document.getElementById("weaponSave");
+      const attackBackdrop = document.getElementById("attackBackdrop");
+      const attackModalTitle = document.getElementById("attackModalTitle");
+      const attackNameInput = document.getElementById("attackNameInput");
+      const attackSkillInput = document.getElementById("attackSkillInput");
+      const attackAmmoUseInput = document.getElementById("attackAmmoUseInput");
+      const attackModsInput = document.getElementById("attackModsInput");
+      const attackCancel = document.getElementById("attackCancel");
+      const attackAdd = document.getElementById("attackAdd");
+      const deleteWeaponBackdrop = document.getElementById("deleteWeaponBackdrop");
+      const deleteWeaponSub = document.getElementById("deleteWeaponSub");
+      const deleteWeaponCancel = document.getElementById("deleteWeaponCancel");
+      const deleteWeaponConfirm = document.getElementById("deleteWeaponConfirm");
       const startupBackdrop = document.getElementById("startupBackdrop");
       const startupLoadPdf = document.getElementById("startupLoadPdf");
       const startupLoadState = document.getElementById("startupLoadState");
@@ -1712,6 +3246,17 @@
 
       const state = {
         characterName: "",
+        characterLog: [],
+        hpTotal: "5",
+        hpCurrent: "45",
+        bodySpTotal: "9",
+        bodySpCurrent: "12",
+        headSpTotal: "12",
+        headSpCurrent: "8",
+        damageValue: "",
+        damageCrit: false,
+        damageAp: false,
+        fireSeverity: 0,
         skills: {},
         columnSkills: { col1: [], col2: [], col3: [] },
         pinnedColumns: { col1: [], col2: [], col3: [] },
@@ -1719,7 +3264,13 @@
         globalMod: "",
         luckNext: 0,
         luckPool: 0,
-        luckTotal: 0
+        luckTotal: 0,
+        criticalInjuries: [],
+        weapons: [],
+        draftWeapon: null,
+        editingWeaponId: null,
+        deleteWeaponId: null,
+        editingAttackId: null
       };
       const REDLINK_STORAGE_KEY = "redlink.enabled";
       const REDLINK_CHANNEL_KEY = "redlink.channel";
@@ -2114,6 +3665,17 @@
         return "";
       }
 
+      function extractWeaponNames(fields) {
+        const names = [];
+        fields.forEach((field) => {
+          const fieldName = String(field.getName?.() ?? "");
+          if (!fieldName || !fieldName.toLowerCase().startsWith("weapon")) return;
+          const value = normalizeFreeTextName(getFieldValue(field));
+          if (value) names.push(value);
+        });
+        return names;
+      }
+
       function setCharacterName(name) {
         state.characterName = name || "";
         characterNameInput.value = state.characterName;
@@ -2286,9 +3848,9 @@
         return `!r 1d10+${base}${mod} ${skillName}`;
       }
 
-      function openRollCountModal(skill, flashEl) {
-        pendingMulti = { skill, flashEl };
-        rollCountTitle.textContent = formatSkillLabel(skill);
+      function openRollCountModal(config, flashEl) {
+        pendingMulti = { ...config, flashEl };
+        rollCountTitle.textContent = config.label;
         rollCountSub.textContent = "Enter the number of rolls.";
         rollCountInput.value = "2";
         rollCountBackdrop.dataset.open = "true";
@@ -2311,9 +3873,11 @@
           rollCountInput.focus();
           return;
         }
-        const text = buildRollText(pendingMulti.skill, true, count);
+        const text = pendingMulti.buildText(count);
         await copyRollText(text, pendingMulti.flashEl);
-        consumeLuckForRoll();
+        if (pendingMulti.afterCopy) {
+          pendingMulti.afterCopy(count);
+        }
         closeRollCountModal();
       }
 
@@ -2357,9 +3921,16 @@
         });
       }
 
-      function addPinned(skillId, columnId = "col1") {
+      function addPinned(skillId, columnId) {
         removePinned(skillId);
-        const list = state.pinnedColumns[columnId] || state.pinnedColumns.col1;
+        let targetColumn = columnId;
+        // If no columnId specified, use round-robin distribution
+        if (!targetColumn) {
+          const totalPinned = allPinnedIds().length;
+          const columns = ["col1", "col2", "col3"];
+          targetColumn = columns[totalPinned % 3];
+        }
+        const list = state.pinnedColumns[targetColumn] || state.pinnedColumns.col1;
         list.push(skillId);
       }
 
@@ -2460,8 +4031,766 @@
           visibleSkillIds.add(skill.id);
         });
 
+        renderCharacterLog();
+        renderCriticalInjuries();
+        renderWeapons();
         renderPinned();
         renderColumns(visibleSkillIds, needle.length === 0);
+      }
+
+        function renderCharacterLog() {
+          const entries = Array.isArray(state.characterLog) ? state.characterLog : [];
+          renderLogEntries(entries);
+          if (logPreview) {
+            const lastEntry = entries[entries.length - 1];
+            logPreview.textContent = lastEntry ? `Last: ${lastEntry}` : "";
+          }
+        }
+
+      function renderLogEntries(entries) {
+        if (!logEntries || !logEmpty) return;
+        logEntries.textContent = "";
+        if (entries.length === 0) {
+          logEmpty.hidden = false;
+          return;
+        }
+        logEmpty.hidden = true;
+        entries.forEach((entry) => {
+          const row = document.createElement("div");
+          row.className = "log-entry";
+          row.textContent = entry;
+          logEntries.appendChild(row);
+        });
+      }
+
+      function openLogModal() {
+        if (!logBackdrop) return;
+        logBackdrop.dataset.open = "true";
+        renderCharacterLog();
+      }
+
+      function closeLogModal() {
+        if (!logBackdrop) return;
+        logBackdrop.dataset.open = "false";
+      }
+
+      let critData = null;
+
+      async function loadCritData() {
+        if (critData) return critData;
+        try {
+          const el = document.getElementById("critical-injuries");
+          const raw = el ? el.textContent : "";
+          const data = JSON.parse(raw || '{"body":[],"head":[]}');
+          if (!data || typeof data !== "object") throw new Error("Invalid critical injury data");
+          critData = {
+            body: Array.isArray(data.body) ? data.body : [],
+            head: Array.isArray(data.head) ? data.head : []
+          };
+        } catch (error) {
+          setError(String(error?.stack || error?.message || error));
+          critData = { body: [], head: [] };
+        }
+        renderCritTables();
+        return critData;
+      }
+
+      function openCritModal() {
+        if (!critBackdrop) return;
+        critBackdrop.dataset.open = "true";
+      }
+
+      function closeCritModal() {
+        if (!critBackdrop) return;
+        critBackdrop.dataset.open = "false";
+      }
+
+      function renderCritTables() {
+        if (!critBodyTable || !critHeadTable) return;
+        const body = Array.isArray(critData?.body) ? critData.body : [];
+        const head = Array.isArray(critData?.head) ? critData.head : [];
+        critBodyTable.textContent = "";
+        critHeadTable.textContent = "";
+
+        const makeRow = (loc, item) => {
+          const tr = document.createElement("tr");
+          tr.className = "crit-row";
+          tr.dataset.location = loc;
+          tr.dataset.roll = String(item.roll);
+          tr.innerHTML = `<td>${escapeHtml(String(item.roll))}</td><td>${escapeHtml(item.injury || "")}</td>`;
+          tr.addEventListener("click", () => {
+            addCriticalInjury({
+              location: loc,
+              roll: item.roll,
+              injury: item.injury,
+              injuryEffect: item.injuryEffect,
+              quickFix: item.quickFix,
+              treatment: item.treatment
+            });
+          });
+          return tr;
+        };
+
+        body.forEach((item) => critBodyTable.appendChild(makeRow("body", item)));
+        head.forEach((item) => critHeadTable.appendChild(makeRow("head", item)));
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+      }
+
+      function uid() {
+        return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+      }
+
+      function clampAmmo(cur, max) {
+        const m = Math.max(0, Number.isFinite(max) ? max : 0);
+        const c = Math.max(0, Number.isFinite(cur) ? cur : 0);
+        return { cur: Math.min(c, m), max: m };
+      }
+
+      const WEAPON_SKILL_KEYS = [
+        toKey("Melee Weapon"),
+        toKey("Archery"),
+        toKey("Autofire"),
+        toKey("Handgun"),
+        toKey("Shoulder Arms"),
+        toKey("Heavy Weapons")
+      ];
+
+      function normalizeWeaponSkillKey(value) {
+        const key = toKey(value);
+        if (key === toKey("melee")) return toKey("Melee Weapon");
+        if (WEAPON_SKILL_KEYS.includes(key)) return key;
+        return WEAPON_SKILL_KEYS[0];
+      }
+
+      function getWeaponSkillLabel(skillKey) {
+        const meta = canonicalMeta[skillKey];
+        return meta ? meta.displayName : skillKey;
+      }
+
+      function getWeaponSkillBase(skillKey) {
+        const key = normalizeWeaponSkillKey(skillKey);
+        const skill = Object.values(state.skills).find((entry) => entry.canonicalKey === key);
+        const base = String(skill?.base ?? "").trim();
+        return base || "0";
+      }
+
+      function formatWeaponRollLabel(weapon, attack) {
+        const weaponName = String(weapon?.name || "").trim();
+        const attackName = String(attack?.name || "").trim();
+        const skillLabel = getWeaponSkillLabel(normalizeWeaponSkillKey(attack?.skillKey || ""));
+        const core = [weaponName, attackName].filter(Boolean).join(" - ");
+        if (!core) return skillLabel || "Weapon Attack";
+        return skillLabel ? `${core} (${skillLabel})` : core;
+      }
+
+      function ensureWeaponSkillOptions() {
+        if (!attackSkillInput) return;
+        attackSkillInput.textContent = "";
+        WEAPON_SKILL_KEYS.forEach((key) => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = getWeaponSkillLabel(key);
+          attackSkillInput.appendChild(option);
+        });
+      }
+
+      function normalizeCriticalInjury(item) {
+        if (!item || typeof item !== "object") return null;
+        const location = item.location === "head" ? "head" : "body";
+        const roll = Number(item.roll);
+        const injury = String(item.injury || "").trim();
+        if (!injury || !Number.isFinite(roll)) return null;
+        return {
+          location,
+          roll,
+          injury,
+          injuryEffect: String(item.injuryEffect || "").trim(),
+          quickFix: String(item.quickFix || "").trim(),
+          treatment: String(item.treatment || "").trim()
+        };
+      }
+
+      function addCriticalInjury(item) {
+        const normalized = normalizeCriticalInjury(item);
+        if (!normalized) return;
+        if (!Array.isArray(state.criticalInjuries)) state.criticalInjuries = [];
+        const exists = state.criticalInjuries.some(
+          (ci) => ci && ci.location === normalized.location && Number(ci.roll) === normalized.roll
+        );
+        if (!exists) {
+          state.criticalInjuries.push(normalized);
+        }
+        renderCriticalInjuries();
+      }
+
+      function removeCriticalInjury(index) {
+        if (!Array.isArray(state.criticalInjuries)) return;
+        state.criticalInjuries.splice(index, 1);
+        renderCriticalInjuries();
+      }
+
+      function renderCriticalInjuries() {
+        if (!critList) return;
+        const list = Array.isArray(state.criticalInjuries) ? state.criticalInjuries : [];
+        critList.textContent = "";
+        if (list.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "modalSub";
+          empty.textContent = "No critical injuries tracked.";
+          critList.appendChild(empty);
+          return;
+        }
+
+        list.forEach((ci, idx) => {
+          const item = normalizeCriticalInjury(ci);
+          if (!item) return;
+          const el = document.createElement("div");
+          el.className = "crit-item";
+          const locationLabel = item.location === "head" ? "Head" : "Body";
+          el.innerHTML = `
+            <div class="crit-item-title">
+              <strong>${escapeHtml(item.injury)}</strong>
+              <span class="crit-item-meta">${escapeHtml(locationLabel)} ·  Treatment: ${escapeHtml(item.treatment || "")}</span>
+              
+              
+              
+              </div>
+            <div class="crit-item-body"><strong>Effect:</strong> ${escapeHtml(item.injuryEffect || "")}</div>
+             <div class="crit-item-body"><strong>Quickfix: ${escapeHtml(item.quickFix || "")}</div>
+            <div class="crit-item-actions">
+              <button class="crit-remove" type="button" aria-label="Remove critical injury">Remove</button>
+            </div>
+          `;
+          el.querySelector(".crit-remove")?.addEventListener("click", () => removeCriticalInjury(idx));
+          critList.appendChild(el);
+        });
+      }
+
+      function weaponNameKey(name) {
+        return normalizeFreeTextName(name).toLowerCase();
+      }
+
+      function normalizeWeaponAttack(attack) {
+        if (!attack || typeof attack !== "object") return null;
+        const name = normalizeFreeTextName(attack.name);
+        if (!name) return null;
+        const skillKey = normalizeWeaponSkillKey(
+          attack.skillKey || attack.skill || attack.skillName || ""
+        );
+        const ammoUse = Math.max(0, Number(attack.ammoUse ?? 0));
+        const mods = String(attack.mods ?? attack.baseMods ?? "").trim();
+        return {
+          id: attack.id || uid(),
+          name,
+          skillKey,
+          ammoUse,
+          mods
+        };
+      }
+
+      function normalizeWeapon(weapon) {
+        if (!weapon || typeof weapon !== "object") return null;
+        const name = normalizeFreeTextName(weapon.name);
+        if (!name) return null;
+        const ammoName = normalizeFreeTextName(weapon.ammoName);
+        const ammoCur = Number(weapon.ammoCur ?? 0);
+        const ammoMax = Number(weapon.ammoMax ?? 0);
+        const normalizedAttacks = Array.isArray(weapon.attacks)
+          ? weapon.attacks.map(normalizeWeaponAttack).filter(Boolean)
+          : [];
+        const { cur, max } = clampAmmo(ammoCur, ammoMax);
+        return {
+          id: weapon.id || uid(),
+          name,
+          ammoName,
+          ammoCur: cur,
+          ammoMax: max,
+          attacks: normalizedAttacks
+        };
+      }
+
+      function addWeaponsFromNames(names) {
+        if (!Array.isArray(names)) return;
+        if (!Array.isArray(state.weapons)) state.weapons = [];
+        const existing = new Set(state.weapons.map((w) => weaponNameKey(w.name)));
+        names.forEach((name) => {
+          const cleaned = normalizeFreeTextName(name);
+          if (!cleaned) return;
+          const key = weaponNameKey(cleaned);
+          if (existing.has(key)) return;
+          state.weapons.push({
+            id: uid(),
+            name: cleaned,
+            ammoName: "",
+            ammoCur: 0,
+            ammoMax: 0,
+            attacks: []
+          });
+          existing.add(key);
+        });
+      }
+
+      function setBackdropOpen(backdrop, isOpen) {
+        if (!backdrop) return;
+        backdrop.dataset.open = isOpen ? "true" : "false";
+      }
+
+      function renderWeaponModesPreview() {
+        if (!weaponModesPreview) return;
+        weaponModesPreview.textContent = "";
+        const draft = state.draftWeapon;
+        if (!draft || !draft.attacks.length) {
+          weaponModesPreview.className = "empty-state";
+          weaponModesPreview.textContent = 'No attack modes yet. Use "Add Attack".';
+          return;
+        }
+
+        weaponModesPreview.className = "";
+        const wrap = document.createElement("div");
+        wrap.className = "weapon-mode-list";
+
+        draft.attacks.forEach((attack) => {
+          const line = document.createElement("div");
+          line.className = "weapon-mode-line";
+
+          const title = document.createElement("div");
+          title.innerHTML = `<strong>${escapeHtml(attack.name)}</strong>`;
+          line.appendChild(title);
+
+          const meta = document.createElement("div");
+          meta.className = "weapon-mode-meta";
+          const skillLabel = getWeaponSkillLabel(normalizeWeaponSkillKey(attack.skillKey));
+          meta.textContent = `Skill: ${skillLabel} · Ammo/use: ${attack.ammoUse}`;
+          line.appendChild(meta);
+
+          if (attack.mods) {
+            const mods = document.createElement("div");
+            mods.className = "weapon-mode-meta";
+            mods.textContent = `Mods: ${attack.mods}`;
+            line.appendChild(mods);
+          }
+
+          const actions = document.createElement("div");
+          actions.className = "weapon-mode-actions";
+          actions.innerHTML = `
+            <button class="btn-mini" data-action="edit-attack" data-aid="${escapeHtml(attack.id)}" type="button">Edit</button>
+            <button class="btn-mini btn-danger" data-action="delete-attack" data-aid="${escapeHtml(attack.id)}" type="button">Delete</button>
+          `;
+          line.appendChild(actions);
+          wrap.appendChild(line);
+        });
+
+        weaponModesPreview.appendChild(wrap);
+      }
+
+      function openWeaponModal(mode, weapon) {
+        state.editingWeaponId = weapon?.id ?? null;
+        state.draftWeapon = weapon
+          ? JSON.parse(JSON.stringify(weapon))
+          : { id: uid(), name: "", ammoName: "", ammoCur: 0, ammoMax: 0, attacks: [] };
+
+        if (weaponModalTitle) {
+          weaponModalTitle.textContent = mode === "edit" ? "Edit Weapon" : "Add Weapon";
+        }
+        if (weaponNameInput) weaponNameInput.value = state.draftWeapon.name;
+        if (ammoNameInput) ammoNameInput.value = state.draftWeapon.ammoName;
+        if (ammoCurInput) ammoCurInput.value = state.draftWeapon.ammoCur;
+        if (ammoMaxInput) ammoMaxInput.value = state.draftWeapon.ammoMax;
+        renderWeaponModesPreview();
+        setBackdropOpen(weaponBackdrop, true);
+      }
+
+      function saveWeaponFromModal() {
+        const name = weaponNameInput?.value.trim() || "";
+        const ammoName = ammoNameInput?.value.trim() || "";
+        const ammoCur = Number(ammoCurInput?.value || 0);
+        const ammoMax = Number(ammoMaxInput?.value || 0);
+
+        if (!name) {
+          alert("Weapon name is required.");
+          return;
+        }
+
+        const { cur, max } = clampAmmo(ammoCur, ammoMax);
+
+        state.draftWeapon.name = name;
+        state.draftWeapon.ammoName = ammoName;
+        state.draftWeapon.ammoCur = cur;
+        state.draftWeapon.ammoMax = max;
+
+        if (state.editingWeaponId) {
+          const idx = state.weapons.findIndex((w) => w.id === state.editingWeaponId);
+          if (idx >= 0) state.weapons[idx] = state.draftWeapon;
+        } else {
+          state.weapons.push(state.draftWeapon);
+        }
+
+        state.draftWeapon = null;
+        state.editingWeaponId = null;
+        setBackdropOpen(weaponBackdrop, false);
+        renderWeapons();
+      }
+
+      function openAttackModal(attackId) {
+        if (!state.draftWeapon) return;
+        ensureWeaponSkillOptions();
+        state.editingAttackId = attackId ?? null;
+        const isEditing = Boolean(attackId);
+        const fallbackKey = WEAPON_SKILL_KEYS[0];
+
+        if (isEditing) {
+          const attack = state.draftWeapon.attacks.find((a) => a.id === attackId);
+          if (!attack) return;
+          if (attackModalTitle) attackModalTitle.textContent = "Edit Attack";
+          if (attackNameInput) attackNameInput.value = attack.name;
+          if (attackSkillInput) attackSkillInput.value = normalizeWeaponSkillKey(attack.skillKey || fallbackKey);
+          if (attackAmmoUseInput) attackAmmoUseInput.value = attack.ammoUse;
+          if (attackModsInput) attackModsInput.value = attack.mods || "";
+          if (attackAdd) attackAdd.textContent = "Save";
+        } else {
+          if (attackModalTitle) attackModalTitle.textContent = "Add Attack";
+          if (attackNameInput) attackNameInput.value = "";
+          if (attackSkillInput) attackSkillInput.value = fallbackKey;
+          if (attackAmmoUseInput) attackAmmoUseInput.value = 1;
+          if (attackModsInput) attackModsInput.value = "";
+          if (attackAdd) attackAdd.textContent = "Add";
+        }
+
+        setBackdropOpen(attackBackdrop, true);
+      }
+
+      function addAttackFromModal() {
+        if (!state.draftWeapon) return;
+        const name = attackNameInput?.value.trim() || "";
+        const skillKey = normalizeWeaponSkillKey(attackSkillInput?.value || "");
+        const ammoUse = Math.max(0, Number(attackAmmoUseInput?.value || 0));
+        const mods = attackModsInput?.value.trim() || "";
+
+        if (!name) {
+          alert("Attack name is required.");
+          return;
+        }
+
+        if (state.editingAttackId) {
+          const attack = state.draftWeapon.attacks.find((a) => a.id === state.editingAttackId);
+          if (attack) {
+            attack.name = name;
+            attack.skillKey = skillKey;
+            attack.ammoUse = ammoUse;
+            attack.mods = mods;
+          }
+        } else {
+          state.draftWeapon.attacks.push({
+            id: uid(),
+            name,
+            skillKey,
+            ammoUse,
+            mods
+          });
+        }
+
+        state.editingAttackId = null;
+        setBackdropOpen(attackBackdrop, false);
+        renderWeaponModesPreview();
+      }
+
+      function openDeleteWeaponModal(weaponId) {
+        const weapon = state.weapons.find((w) => w.id === weaponId);
+        state.deleteWeaponId = weaponId;
+        if (deleteWeaponSub) {
+          deleteWeaponSub.textContent = weapon
+            ? `This will permanently delete "${weapon.name}" and all of its attack modes. This cannot be undone.`
+            : "This cannot be undone.";
+        }
+        setBackdropOpen(deleteWeaponBackdrop, true);
+      }
+
+      function confirmDeleteWeapon() {
+        const id = state.deleteWeaponId;
+        state.weapons = state.weapons.filter((w) => w.id !== id);
+        state.deleteWeaponId = null;
+        setBackdropOpen(deleteWeaponBackdrop, false);
+        renderWeapons();
+      }
+
+      function updateWeaponInline(id, patch) {
+        const weapon = state.weapons.find((w) => w.id === id);
+        if (!weapon) return;
+        Object.assign(weapon, patch);
+        const { cur, max } = clampAmmo(Number(weapon.ammoCur), Number(weapon.ammoMax));
+        weapon.ammoCur = cur;
+        weapon.ammoMax = max;
+        renderWeapons();
+      }
+
+      function updateAttackInline(weaponId, attackId, patch) {
+        const weapon = state.weapons.find((w) => w.id === weaponId);
+        if (!weapon) return;
+        const attack = weapon.attacks.find((a) => a.id === attackId);
+        if (!attack) return;
+        Object.assign(attack, patch);
+      }
+
+      function consumeWeaponAmmo(weapon, attack, count) {
+        const ammoUse = Math.max(0, Number(attack?.ammoUse ?? 0));
+        if (!ammoUse) return;
+        const totalUse = ammoUse * Math.max(1, count);
+        weapon.ammoCur = Math.max(0, Number(weapon.ammoCur ?? 0) - totalUse);
+        const { cur, max } = clampAmmo(weapon.ammoCur, Number(weapon.ammoMax ?? 0));
+        weapon.ammoCur = cur;
+        weapon.ammoMax = max;
+      }
+
+      function buildWeaponRollText(weapon, attack, rollCount) {
+        const base = getWeaponSkillBase(attack.skillKey);
+        const mod = buildCombinedModifier(attack.mods);
+        const label = formatWeaponRollLabel(weapon, attack);
+        if (rollCount) {
+          return `!rr ${rollCount} 1d10+${base}${mod} ${label}`;
+        }
+        return `!r 1d10+${base}${mod} ${label}`;
+      }
+
+      async function handleWeaponRoll(weapon, attack, rollCount, flashEl) {
+        const text = buildWeaponRollText(weapon, attack, rollCount > 1 ? rollCount : null);
+        await copyRollText(text, flashEl);
+        consumeWeaponAmmo(weapon, attack, rollCount);
+        renderWeapons();
+      }
+
+      function renderWeapons() {
+        if (!weaponsList) return;
+        const list = Array.isArray(state.weapons) ? state.weapons : [];
+        weaponsList.textContent = "";
+
+        if (list.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = 'No weapons yet. Click "Add Weapon".';
+          weaponsList.appendChild(empty);
+          return;
+        }
+
+        list.forEach((weapon) => {
+          const card = document.createElement("div");
+          card.className = "weapon-card";
+
+          const row = document.createElement("div");
+          row.className = "weapon-row";
+
+          const nameCell = document.createElement("div");
+          const name = document.createElement("div");
+          name.className = "weapon-name";
+          name.textContent = weapon.name;
+          name.title = weapon.name;
+          nameCell.appendChild(name);
+
+          const ammoCell = document.createElement("div");
+          ammoCell.className = "ammo-counts";
+
+          const ammoCur = document.createElement("input");
+          ammoCur.type = "number";
+          ammoCur.min = "0";
+          ammoCur.step = "1";
+          ammoCur.value = String(weapon.ammoCur ?? 0);
+          ammoCur.dataset.role = "ammo-cur";
+          ammoCur.dataset.id = weapon.id;
+
+          const ammoLabel = document.createElement("div");
+          ammoLabel.className = "weapon-meta";
+          ammoLabel.textContent = "Max";
+
+          const ammoMax = document.createElement("input");
+          ammoMax.type = "number";
+          ammoMax.min = "0";
+          ammoMax.step = "1";
+          ammoMax.value = String(weapon.ammoMax ?? 0);
+          ammoMax.dataset.role = "ammo-max";
+          ammoMax.dataset.id = weapon.id;
+
+          ammoCell.appendChild(ammoCur);
+          ammoCell.appendChild(ammoLabel);
+          ammoCell.appendChild(ammoMax);
+
+          const metaCell = document.createElement("div");
+          metaCell.className = "weapon-meta";
+          metaCell.textContent = `Type: ${weapon.ammoName || "Unspecified"}`;
+
+          const actions = document.createElement("div");
+          actions.className = "weapon-actions";
+          actions.innerHTML = `
+            <button class="btn-mini" data-action="edit" data-id="${escapeHtml(weapon.id)}" type="button">Edit</button>
+            <button class="btn-mini btn-danger" data-action="delete" data-id="${escapeHtml(weapon.id)}" type="button">Delete</button>
+          `;
+
+          row.appendChild(nameCell);
+          row.appendChild(ammoCell);
+          row.appendChild(metaCell);
+          row.appendChild(actions);
+          card.appendChild(row);
+
+          const attackTable = document.createElement("div");
+          attackTable.className = "attack-table";
+
+          const head = document.createElement("div");
+          head.className = "attack-row attack-row-head";
+          head.innerHTML = `
+            <div>R</div>
+            <div>RR</div>
+            <div>Attack</div>
+            <div>Skill Base</div>
+            <div>Ammo/Atk</div>
+            <div>Mods</div>
+          `;
+          attackTable.appendChild(head);
+
+          const attacks = Array.isArray(weapon.attacks) ? weapon.attacks : [];
+          if (attacks.length) {
+            attacks.forEach((attack) => {
+              const rowEl = document.createElement("div");
+              rowEl.className = "attack-row";
+              const skillKey = normalizeWeaponSkillKey(attack.skillKey);
+              const skillLabel = getWeaponSkillLabel(skillKey);
+              const base = getWeaponSkillBase(skillKey);
+              rowEl.innerHTML = `
+                <button class="btn-roll" type="button" data-action="weapon-roll" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!r</button>
+                <button class="btn-roll" type="button" data-action="weapon-roll-multi" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!rr</button>
+                <div class="attack-name" title="${escapeHtml(attack.name)}">${escapeHtml(attack.name)}</div>
+                <div class="attack-meta">${escapeHtml(`${skillLabel} (Base ${base})`)}</div>
+                <div class="attack-meta">${escapeHtml(String(attack.ammoUse || 0))}</div>
+                <input class="mods-input" data-role="attack-mods" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}" type="text" value="${escapeHtml(attack.mods || "")}" placeholder="+/- mods" />
+              `;
+              attackTable.appendChild(rowEl);
+            });
+          } else {
+            const empty = document.createElement("div");
+            empty.className = "empty-state";
+            empty.textContent = "No attack modes for this weapon.";
+            attackTable.appendChild(empty);
+          }
+
+          card.appendChild(attackTable);
+          weaponsList.appendChild(card);
+        });
+      }
+
+      function handleWeaponListEvents(event) {
+        const target = event.target;
+        if (!target) return;
+
+        if (target.dataset.action === "edit") {
+          const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+          if (weapon) openWeaponModal("edit", weapon);
+          return;
+        }
+
+        if (target.dataset.action === "delete") {
+          openDeleteWeaponModal(target.dataset.id);
+          return;
+        }
+
+        if (target.dataset.action === "weapon-roll") {
+          const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
+          const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
+          if (!weapon || !attack) return;
+          handleWeaponRoll(weapon, attack, 1, target);
+          return;
+        }
+
+        if (target.dataset.action === "weapon-roll-multi") {
+          const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
+          const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
+          if (!weapon || !attack) return;
+          openRollCountModal(
+            {
+              label: formatWeaponRollLabel(weapon, attack),
+              buildText: (count) => buildWeaponRollText(weapon, attack, count),
+              afterCopy: (count) => {
+                consumeWeaponAmmo(weapon, attack, count);
+                renderWeapons();
+              }
+            },
+            target
+          );
+          return;
+        }
+
+        if (target.dataset.role === "ammo-cur") {
+          updateWeaponInline(target.dataset.id, { ammoCur: Number(target.value || 0) });
+          return;
+        }
+
+        if (target.dataset.role === "ammo-max") {
+          updateWeaponInline(target.dataset.id, { ammoMax: Number(target.value || 0) });
+        }
+      }
+
+      function handleWeaponListInput(event) {
+        const target = event.target;
+        if (!target) return;
+        if (target.dataset.role === "attack-mods") {
+          updateAttackInline(target.dataset.wid, target.dataset.aid, { mods: target.value });
+        }
+      }
+
+      function handleWeaponModesPreviewEvents(event) {
+        const target = event.target;
+        if (!target?.dataset?.action) return;
+
+        if (target.dataset.action === "edit-attack") {
+          openAttackModal(target.dataset.aid);
+          return;
+        }
+
+        if (target.dataset.action === "delete-attack") {
+          if (!state.draftWeapon) return;
+          state.draftWeapon.attacks = state.draftWeapon.attacks.filter(
+            (attack) => attack.id !== target.dataset.aid
+          );
+          renderWeaponModesPreview();
+        }
+      }
+
+      function buildLogText() {
+        const entries = Array.isArray(state.characterLog) ? state.characterLog : [];
+        return entries.join("\n");
+      }
+
+      async function saveLogText() {
+        const text = buildLogText();
+        const suggested = `character-log-${new Date().toISOString().slice(0, 10)}.txt`;
+        if (window.showSaveFilePicker) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: suggested,
+            types: [
+              {
+                description: "Text",
+                accept: { "text/plain": [".txt"] }
+              }
+            ]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(text);
+          await writable.close();
+          return;
+        }
+        const blob = new Blob([text], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = suggested;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
       }
 
       function renderPinned() {
@@ -2843,7 +5172,14 @@
       });
 
         multiBtn.addEventListener("click", () => {
-          openRollCountModal(skill, row);
+          openRollCountModal(
+            {
+              label: formatSkillLabel(skill),
+              buildText: (count) => buildRollText(skill, true, count),
+              afterCopy: () => consumeLuckForRoll()
+            },
+            row
+          );
         });
 
         pinBtn.addEventListener("click", () => {
@@ -2855,7 +5191,7 @@
               removeSkill(skill.id);
             }
           } else {
-            addPinned(skill.id, "col1");
+            addPinned(skill.id);
           }
           pinBtn.textContent = isPinned(skill.id) ? "[■]" : "[ ]";
           render();
@@ -3079,7 +5415,7 @@
           stat: meta ? meta.stat : "",
           source: "custom"
         });
-        addPinned(id, "col1");
+        addPinned(id);
         addDialog.close();
         render();
       });
@@ -3111,6 +5447,136 @@
       rollCountInput.addEventListener("focus", () => {
         rollCountInput.select();
       });
+
+      if (logBackdrop) {
+        logBackdrop.addEventListener("click", (event) => {
+          if (event.target === logBackdrop) {
+            closeLogModal();
+          }
+        });
+      }
+
+      if (logOpenBtn) {
+        logOpenBtn.addEventListener("click", openLogModal);
+      }
+
+      if (logCloseBtn) {
+        logCloseBtn.addEventListener("click", closeLogModal);
+      }
+
+      if (logClearBtn) {
+        logClearBtn.addEventListener("click", () => {
+          state.characterLog = [];
+          renderCharacterLog();
+        });
+      }
+
+      if (logSaveBtn) {
+        logSaveBtn.addEventListener("click", async () => {
+          try {
+            await saveLogText();
+          } catch (error) {
+            setError(String(error?.stack || error?.message || error));
+          }
+        });
+      }
+
+      if (critBackdrop) {
+        critBackdrop.addEventListener("click", (event) => {
+          if (event.target === critBackdrop) {
+            closeCritModal();
+          }
+        });
+      }
+
+      if (critOpenBtn) {
+        critOpenBtn.addEventListener("click", async () => {
+          await loadCritData();
+          openCritModal();
+        });
+      }
+
+      if (hpMinus5Btn && hpCurrentInput) {
+        hpMinus5Btn.addEventListener("click", () => {
+          const raw = String(hpCurrentInput.value || "").trim();
+          const current = Number.parseInt(raw, 10);
+          const safeCurrent = Number.isFinite(current) ? current : 0;
+          const next = Math.max(0, safeCurrent - 5);
+          hpCurrentInput.value = String(next);
+          // Trigger any listeners bound via bindStatusField()
+          hpCurrentInput.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      }
+      if (critCloseBtn) {
+        critCloseBtn.addEventListener("click", closeCritModal);
+      }
+
+      if (addWeaponBtn) {
+        addWeaponBtn.addEventListener("click", () => openWeaponModal("add", null));
+      }
+
+      if (weaponCancel) {
+        weaponCancel.addEventListener("click", () => {
+          state.draftWeapon = null;
+          state.editingWeaponId = null;
+          setBackdropOpen(weaponBackdrop, false);
+        });
+      }
+
+      if (weaponSave) {
+        weaponSave.addEventListener("click", saveWeaponFromModal);
+      }
+
+      if (addAttackBtn) {
+        addAttackBtn.addEventListener("click", () => openAttackModal(null));
+      }
+
+      if (attackCancel) {
+        attackCancel.addEventListener("click", () => {
+          state.editingAttackId = null;
+          setBackdropOpen(attackBackdrop, false);
+        });
+      }
+
+      if (attackAdd) {
+        attackAdd.addEventListener("click", addAttackFromModal);
+      }
+
+      if (deleteWeaponCancel) {
+        deleteWeaponCancel.addEventListener("click", () => {
+          state.deleteWeaponId = null;
+          setBackdropOpen(deleteWeaponBackdrop, false);
+        });
+      }
+
+      if (deleteWeaponConfirm) {
+        deleteWeaponConfirm.addEventListener("click", confirmDeleteWeapon);
+      }
+
+      [weaponBackdrop, attackBackdrop, deleteWeaponBackdrop].forEach((backdrop) => {
+        if (!backdrop) return;
+        backdrop.addEventListener("click", (event) => {
+          if (event.target !== backdrop) return;
+          setBackdropOpen(backdrop, false);
+          if (backdrop === weaponBackdrop) {
+            state.draftWeapon = null;
+            state.editingWeaponId = null;
+          }
+          if (backdrop === deleteWeaponBackdrop) {
+            state.deleteWeaponId = null;
+          }
+        });
+      });
+
+      if (weaponsList) {
+        weaponsList.addEventListener("click", handleWeaponListEvents);
+        weaponsList.addEventListener("change", handleWeaponListEvents);
+        weaponsList.addEventListener("input", handleWeaponListInput);
+      }
+
+      if (weaponModesPreview) {
+        weaponModesPreview.addEventListener("click", handleWeaponModesPreviewEvents);
+      }
 
       fallbackSelectBtn.addEventListener("click", () => {
         fallbackTextEl.focus();
@@ -3251,6 +5717,85 @@
       characterNameInput.addEventListener("input", () => {
         state.characterName = characterNameInput.value.trim();
       });
+
+      function bindStatusField(input, key) {
+        if (!input) return;
+        input.addEventListener("input", () => {
+          state[key] = input.value.trim();
+        });
+      }
+
+      const fireStates = {
+        0: { text: "", cls: "" },
+        1: { text: "-2", cls: "mild" },
+        2: { text: "-4", cls: "strong" },
+        3: { text: "-6", cls: "deadly" }
+      };
+
+      function clampFireSeverity(value) {
+        const next = Number(value);
+        if (!Number.isFinite(next)) return 0;
+        return Math.max(0, Math.min(3, next));
+      }
+
+      function applyFireSeverity(value) {
+        if (!fireReadoutBtn) return;
+        const next = fireStates[value] || fireStates[0];
+        fireReadoutBtn.textContent = next.text;
+        fireReadoutBtn.className = "fire-readout";
+        if (next.cls) fireReadoutBtn.classList.add(next.cls);
+      }
+
+      bindStatusField(hpTotalInput, "hpTotal");
+      bindStatusField(hpCurrentInput, "hpCurrent");
+      bindStatusField(bodySpTotalInput, "bodySpTotal");
+      bindStatusField(bodySpCurrentInput, "bodySpCurrent");
+      bindStatusField(headSpTotalInput, "headSpTotal");
+      bindStatusField(headSpCurrentInput, "headSpCurrent");
+      bindStatusField(damageValueInput, "damageValue");
+
+      if (damageCritInput) {
+        damageCritInput.addEventListener("change", () => {
+          state.damageCrit = damageCritInput.checked;
+        });
+      }
+
+      if (damageApInput) {
+        damageApInput.addEventListener("change", () => {
+          state.damageAp = damageApInput.checked;
+        });
+      }
+
+      if (fireSliderInput) {
+        fireSliderInput.addEventListener("input", () => {
+          const severity = clampFireSeverity(fireSliderInput.value);
+          state.fireSeverity = severity;
+          applyFireSeverity(severity);
+        });
+      }
+
+      function syncFireSeverity() {
+        if (!fireSliderInput) return;
+        const severity = clampFireSeverity(state.fireSeverity);
+        fireSliderInput.value = String(severity);
+        applyFireSeverity(severity);
+      }
+
+      function syncStatusInputs() {
+        if (hpTotalInput) hpTotalInput.value = state.hpTotal || "";
+        if (hpCurrentInput) hpCurrentInput.value = state.hpCurrent || "";
+        if (bodySpTotalInput) bodySpTotalInput.value = state.bodySpTotal || "";
+        if (bodySpCurrentInput) bodySpCurrentInput.value = state.bodySpCurrent || "";
+        if (headSpTotalInput) headSpTotalInput.value = state.headSpTotal || "";
+        if (headSpCurrentInput) headSpCurrentInput.value = state.headSpCurrent || "";
+        if (damageValueInput) damageValueInput.value = state.damageValue || "";
+        if (damageCritInput) damageCritInput.checked = Boolean(state.damageCrit);
+        if (damageApInput) damageApInput.checked = Boolean(state.damageAp);
+      }
+
+      syncStatusInputs();
+      syncFireSeverity();
+
       async function parsePdf(file) {
         setError("");
         if (!window.PDFLib?.PDFDocument) {
@@ -3277,6 +5822,7 @@
 
         const characterName = extractCharacterName(valueByFieldNameLower);
         if (characterName) setCharacterName(characterName);
+        const weaponNames = extractWeaponNames(fields);
 
         const parsedSkills = [];
         fields.forEach((field) => {
@@ -3316,6 +5862,16 @@
         buildDefaultLayout();
 
         prunePinnedColumns();
+
+        // Pin emphasized skills
+        Object.values(state.skills).forEach((skill) => {
+          const normalizedName = cleanDisplayName(skill.displayName).toLowerCase();
+          if (EMPHASIZED_SKILLS.has(normalizedName)) {
+            addPinned(skill.id);
+          }
+        });
+
+        addWeaponsFromNames(weaponNames);
         render();
       }
 
@@ -3333,9 +5889,39 @@
         const payload = {
           version: 1,
           characterName: state.characterName,
+          characterLog: state.characterLog,
+          hpTotal: state.hpTotal,
+          hpCurrent: state.hpCurrent,
+          bodySpTotal: state.bodySpTotal,
+          bodySpCurrent: state.bodySpCurrent,
+          headSpTotal: state.headSpTotal,
+          headSpCurrent: state.headSpCurrent,
+          damageValue: state.damageValue,
+          damageCrit: state.damageCrit,
+          damageAp: state.damageAp,
+          fireSeverity: state.fireSeverity,
           luckTotal: state.luckTotal,
           luckPool: state.luckPool,
           luckNext: state.luckNext,
+          criticalInjuries: Array.isArray(state.criticalInjuries) ? state.criticalInjuries : [],
+          weapons: Array.isArray(state.weapons)
+            ? state.weapons.map((weapon) => ({
+                id: weapon.id,
+                name: weapon.name,
+                ammoName: weapon.ammoName,
+                ammoCur: weapon.ammoCur,
+                ammoMax: weapon.ammoMax,
+                attacks: Array.isArray(weapon.attacks)
+                  ? weapon.attacks.map((attack) => ({
+                      id: attack.id,
+                      name: attack.name,
+                      skillKey: attack.skillKey,
+                      ammoUse: attack.ammoUse,
+                      mods: attack.mods
+                    }))
+                  : []
+              }))
+            : [],
           skills: Object.values(state.skills).map((skill) => ({
             id: skill.id,
             displayName: skill.displayName,
@@ -3418,6 +6004,24 @@
       function restoreState(data) {
         if (!data || typeof data !== "object") return;
         setCharacterName(data.characterName || "");
+        state.characterLog = Array.isArray(data.characterLog) ? [...data.characterLog] : [];
+        state.hpTotal = data.hpTotal !== undefined && data.hpTotal !== null ? String(data.hpTotal) : "";
+        state.hpCurrent = data.hpCurrent !== undefined && data.hpCurrent !== null ? String(data.hpCurrent) : "";
+        state.bodySpTotal =
+          data.bodySpTotal !== undefined && data.bodySpTotal !== null ? String(data.bodySpTotal) : "";
+        state.bodySpCurrent =
+          data.bodySpCurrent !== undefined && data.bodySpCurrent !== null ? String(data.bodySpCurrent) : "";
+        state.headSpTotal =
+          data.headSpTotal !== undefined && data.headSpTotal !== null ? String(data.headSpTotal) : "";
+        state.headSpCurrent =
+          data.headSpCurrent !== undefined && data.headSpCurrent !== null ? String(data.headSpCurrent) : "";
+        state.damageValue =
+          data.damageValue !== undefined && data.damageValue !== null ? String(data.damageValue) : "";
+        state.damageCrit = Boolean(data.damageCrit);
+        state.damageAp = Boolean(data.damageAp);
+        state.fireSeverity = clampFireSeverity(data.fireSeverity);
+        syncStatusInputs();
+        syncFireSeverity();
         state.luckTotal = parseLuckValue(data.luckTotal);
         if (data.luckPool === undefined || data.luckPool === null) {
           state.luckPool = state.luckTotal;
@@ -3429,6 +6033,18 @@
         updateLuckNextInputDisplay();
         updateLuckPoolDisplay();
         updateLuckModHints();
+        state.criticalInjuries = Array.isArray(data.criticalInjuries)
+          ? data.criticalInjuries.map(normalizeCriticalInjury).filter(Boolean)
+          : [];
+        renderCriticalInjuries();
+        state.weapons = Array.isArray(data.weapons)
+          ? data.weapons.map(normalizeWeapon).filter(Boolean)
+          : [];
+        state.draftWeapon = null;
+        state.editingWeaponId = null;
+        state.deleteWeaponId = null;
+        state.editingAttackId = null;
+        renderWeapons();
         state.skills = {};
 
         (data.skills || []).forEach((skill) => {
@@ -3498,9 +6114,3 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
