@@ -2,6 +2,14 @@
 <!doctype html>
 <html lang="en">
   <head>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+	  rel="stylesheet"
+	  href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap"
+	/>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta name="description" content="RED Winter Character Sheet Roller - Load your M.K. Bergins Cyberpunk RED Winter character sheet, click a Roll button, and paste the result straight into REDice. The site reads your sheet, builds the correct roll command, and keeps the game moving with no setup or hassle." />
@@ -54,12 +62,15 @@
         --glowD: 0 0 0.65rem rgba(255, 59, 106, 0.24), 0 0 1.2rem rgba(255, 59, 106, 0.10);
         --shadow: 0 18px 42px rgba(0, 0, 0, 0.62);
         --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+		    --sans: "Jost", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
         --scanline: rgba(190, 255, 245, 0.03);
         --noise: rgba(255, 255, 255, 0.035);
         --base-input: calc(5.5ch + 4px);
         --roll-col: 64px;
         --pin-col: 32px;
+        --sp-tick-w: 6px;
+
       }
 
       * {
@@ -362,99 +373,570 @@
 
       .status-row {
         display: grid;
-        grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
         gap: 16px;
         align-items: start;
         margin-bottom: 12px;
       }
 
-      .status-grid {
+      /* Separate panel for Luck + Global Modifier (moved out of Character Status) */
+      .modifiers-panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        padding: 14px 16px;
+        margin-bottom: 12px;
+      }
+
+      .modifiers-grid {
         display: grid;
-        /* Two-column layout inside Character Status: core stats on the left, critical injuries on the right */
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 12px;
+        grid-template-columns: minmax(260px, 1fr) minmax(240px, 360px);
+        gap: 16px;
         align-items: start;
+      }
+
+      .stats-drawer {
+        position: fixed;
+        top: 120px;
+        left: 0;
+        z-index: 70;
+        display: flex;
+        align-items: stretch;
+        --stats-tab-w: 38px;
+        --stats-panel-w: 210px;
+        transform: translateX(calc(-100% + var(--stats-tab-w)));
+        transition: transform 220ms ease;
+      }
+
+      .stats-drawer[data-open="true"] {
+        transform: translateX(0);
+      }
+
+      .stats-tab {
+        width: var(--stats-tab-w);
+        height: 120px;
+        padding: 0 6px;
+        border: 1px solid var(--border-strong);
+        border-left: none;
+        border-right: 1px solid var(--border-strong);
+        background: rgba(6, 10, 18, 0.92);
+        color: var(--ink-muted);
+        font-family: var(--mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.24em;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        align-self: center;
+        margin-left: -1px;
+      }
+
+      .stats-tab span {
+        display: block;
+        transform: rotate(90deg);
+      }
+
+      .stats-tab:hover,
+      .stats-tab:focus-visible {
+        color: var(--text);
+      }
+
+      .stats-panel {
+        width: var(--stats-panel-w);
+        background: var(--panel);
+        border: 1px solid var(--border-strong);
+        border-left: none;
+        box-shadow: var(--shadow);
+        padding: 12px 10px;
+      }
+
+      .stats-grid {
+        display: grid;
+        gap: 10px;
+        justify-items: center;
+      }
+
+      .stat-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        position: relative;
+      }
+
+      .stat-row-hum {
+        gap: 4px;
+      }
+
+      .stat-hum-stack {
+        position: relative;
+        display: inline-block;
+      }
+
+      .stat-hum-temp-wrap {
+        position: absolute;
+        left: calc(100% + 8px);
+        top: 0;
+        display: grid;
+        justify-items: center;
+      }
+
+      .stat-label-inline {
+        font-size: 10px;
+        letter-spacing: 0.16em;
+      }
+
+      .stat-hum-temp-wrap .stat-label-inline {
+        position: absolute;
+        top: -14px;
+      }
+
+      .stat-row--pair {
+        align-items: center;
+      }
+
+      .stat-label {
+        font-family: var(--mono);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        font-size: 12px;
+        text-align: center;
+        margin: 0;
+        padding: 0 6px;
+        background: var(--panel);
+        position: relative;
+        z-index: 1;
+        margin-bottom: -8px;
+      }
+
+      .stat-value {
+        width: 78px;
+        height: 40px;
+        border: 1px solid var(--border-strong);
+        background: rgba(10, 16, 28, 0.65);
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .stat-value--slim {
+        width: 56px;
+        border-color: rgba(110, 255, 246, 0.28);
+      }
+
+      .stat-value--pair {
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+      }
+
+      .stat-input {
+        width: 28px;
+        background: transparent;
+        border: none;
+        color: inherit;
+        font: inherit;
+        text-align: center;
+        letter-spacing: inherit;
+      }
+
+      .stat-input:focus {
+        outline: none;
+        color: #ffffff;
+      }
+
+      .stat-sub {
+        display: none;
+      }
+
+      .stat-main {
+        font-size: 18px;
+        font-weight: 600;
+        display: inline-block;
+      }
+
+      .stat-divider {
+        opacity: 0.5;
+      }
+
+      .stat-subvalue {
+        font-size: 12px;
+        opacity: 0.62;
+        display: inline-block;
+      }
+
+      .stat-total {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: var(--ink-muted);
+        margin-top: 2px;
+      }
+
+      .stat-total-inline {
+        font-size: 15px;
+        letter-spacing: 0.08em;
+        color: var(--text);
+        margin-top: 0;
+        margin-right: 4px;
+      }
+
+      #statHumBox {
+        position: relative;
+      }
+
+      .stat-hum-temp {
+        position: absolute;
+        right: calc(100% + 6px);
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: 0;
       }
 
       .status-meta {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 12px;
-
-        align-content: start;
-        align-items: start;
+        align-items: end;
         margin-bottom: 12px;
       }
+
       .status-name {
-        margin-top: 15px;
-
-      } 
-      .status-controls {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        gap: 16px;
-        align-items: start;
-      }
-
-      .status-core {
-        display: grid;
-        gap: 12px;
-      }
-
-      .status-mods {
-        
-        padding-top: 12px;
-        display: grid;
-        gap: 8px;
-      }
-
-      .status-mods .global-mod-row {
-        grid-template-columns: minmax(0, 1fr);
-        align-items: start;
-        justify-items: start;
-      }
-
-      .status-mods .global-mod-field {
-        max-width: 280px;
-        width: 100%;
-      }
-
-      .status-mods .luck-section {
-        justify-self: start;
-        max-width: 280px;
-        width: 100%;
-      }
-
-      .status-mods .luck-box {
-        width: 100%;
+        margin: 0;
       }
 
       .status-log {
         border: none;
         background: transparent;
-
-        padding-top: 20px;
+        padding: 0;
         display: flex;
-
-        
-      }
-
-      .status-log button {
-        justify-self: end;
+        align-items: flex-end;
+        justify-content: flex-end;
       }
 
       .status-log-preview {
-        font-family: var(--mono);
-        font-size: 11px;
-        color: var(--ink-muted);
+        display: none;
       }
 
-      .status-hp {
+      .status-body {
         display: grid;
-        grid-template-columns: auto auto;
-        gap: 6px;
+        gap: 12px;
+      }
+
+      /* Combat row: HUD + damage + modes + flags + fire */
+      .status-combat-row {
+        display: grid;
+        grid-template-columns:
+          minmax(320px, 1fr)
+          100px
+          100px
+          130px
+          minmax(200px, 260px);
+        gap: 0px;
         align-items: end;
-        width: fit-content;
+      }
+
+      .status-combat-row > *:not(:first-child) {
+        border-left: 0px solid rgba(44, 246, 232, 0.18);
+        padding-left: 14px;
+      }
+
+      .damage-modes,
+      .damage-flags {
+        border-left: none;
+      }
+
+      .status-kicker {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        line-height: 1;
+      }
+
+      .status-damage {
+        display: grid;
+        gap: 6px;
+        align-content: end;
+      }
+
+      .status-damage .damage-input {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .damage-modes {
+        display: grid;
+        gap: 6px;
+        align-content: end;
+      }
+
+      .damage-mode-labels {
+        display: grid;
+        grid-template-columns: 20px 20px 31px;
+        gap: 8px;
+        justify-content: start;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        text-align: left;
+        
+      }
+
+      .damage-mode-buttons {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-end;
+        gap: 8px;
+      }
+
+      .damage-flags {
+        display: grid;
+
+        align-content: end;
+      }
+
+      .damage-flag {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        user-select: none;
+      }
+
+      .damage-flag--head span {
+        color: var(--accent-2);
+      }
+
+      .status-critical {
+        margin: 0;
+        border: 1px solid var(--border);
+        background: rgba(6, 10, 18, 0.55);
+        padding: 10px;
+        max-width: 90%;
+      }
+
+      .status-critical-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+
+      .status-critical-head .status-title {
+        margin: 0;
+      }
+
+      .status-critical-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .status-hp {
+        /* Legacy numeric HP inputs (now hidden by Combat HUD) */
+        display: none;
+      }
+
+      /* --- Combat HUD (HP bar + Head/Body SP tick bars) --- */
+      .hud-hidden-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .combat-hud {
+        border: 1px solid var(--border);
+        background: rgba(6, 10, 18, 0.55);
+        box-shadow: inset 0 0 0 1px rgba(44, 246, 232, 0.06);
+        padding: 10px 12px 12px;
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .hud-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .hud-kicker {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        line-height: 1;
+      }
+
+      .hud-numline {
+        font-family: var(--mono);
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+      }
+
+      .hud-num {
+        min-width: 2.2ch;
+        display: inline-block;
+        text-align: right;
+        outline: none;
+        padding: 0 2px;
+        border: 1px solid transparent;
+        border-radius: 0;
+      }
+
+      .hud-num[contenteditable="true"] {
+        cursor: text;
+      }
+
+      .hud-num[contenteditable="true"]:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px rgba(44, 246, 232, 0.18);
+        background: rgba(8, 14, 26, 0.55);
+      }
+
+      .hud-sep {
+        opacity: 0.65;
+        font-family: var(--mono);
+      }
+
+      .hud-hp-bar {
+        position: relative;
+        height: 16px;
+        border: 0px solid rgba(255, 59, 106, 0.5);
+        background: rgba(218, 13, 13, 0.35);
+        overflow: hidden;
+        min-width: 0;
+        --cut-w: 10px;
+        --cut-h: 10px;
+        clip-path: polygon(
+        0 0,
+        100% 0,
+        100% calc(100% - var(--cut-h)),
+        calc(100% - var(--cut-w)) 100%,
+        0 100%
+      );
+      }
+
+      .hud-hp-fill {
+        position: absolute;
+        inset: 0;
+        width: 0%;
+        background: linear-gradient(90deg, rgba(255, 59, 106, 0.95), rgba(255, 59, 106, 0.32));
+        transform-origin: left center;
+
+      }
+
+      .hud-hp-preview {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        opacity: 0;
+        pointer-events: none;
+        background: rgba(44, 246, 232, 0.35);
+        mix-blend-mode: screen;
+        transition: opacity 80ms linear;
+      }
+
+      .hud-hp-preview.active {
+        opacity: 1;
+      }
+
+      .hud-hp-ticks {
+        display: none; /* removed per request */
+        grid-template-columns: repeat(10, 1fr);
+        gap: 3px;
+        height: 10px;
+        margin-top: 6px;
+        opacity: 0.85;
+      }
+
+      .hud-hp-tick {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .hud-hp-tick.on {
+        background: rgba(44, 246, 232, 0.68);
+        border-color: rgba(44, 246, 232, 0.28);
+      }
+
+      .hud-sp-ticks {
+        display: grid;
+        gap: 3px;
+        height: 12px;
+        min-width: 0;
+        justify-content: start;
+      }
+
+      .hud-sp-tick {
+        background: rgba(218, 13, 13, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .hud-sp-tick.on {
+        background: rgba(44, 246, 232, 0.72);
+        border-color: rgba(44, 246, 232, 0.28);
+      }
+
+      .hud-sp-tick.preview {
+        background: rgba(255, 212, 212, 0.55);
+        border-color: rgba(255, 212, 210, 0.45);
+        box-shadow: 0 0 0.5rem rgba(255, 212, 210, 0.18);
+      }
+
+      .hud-sp-row {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .hud-flash {
+        animation: hudflash 420ms ease;
+      }
+
+      @keyframes hudflash {
+        0% { box-shadow: 0 0 0 0 rgba(44, 246, 232, 0); }
+        40% { box-shadow: 0 0 0 2px rgba(44, 246, 232, 0.35); }
+        100% { box-shadow: 0 0 0 0 rgba(44, 246, 232, 0); }
       }
 
       .status-hp-with-fire {
@@ -528,23 +1010,16 @@
 
       .status-sp-layout {
         display: grid;
-        grid-template-columns: max-content max-content max-content max-content max-content 1fr;
-        grid-template-rows: min-content auto auto;
-        column-gap: 0;
+        grid-template-columns: max-content max-content max-content max-content 1fr;
+        grid-template-rows: min-content auto;
+        column-gap: 6px;
         row-gap: 0;
         align-items: start;
       }
 
       .sp-block {
-        grid-column: 1;
-        grid-row: 1 / span 3;
-        display: grid;
-        grid-template-columns: max-content max-content;
-        grid-template-rows: min-content auto auto;
-        column-gap: 6px;
-        row-gap: 0;
-        align-items: start;
-        width: fit-content;
+        /* Legacy numeric SP inputs (now hidden by Combat HUD) */
+        display: none;
       }
 
       .sp-block .sp-header {
@@ -616,13 +1091,13 @@
 
       .wedge-btn.half {
         opacity: 0.66;
-        margin-left: 6px;
+        margin-left: 0;
         clip-path: polygon(0 0, 100% 33%, 100% 100%, 0 100%);
       }
 
       .wedge-btn.bypass {
         opacity: 1;
-        margin-left: 6px;
+        margin-left: 0;
         width: 31px;
         clip-path: polygon(0 45%, 100% 100%, 0 100%);
       }
@@ -666,7 +1141,7 @@
         display: inline-flex;
         flex-direction: column;
         align-items: center;
-        gap: 2px;
+        gap: 0px;
       }
 
       .damage-toggle input {
@@ -674,10 +1149,27 @@
         cursor: pointer;
       }
 
+      .damage-toggle.headshot span{
+        color: var(--accent-2);
+      }
+
+      .wedge-btn[data-hot="true"]{
+        filter: brightness(1.15);
+        box-shadow: 0 0 0.65rem rgba(44, 246, 232, 0.24);
+      }
+
+
       .damage-field {
         display: grid;
         gap: 3px;
         max-width: 70px;
+      }
+
+      /* Damage box + Fire control inline row */
+      .damage-fire-row {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
       }
 
       .damage-legend {
@@ -734,9 +1226,11 @@
       }
 
       .fire-wrap {
-        display: flex;
+        display: grid;
+        grid-template-columns: auto auto 1fr auto;
         align-items: center;
         gap: 10px;
+        width: 100%;
       }
 
       .fire-readout-stack {
@@ -894,9 +1388,9 @@
       }
 
       .fire-minus5 {
-        padding: 6px 8px;
-        font-size: 10px;
-        align-self: center;
+
+        margin-left: 0;
+        align-self: end;
       }
 
       @media (max-width: 980px) {
@@ -907,16 +1401,16 @@
 
       @media (max-width: 720px) {
         .status-sp-layout {
-          grid-template-columns: max-content max-content max-content max-content max-content;
-          grid-template-rows: min-content auto auto auto;
-          column-gap: 6px;
+          grid-template-columns: max-content max-content max-content max-content;
+          grid-template-rows: min-content auto auto;
+          column-gap: 10px;
           row-gap: 0;
           align-items: start;
         }
 
         .status-damage-group {
           grid-column: 1 / -1 !important;
-          grid-row: 4 !important;
+          grid-row: 3 !important;
           padding-left: 0;
           margin-top: 0px;
         }
@@ -1026,71 +1520,85 @@
       .luck-box {
         border: 1px solid var(--border-strong);
         border-radius: 0;
-        padding: 4px 8px 6px;
+        padding: 2px 6px 4px;
         margin: 0;
         background: rgba(0, 0, 0, 0.08);
         min-width: 0;
       }
 
       .luck-box legend {
-        padding: 0 6px;
+        padding: 0 4px;
         font-family: var(--mono);
-        font-size: 10px;
+        font-size: 9px;
         letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--ink-muted);
       }
 
       .luck-box label {
-        margin-bottom: 2px;
-        font-size: 10px;
+        margin-bottom: 0;
+        font-size: 9px;
+        line-height: 1.1;
         letter-spacing: 0.18em;
       }
 
       .luck-grid {
         display: grid;
         grid-template-columns: auto auto auto auto;
-        gap: 6px;
+        gap: 4px;
         align-items: center;
       }
 
       .luck-col {
         display: grid;
-        gap: 4px;
+        gap: 2px;
       }
 
       .luck-use {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 3px;
       }
 
       .luck-outof {
         font-family: var(--mono);
-        font-size: 11px;
+        font-size: 10px;
         color: var(--ink-muted);
         align-self: center;
-        padding-top: 14px;
+        padding-top: 0;
       }
 
       .luck-btn {
-        padding: 3px 5px;
-        min-width: 24px;
+        padding: 2px 4px;
+        min-width: 22px;
         text-align: center;
+        line-height: 1;
       }
 
       .luck-input {
         padding: 0 1px;
         text-align: center;
-        font-size: 12px;
-        line-height: 1.1;
-        width: 4.5ch;
-        min-width: 4.5ch;
-        max-width: 4.5ch;
+        font-size: 11px;
+        line-height: 1;
+        width: 4ch;
+        min-width: 4ch;
+        max-width: 4ch;
         box-sizing: border-box;
       }
 
       .luck-digit {
+        width: 4ch;
+        min-width: 4ch;
+        max-width: 4ch;
+      }
+
+      #luckTotalInput {
+        width: 4.5ch;
+        min-width: 4.5ch;
+        max-width: 4.5ch;
+      }
+
+      #luckNextInput {
         width: 4.5ch;
         min-width: 4.5ch;
         max-width: 4.5ch;
@@ -1106,7 +1614,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: 2px;
         min-width: 0;
       }
 
@@ -1120,7 +1628,7 @@
         font-family: inherit;
         text-align: center;
         padding: 0;
-        font-size: 32px;
+        font-size: 24px;
         line-height: 1;
         box-sizing: border-box;
       }
@@ -1274,14 +1782,16 @@
         display: grid;
         grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
         align-items: center;
-        gap: 8px;
+        gap: 0px;
         padding: 2px 6px;
         border: 1px solid var(--border);
         background: var(--panel2);
         width: 100%;
+        
+        
       }
 
-      .skill-row[draggable="true"] {
+      .skill-name[draggable="true"] {
         cursor: grab;
       }
 
@@ -1292,14 +1802,15 @@
       .skill-row.group-child .skill-name {
         padding-left: 16px;
         position: relative;
+        
       }
 
       .skill-row.group-child .skill-name::before {
-        content: ">";
+        content: "↳";
         position: absolute;
         left: 2px;
-        color: var(--accent);
-      }
+        color: var(--ink-muted);
+            }
 
       .skill-group-row {
         display: grid;
@@ -1346,11 +1857,13 @@
 
       .skill-name {
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 200;
+        letter-spacing: 0.1em;
         min-width: 0;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        transform: scaleY(1.4);
       }
 
       .skill-name-text {
@@ -1431,7 +1944,7 @@
       .btn-roll {
         position: relative;
         isolation: isolate;
-        background: var(--btn-base);
+        /* background: var(--btn-base); */
         color: var(--btn-text);
         border: 1px solid var(--btn-border);
         border-radius: 0;
@@ -1443,14 +1956,18 @@
         font-weight: 800;
         box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.65) inset;
         transition: border-color 100ms linear, color 100ms linear, transform 40ms linear;
-        --btn-base: #3f1616;
-        --btn-overlay: #ff3b45;
+        --btn-base: #3f1624; /* shifted from deep red-brown → deep magenta-brown */
+        background: rgba(255, 59, 106, 0.14);
+        --btn-overlay: #ff3b6a;
+
         --btn-selected-alpha: 0.18;
         --btn-hover-alpha: 0.69;
         --btn-hover-current: 0;
-        --btn-border: rgba(255, 59, 69, 0.55);
-        --btn-border-boost: rgba(255, 59, 69, 0.95);
-        --btn-text: rgba(255, 59, 69, 0.92);
+
+        --btn-border: rgba(255, 59, 106, 0.55);
+        --btn-border-boost: rgba(255, 59, 106, 0.95);
+        --btn-text: rgba(255, 59, 106, 0.92);
+
       }
 
       .btn-roll::before,
@@ -1481,16 +1998,17 @@
       }
 
       .btn-roll.roll-armed {
-        color: rgba(255, 255, 255, 0.96);
-        border-color: rgba(255, 59, 69, 1);
-        --btn-hover-current: 0;
+        color: rgba(255, 255, 255, 0.918);
+        border-color: rgba(255, 59, 106, 1);
+        --btn-hover-current: 1;
       }
 
       .btn-roll.roll-flash {
         --btn-selected-alpha: 1;
         --btn-hover-current: var(--btn-hover-alpha);
-        box-shadow: 0 0 10px rgba(255, 59, 69, 0.35);
+        box-shadow: 0 0 10px rgba(255, 59, 106, 0.35);
       }
+
 
       .btn-roll:active {
         transform: translateY(1px);
@@ -1513,6 +2031,7 @@
         background: rgba(255, 59, 106, 0.14);
         border-color: rgba(255, 59, 106, 0.65);
         color: var(--accent-3);
+        
       }
 
       .btn-danger:hover {
@@ -1524,7 +2043,7 @@
         text-transform: none;
         font-size: 11px;
         letter-spacing: 0.08em;
-        padding: 1px 4px;
+        padding: 3px 2px;
         min-width: 2.2em;
         color: var(--ink);
         font-weight: 800;
@@ -1634,19 +2153,6 @@
         100% {
           box-shadow: 0 0 0 0 rgba(44, 246, 232, 0);
         }
-      }
-
-      .fallback {
-        margin-top: 18px;
-        background: rgba(255, 59, 106, 0.12);
-        border: 1px solid var(--accent-3);
-        padding: 12px;
-      }
-
-      .fallback-actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
       }
 
       .error {
@@ -1791,26 +2297,6 @@
         box-shadow: var(--glowA);
       }
 
-      .status-critical {
-        margin-top: 12px;
-		margin-left: -150px;
-        border: 1px solid var(--border);
-
-        background: var(--panel2);
-        padding: 10px;
-      }
-
-      .status-critical-head {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
-      }
-
-      .status-critical-head .status-title {
-        margin: 0;
-      }
-
       .crit-list {
         display: grid;
         gap: 8px;
@@ -1855,6 +2341,7 @@
 
       .crit-item-actions {
         display: flex;
+        
         justify-content: flex-end;
       }
 
@@ -1864,6 +2351,7 @@
         border: 1px solid rgba(255, 59, 106, 0.6);
         padding: 4px 8px;
         font-size: 10px;
+        margin-top: -40px;
       }
 
       .crit-remove:hover {
@@ -1922,13 +2410,16 @@
         padding: 10px;
         display: grid;
         gap: 8px;
+        width: 100%;
+        min-width: 0;
       }
 
       .weapon-row {
         display: grid;
-        grid-template-columns: minmax(180px, 1fr) minmax(180px, 240px) minmax(150px, 220px) auto;
+        grid-template-columns: auto 1fr auto;
         gap: 10px;
         align-items: end;
+        min-width: 0;
       }
 
       .weapon-name {
@@ -1950,14 +2441,23 @@
 
       .ammo-counts {
         display: grid;
-        grid-template-columns: 1fr auto 1fr;
+        grid-template-columns: 60px 74px 32px 60px;
         gap: 8px;
         align-items: center;
+      }
+
+      .ammo-counts .btn-reload {
+        padding: 4px 6px;
+        font-size: 10px;
+        min-width: 74px;
+        text-align: center;
       }
 
       .ammo-counts input {
         text-align: center;
         padding: 4px 6px;
+        width: 50px;
+        max-width: 50px;
       }
 
       .weapon-actions {
@@ -1965,7 +2465,8 @@
         gap: 8px;
         justify-content: flex-end;
         align-items: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        margin-left: auto;
       }
 
       .attack-table {
@@ -1977,10 +2478,11 @@
 
       .attack-row {
         display: grid;
-        grid-template-columns: 58px 58px minmax(160px, 1fr) minmax(160px, 220px) 120px minmax(180px, 260px);
+        grid-template-columns: 50px 50px minmax(120px, 1fr) minmax(120px, 160px) 100px minmax(140px, 180px);
         gap: 8px;
         align-items: center;
         padding: 4px 0;
+        min-width: 0;
       }
 
       .attack-row-head {
@@ -2166,7 +2668,10 @@
         .status-row {
           grid-template-columns: 1fr;
         }
-        .status-grid {
+        .status-combat-row {
+          grid-template-columns: 1fr;
+        }
+        .modifiers-grid {
           grid-template-columns: 1fr;
         }
         .columns {
@@ -2177,6 +2682,10 @@
         }
         .skill-row {
           grid-template-columns: auto 1fr auto auto auto;
+        }
+        .stats-drawer {
+          top: 92px;
+          --stats-panel-w: 210px;
         }
       }
 
@@ -2193,6 +2702,10 @@
         .skill-row {
           grid-template-columns: auto 1fr auto auto auto;
           gap: 6px;
+        }
+        .stats-drawer {
+          top: 72px;
+          --stats-panel-w: 190px;
         }
       }
     </style>
@@ -2242,253 +2755,171 @@
       <div class="status-row">
         <section class="status-panel">
           <div class="status-title">Character Status</div>
+
           <div class="status-meta">
             <div class="status-name">
               <label for="characterName">Name</label>
               <input id="characterName" type="text" placeholder="From sheet or type here" />
             </div>
+
             <div class="status-log">
               <button id="logOpenBtn" type="button">Log</button>
               <div id="logPreview" class="status-log-preview" aria-live="polite"></div>
             </div>
           </div>
-          <div class="status-grid">
-            <div class="status-controls">
-              <div class="status-core">
-                <div class="status-hp-with-fire">
-                  <div class="status-hp" aria-label="Hit points">
-                    <div class="hp-starting">
-                      <div class="hp-starting-label">Max</div>
-                      <input
-                        id="hpTotal"
-                        class="small-input"
-                        type="text"
-                        inputmode="numeric"
-                        aria-label="HP max"
-                      />
+
+          <div class="status-body">
+            <div class="status-combat-row" aria-label="Combat HUD and damage controls">
+              <div class="combat-hud" aria-label="Health and armor HUD">
+                    <!-- HP row -->
+                    <div class="hud-row" id="hudHpRow">
+                      <div class="hud-kicker">HP</div>
+                      <div>
+                        <div class="hud-hp-bar" id="hudHpBar" role="meter" aria-label="HP bar" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+                          <div class="hud-hp-fill" id="hudHpFill"></div>
+                          <div class="hud-hp-preview" id="hudHpPreview" aria-hidden="true"></div>
+                        </div>
+
+                      </div>
+                      <div class="hud-numline" aria-label="HP current and max">
+                        <span id="hudHpCur" class="hud-num" contenteditable="true" role="textbox" aria-label="HP current" spellcheck="false"></span>
+                        <span class="hud-sep">/</span>
+                        <span id="hudHpMax" class="hud-num" contenteditable="true" role="textbox" aria-label="HP max" spellcheck="false"></span>
+                      </div>
+
+                      <!-- hidden canonical inputs (used by existing code/state/PDF parsing) -->
+                      <input id="hpTotal" class="hud-hidden-input" type="text" inputmode="numeric" aria-hidden="true" />
+                      <input id="hpCurrent" class="hud-hidden-input" type="text" inputmode="numeric" aria-hidden="true" />
                     </div>
-                    <div class="hp-current">
-                      <div class="hp-label">HP</div>
-                      <input
-                        id="hpCurrent"
-                        class="big-input"
-                        type="text"
-                        inputmode="numeric"
-                        aria-label="HP current"
-                      />
+
+                    <!-- SP rows -->
+                    <div class="hud-sp-row" id="hudHeadRow" aria-label="Head armor">
+                      <div class="hud-kicker">HEAD SP</div>
+                      <div class="hud-sp-ticks" id="hudHeadTicks" aria-hidden="true"></div>
+                      <div class="hud-numline" aria-label="Head SP current and max">
+                        <span id="hudHeadCur" class="hud-num" contenteditable="true" role="textbox" aria-label="Head SP current" spellcheck="false"></span>
+                        <span class="hud-sep">/</span>
+                        <span id="hudHeadMax" class="hud-num" contenteditable="true" role="textbox" aria-label="Head SP max" spellcheck="false"></span>
+                      </div>
+                      <input id="headSpTotal" class="hud-hidden-input" type="text" inputmode="numeric" aria-hidden="true" />
+                      <input id="headSpCurrent" class="hud-hidden-input" type="text" inputmode="numeric" aria-hidden="true" />
+                    </div>
+
+                    <div class="hud-sp-row" id="hudBodyRow" aria-label="Body armor">
+                      <div class="hud-kicker">BODY SP</div>
+                      <div class="hud-sp-ticks" id="hudBodyTicks" aria-hidden="true"></div>
+                      <div class="hud-numline" aria-label="Body SP current and max">
+                        <span id="hudBodyCur" class="hud-num" contenteditable="true" role="textbox" aria-label="Body SP current" spellcheck="false"></span>
+                        <span class="hud-sep">/</span>
+                        <span id="hudBodyMax" class="hud-num" contenteditable="true" role="textbox" aria-label="Body SP max" spellcheck="false"></span>
+                      </div>
+                      <input id="bodySpTotal" class="hud-hidden-input" type="text" inputmode="numeric" aria-hidden="true" />
+                      <input id="bodySpCurrent" class="hud-hidden-input" type="text" inputmode="numeric" aria-hidden="true" />
                     </div>
                   </div>
-                  <div class="status-fire" aria-label="Fire severity">
-                    <div class="fire-wrap">
-                      <div class="fire-readout-stack">
-                        <div class="fire-title">On Fire</div>
-                        <button class="fire-readout" id="readoutBtn" type="button" aria-label="Fire penalty"></button>
-                      </div>
-                      <div class="fire-slider-area">
-                        <div class="fire-segments">
-                          <div class="fire-seg s1"></div>
-                          <div class="fire-seg s2"></div>
-                          <div class="fire-seg s3"></div>
-                          <div class="fire-seg s4"></div>
-                        </div>
-                        <input
-                          class="fire-slider"
-                          id="fireSlider"
-                          type="range"
-                          min="0"
-                          max="3"
-                          step="1"
-                          value="0"
-                          aria-label="Fire severity"
-                        />
-                        <div class="fire-labels">
-                          <div class="fire-label">Deadly</div>
-                          <div class="fire-label">Strong</div>
-                          <div class="fire-label">Mild</div>
-                          <div class="fire-label empty"></div>
-                        </div>
-                      </div>
-                      <button id="hpMinus5Btn" class="fire-minus5" type="button">-5 HP</button>
-                    </div>
-                  </div>
+
+              <div class="status-damage" aria-label="Damage entry">
+                <div class="status-kicker">Damage</div>
+                <input
+                  id="damageValue"
+                  class="damage-input"
+                  type="text"
+                  inputmode="numeric"
+                  placeholder="0"
+                  aria-label="Damage amount"
+                />
+              </div>
+
+              <div class="damage-modes" aria-label="Damage modes">
+                <div class="damage-mode-labels" aria-hidden="true">
+                  <span>Full</span>
+                  <span>Half</span>
+                  <span>Bypass</span>
                 </div>
-                <div class="status-sp-layout" aria-label="Armor and damage controls">
-                  <div class="sp-block" aria-label="SP values">
-                    <div class="sp-header-pad" aria-hidden="true"></div>
-                    <div class="sp-header">SP</div>
-                    <input
-                      id="headSpTotal"
-                      class="small-input"
-                      type="text"
-                      inputmode="numeric"
-                      aria-label="Head SP max"
-                    />
-                    <input
-                      id="headSpCurrent"
-                      class="big-input"
-                      type="text"
-                      inputmode="numeric"
-                      aria-label="Head SP current"
-                    />
-                    <input
-                      id="bodySpTotal"
-                      class="small-input"
-                      type="text"
-                      inputmode="numeric"
-                      aria-label="Body SP max"
-                    />
-                    <input
-                      id="bodySpCurrent"
-                      class="big-input"
-                      type="text"
-                      inputmode="numeric"
-                      aria-label="Body SP current"
-                    />
-                  </div>
-                  <div class="scale-label" style="grid-column:3;">Full</div>
-                  <div class="scale-label" style="grid-column:4;">Half</div>
-                  <div class="scale-label" style="grid-column:5;">Bypass</div>
-                  <div class="damage-location-label" style="grid-row:2;">Head</div>
+                <div class="damage-mode-buttons">
                   <button
+                    id="damageFullBtn"
                     class="wedge-btn full"
                     type="button"
-                    style="grid-column:3;grid-row:2;"
-                    aria-label="Head full damage"
-                    title="Full"
+                    data-mode="full"
+                    aria-label="Apply damage (Full SP)"
+                    title="Apply damage vs Full SP"
                   ></button>
                   <button
+                    id="damageHalfBtn"
                     class="wedge-btn half"
                     type="button"
-                    style="grid-column:4;grid-row:2;"
-                    aria-label="Head half damage"
-                    title="Half"
+                    data-mode="half"
+                    aria-label="Apply damage (Half SP)"
+                    title="Apply damage vs Half SP"
                   ></button>
                   <button
+                    id="damageBypassBtn"
                     class="wedge-btn bypass"
                     type="button"
-                    style="grid-column:5;grid-row:2;"
-                    aria-label="Head bypass armor"
-                    title="Bypass"
+                    data-mode="bypass"
+                    aria-label="Apply damage (Ignore SP)"
+                    title="Apply damage (Ignore SP)"
                   ></button>
-                  <div class="damage-location-label" style="grid-row:3;">Body</div>
-                  <button
-                    class="wedge-btn full"
-                    type="button"
-                    style="grid-column:3;grid-row:3;"
-                    aria-label="Body full damage"
-                    title="Full"
-                  ></button>
-                  <button
-                    class="wedge-btn half"
-                    type="button"
-                    style="grid-column:4;grid-row:3;"
-                    aria-label="Body half damage"
-                    title="Half"
-                  ></button>
-                  <button
-                    class="wedge-btn bypass"
-                    type="button"
-                    style="grid-column:5;grid-row:3;"
-                    aria-label="Body bypass armor"
-                    title="Bypass"
-                  ></button>
-                  <div class="status-damage-group" style="grid-column:6;grid-row:2 / span 2;">
-                    <div class="status-damage-panel" aria-label="Damage entry">
-                      <div class="damage-toggles">
-                        <label class="damage-toggle">
-                          <span>Crit</span>
-                          <input id="damageCrit" type="checkbox" aria-label="Critical injury" />
-                        </label>
-                        <label class="damage-toggle">
-                          <span>AP</span>
-                          <input id="damageAp" type="checkbox" aria-label="Armor piercing" />
-                        </label>
-                      </div>
-                      <div class="damage-field">
-                        <div class="damage-legend">Damage</div>
-                        <input
-                          id="damageValue"
-                          class="damage-input"
-                          type="text"
-                          inputmode="numeric"
-                          placeholder="0"
-                          aria-label="Damage amount"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-              <div class="status-mods" aria-label="Situational modifiers">
-                <div class="status-title">Modifiers</div>
-                <div class="global-mod-row">
-
-                  <div class="luck-section">
-                    <fieldset class="luck-box">
-                      <legend>Luck</legend>
-                      <div class="luck-grid">
-                        <div class="luck-col">
-                          <label for="luckNextInput">Use</label>
-                          <div class="luck-use">
-                            <button id="luckPlus" class="luck-btn" type="button" aria-label="Add luck to next roll">+</button>
-                            <input
-                              id="luckNextInput"
-                              class="luck-input luck-digit"
-                              type="text"
-                              inputmode="numeric"
-                              aria-label="Luck to add on the next roll"
-                            />
-                            <button
-                              id="luckMinus"
-                              class="luck-btn"
-                              type="button"
-                              aria-label="Remove luck from next roll"
-                            >
-                              -
-                            </button>
-                          </div>
-                        </div>
-                        <div class="luck-col">
-                          <label for="luckPoolInput">Remaining</label>
-                          <div id="luckPoolDisplay" class="luck-pool" aria-live="polite">
-                            <span id="luckAfter" class="luck-after">0</span>
-                            <span class="luck-sep">-></span>
-                            <input
-                              id="luckPoolInput"
-                              class="luck-pool-input luck-digit"
-                              type="text"
-                              inputmode="numeric"
-                              aria-label="Remaining luck pool"
-                            />
-                          </div>
-                        </div>
-                        <div class="luck-outof">out of</div>
-                        <div class="luck-col">
-                          <label for="luckTotalInput">Starting</label>
-                          <input
-                            id="luckTotalInput"
-                            class="luck-input luck-digit"
-                            type="text"
-                            inputmode="numeric"
-                            aria-label="Starting luck"
-                          />
-                        </div>
-                      </div>
-                    </fieldset>
-                  </div>
-                    <div class="global-mod-field">
-                    <label for="globalModInput">Global Modifier</label>
-                    <input id="globalModInput" type="text" placeholder="Applies to all skills" />
-                  </div>
                 </div>
               </div>
+
+              <div class="damage-flags" aria-label="Damage flags">
+                <label class="damage-flag damage-flag--head">
+                  <input id="damageHeadshot" type="checkbox" aria-label="Headshot" />
+                  <span>Head</span>
+                </label>
+                <label class="damage-flag">
+                  <input id="damageAp" type="checkbox" aria-label="Armor piercing" />
+                  <span>AP</span>
+                </label>
+                <label class="damage-flag">
+                  <input id="damageNoAblate" type="checkbox" aria-label="Do not ablate armor" />
+                  <span>No Ablate</span>
+                </label>
+              </div>
+
+              <div class="status-fire" aria-label="Fire severity">
+                          <div class="fire-wrap">
+                            <div class="fire-readout-stack">
+                              <div class="fire-title">On Fire</div>
+                              <button class="fire-readout" id="readoutBtn" type="button" aria-label="Fire penalty"></button>
+                            </div>
+                            <div class="fire-slider-area">
+                              <div class="fire-segments">
+                                <div class="fire-seg s1"></div>
+                                <div class="fire-seg s2"></div>
+                                <div class="fire-seg s3"></div>
+                                <div class="fire-seg s4"></div>
+                              </div>
+                              <input
+                                class="fire-slider"
+                                id="fireSlider"
+                                type="range"
+                                min="0"
+                                max="3"
+                                step="1"
+                                value="0"
+                                aria-label="Fire severity"
+                              />
+                              <div class="fire-labels">
+                                <div class="fire-label">Deadly</div>
+                                <div class="fire-label">Strong</div>
+                                <div class="fire-label">Mild</div>
+                                <div class="fire-label empty"></div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
             </div>
 
             <div class="status-critical" aria-label="Current critical injuries">
               <div class="status-critical-head">
                 <div class="status-title">Critical Injuries</div>
-                <button id="critOpenBtn" type="button">Add</button>
+                <div class="status-critical-actions">
+                  <button id="critOpenBtn" type="button">Add</button>
+                  <button id="hpMinus5Btn" class="fire-minus5" type="button">-5 HP</button>
+                </div>
               </div>
               <div id="critList" class="crit-list" aria-live="polite"></div>
             </div>
@@ -2498,15 +2929,76 @@
         <section class="weapons-panel" aria-label="Weapons panel">
           <div class="weapons" aria-label="Weapons">
             <div class="weapons-head">
-              <div class="status-title">Weapons</div>
+              <div class="status-title">Weapons & Attacks</div>
               <div class="right">
-                <button id="addWeaponBtn" type="button">Add Weapon</button>
+                <button id="addWeaponBtn" type="button">Add Weapon/Attack</button>
               </div>
             </div>
             <div id="weaponsList" class="weapons-list" aria-live="polite"></div>
           </div>
         </section>
       </div>
+
+
+      <section class="modifiers-panel" aria-label="Luck and global modifiers">
+        <div class="status-title">Luck &amp; Modifiers</div>
+        <div class="modifiers-grid">
+          <div class="luck-section">
+            <fieldset class="luck-box">
+              <legend>Luck</legend>
+              <div class="luck-grid">
+                <div class="luck-col">
+                  <label for="luckNextInput">Use</label>
+                  <div class="luck-use">
+                    <button id="luckPlus" class="luck-btn" type="button" aria-label="Add luck to next roll">+</button>
+                    <input
+                      id="luckNextInput"
+                      class="luck-input luck-digit"
+                      type="text"
+                      inputmode="numeric"
+                      aria-label="Luck to add on the next roll"
+                    />
+                    <button id="luckMinus" class="luck-btn" type="button" aria-label="Remove luck from next roll">-</button>
+                  </div>
+                </div>
+
+                <div class="luck-col">
+                  <label for="luckPoolInput">Remaining</label>
+                  <div id="luckPoolDisplay" class="luck-pool" aria-live="polite">
+                    <span id="luckAfter" class="luck-after">0</span>
+                    <span class="luck-sep">-&gt;</span>
+                    <input
+                      id="luckPoolInput"
+                      class="luck-pool-input luck-digit"
+                      type="text"
+                      inputmode="numeric"
+                      aria-label="Remaining luck pool"
+                    />
+                  </div>
+                </div>
+
+                <div class="luck-outof">out of</div>
+
+                <div class="luck-col">
+                  <label for="luckTotalInput">Starting</label>
+                  <input
+                    id="luckTotalInput"
+                    class="luck-input luck-digit"
+                    type="text"
+                    inputmode="numeric"
+                    aria-label="Starting luck"
+                  />
+                </div>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="global-mod-field">
+            <label for="globalModInput">Global Modifier</label>
+            <input id="globalModInput" type="text" placeholder="Applies to all skills" />
+          </div>
+        </div>
+      </section>
 
       <section class="pinned">
         <div class="pinned-head">
@@ -2537,14 +3029,83 @@
 
       <section class="columns" id="columns"></section>
 
-      <section id="clipboardFallback" class="fallback" hidden>
-        <div>Clipboard blocked. Copy the roll text below:</div>
-        <textarea id="fallbackText" rows="2" readonly></textarea>
-        <div class="fallback-actions">
-          <button id="fallbackSelect" type="button">Select Text</button>
-          <button id="fallbackClose" type="button">Close</button>
+    </div>
+
+    <div id="statsDrawer" class="stats-drawer" data-open="false">
+      <aside id="statsPanel" class="stats-panel" aria-label="Character stats">
+        <div class="stats-grid">
+          <div class="stat-row">
+            <span class="stat-label">INT</span>
+            <span id="statInt" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">REF</span>
+            <span id="statRef" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">DEX</span>
+            <span id="statDex" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">TECH</span>
+            <span id="statTech" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">COOL</span>
+            <span id="statCool" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">WILL</span>
+            <span id="statWill" class="stat-value">--</span>
+          </div>
+          <div class="stat-row stat-row--pair">
+            <span class="stat-label">LUCK</span>
+            <span id="statLuck" class="stat-value stat-value--pair">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">MOVE</span>
+            <span id="statMove" class="stat-value">--</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">BODY</span>
+            <span id="statBody" class="stat-value stat-value--pair">--</span>
+          </div>
+          <div class="stat-row stat-row--pair">
+            <span class="stat-label">EMP</span>
+            <span id="statEmp" class="stat-value stat-value--pair">--</span>
+          </div>
+          <div class="stat-row stat-row--pair stat-row-hum">
+            <span class="stat-label">HUM</span>
+            <div class="stat-hum-stack">
+              <span id="statHumBox" class="stat-value stat-value--pair">
+                <span
+                  id="statHumTempTotal"
+                  class="stat-total stat-total-inline stat-hum-temp"
+                  aria-label="Humanity total with temp"
+                ></span>
+                <input id="statHumInput" class="stat-input" type="text" inputmode="numeric" aria-label="Current humanity" />
+                <span class="stat-divider">/</span>
+                <span id="statHumMax" class="stat-subvalue">--</span>
+              </span>
+              <span class="stat-hum-temp-wrap">
+                <span class="stat-label stat-label-inline">+/-</span>
+                <span class="stat-value stat-value--slim">
+                  <input
+                    id="statHumTempInput"
+                    class="stat-input"
+                    type="text"
+                    inputmode="numeric"
+                    aria-label="Temporary humanity adjustment"
+                  />
+                </span>
+              </span>
+            </div>
+          </div>
         </div>
-      </section>
+      </aside>
+      <button id="statsTab" class="stats-tab" type="button" aria-expanded="false" aria-controls="statsPanel">
+        <span>STATS</span>
+      </button>
     </div>
 
     <div id="startupBackdrop" class="startup-backdrop" data-open="true">
@@ -2567,6 +3128,11 @@
       <div class="modal" data-label="Multi Roll" role="dialog" aria-modal="true" aria-labelledby="rollCountTitle">
         <h2 id="rollCountTitle" class="modalTitle">Multi-roll</h2>
         <p id="rollCountSub" class="modalSub"></p>
+        <p id="rollCountNote" class="modalSub" hidden></p>
+        <div class="modalField">
+          <label for="rollCountModInput">Modifiers</label>
+          <input id="rollCountModInput" type="text" placeholder="+2 -1" />
+        </div>
         <div class="modalField">
           <label for="rollCountInput">Number of rolls</label>
           <input id="rollCountInput" type="number" min="1" step="1" value="2" />
@@ -2648,15 +3214,9 @@
           </div>
         </div>
 
-        <div class="modalGrid2">
-          <div class="modalField">
-            <label for="ammoCurInput">Current ammo</label>
-            <input id="ammoCurInput" type="number" min="0" step="1" value="0" />
-          </div>
-          <div class="modalField">
-            <label>Attack modes</label>
-            <button id="addAttackBtn" type="button">Add Attack</button>
-          </div>
+        <div class="modalField">
+          <label>Attack modes</label>
+          <button id="addAttackBtn" type="button">Add Attack</button>
         </div>
 
         <div class="modalField">
@@ -2892,49 +3452,56 @@
     {
       "roll": 2,
       "injury": "Dismembered Arm",
-      "injuryEffect": "The dismembered arm is gone. You drop any items in that arm’s hand immediately. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "The arm is severed. Any held items are dropped.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV17"
     },
     {
       "roll": 3,
       "injury": "Dismembered Hand",
-      "injuryEffect": "The dismembered hand is gone. You drop any items in that hand immediately. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "The hand is severed. Any held items are dropped.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV17"
     },
     {
       "roll": 4,
       "injury": "Collapsed Lung",
-      "injuryEffect": "-2 to MOVE (minimum 1). Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "-2 MOVE (minimum 1).",
+      "deathSave": 1,
       "quickFix": "Paramedic DV15",
       "treatment": "Surgery DV15"
     },
     {
       "roll": 5,
       "injury": "Broken Ribs",
-      "injuryEffect": "At the end of every Turn where you move further than 4m/yds on foot, you re-suffer this Critical Injury’s Bonus Damage directly to your Hit Points.",
+      "injuryEffect": "After any Turn where you move more than 4m/yds on foot, take this injury’s Bonus Damage directly to HP.",
+      "deathSave": 0,
       "quickFix": "Paramedic DV13",
       "treatment": "Paramedic DV15 or Surgery DV13"
     },
     {
       "roll": 6,
       "injury": "Broken Arm",
-      "injuryEffect": "The broken arm cannot be used. You drop any items in that arm’s hand immediately.",
+      "injuryEffect": "The arm is unusable. Drop any items held in that hand.",
+      "deathSave": 0,
       "quickFix": "Paramedic DV13",
       "treatment": "Paramedic DV15 or Surgery DV13"
     },
     {
       "roll": 7,
       "injury": "Foreign Object",
-      "injuryEffect": "At the end of every Turn where you move further than 4m/yds on foot, you re-suffer this Critical Injury’s Bonus Damage directly to your Hit Points.",
+      "injuryEffect": "After any Turn where you move more than 4m/yds on foot, take this injury’s Bonus Damage directly to HP.",
+      "deathSave": 0,
       "quickFix": "First Aid or Paramedic DV13",
-      "treatment": "Quick Fix removes Injury Effect permanently"
+      "treatment": "Quick Fix permanently removes effect"
     },
     {
       "roll": 8,
       "injury": "Broken Leg",
-      "injuryEffect": "-4 to MOVE (minimum 1).",
+      "injuryEffect": "-4 MOVE (minimum 1).",
+      "deathSave": 0,
       "quickFix": "Paramedic DV13",
       "treatment": "Paramedic DV15 or Surgery DV13"
     },
@@ -2942,27 +3509,31 @@
       "roll": 9,
       "injury": "Torn Muscle",
       "injuryEffect": "-2 to Melee Attacks.",
+      "deathSave": 0,
       "quickFix": "First Aid or Paramedic DV13",
-      "treatment": "Quick Fix removes Injury Effect permanently"
+      "treatment": "Quick Fix permanently removes effect"
     },
     {
       "roll": 10,
       "injury": "Spinal Injury",
-      "injuryEffect": "Next Turn, you cannot take an Action, but you can still take a Move Action. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "On your next Turn, you cannot take an Action but may still Move.",
+      "deathSave": 1,
       "quickFix": "Paramedic DV15",
       "treatment": "Surgery DV15"
     },
     {
       "roll": 11,
       "injury": "Crushed Fingers",
-      "injuryEffect": "-4 to all Actions involving that hand.",
+      "injuryEffect": "-4 to all Actions using that hand.",
+      "deathSave": 0,
       "quickFix": "Paramedic DV13",
       "treatment": "Surgery DV15"
     },
     {
       "roll": 12,
       "injury": "Dismembered Leg",
-      "injuryEffect": "The dismembered leg is gone. -6 to MOVE (minimum 1). You cannot dodge attacks. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "The leg is severed. -6 MOVE (minimum 1). You cannot Dodge.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV17"
     }
@@ -2971,21 +3542,24 @@
     {
       "roll": 2,
       "injury": "Lost Eye",
-      "injuryEffect": "The lost eye is gone. -4 to Ranged Attacks & Perception Checks involving vision. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "-4 to Ranged Attacks and vision-based Perception.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV17"
     },
     {
       "roll": 3,
       "injury": "Brain Injury",
-      "injuryEffect": "-2 to all Actions. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "-2 to all Actions.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV17"
     },
     {
       "roll": 4,
       "injury": "Damaged Eye",
-      "injuryEffect": "-2 to Ranged Attacks & Perception Checks involving vision.",
+      "injuryEffect": "-2 to Ranged Attacks and vision-based Perception.",
+      "deathSave": 0,
       "quickFix": "Paramedic DV15",
       "treatment": "Surgery DV13"
     },
@@ -2993,165 +3567,376 @@
       "roll": 5,
       "injury": "Concussion",
       "injuryEffect": "-2 to all Actions.",
+      "deathSave": 0,
       "quickFix": "First Aid or Paramedic DV13",
-      "treatment": "Quick Fix removes Injury Effect permanently"
+      "treatment": "Quick Fix permanently removes effect"
     },
     {
       "roll": 6,
       "injury": "Broken Jaw",
-      "injuryEffect": "-4 to all Actions involving speech.",
+      "injuryEffect": "-4 to Actions requiring speech.",
+      "deathSave": 0,
       "quickFix": "Paramedic DV13",
       "treatment": "Paramedic or Surgery DV13"
     },
     {
       "roll": 7,
       "injury": "Foreign Object",
-      "injuryEffect": "At the end of every Turn where you move further than 4m/yds on foot, you re-suffer this Critical Injury’s Bonus Damage directly to your Hit Points.",
+      "injuryEffect": "After any Turn where you move more than 4m/yds on foot, take this injury’s Bonus Damage directly to HP.",
+      "deathSave": 0,
       "quickFix": "First Aid or Paramedic DV13",
-      "treatment": "Quick Fix removes Injury Effect permanently"
+      "treatment": "Quick Fix permanently removes effect"
     },
     {
       "roll": 8,
       "injury": "Whiplash",
-      "injuryEffect": "Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "No immediate Action penalties.",
+      "deathSave": 1,
       "quickFix": "Paramedic DV13",
       "treatment": "Paramedic or Surgery DV13"
     },
     {
       "roll": 9,
       "injury": "Cracked Skull",
-      "injuryEffect": "Aimed Shots to your head multiply the damage that gets through your SP by 3 instead of 2. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "Head Aimed Shots deal triple damage past SP instead of double.",
+      "deathSave": 1,
       "quickFix": "Paramedic DV15",
       "treatment": "Paramedic or Surgery DV15"
     },
     {
       "roll": 10,
       "injury": "Damaged Ear",
-      "injuryEffect": "Whenever you move further than 4m/yds on foot in a Turn, you cannot take a Move Action on your next Turn. Additionally, you take a -2 to Perception Checks involving hearing.",
+      "injuryEffect": "After moving more than 4m/yds in a Turn, you lose your next Move Action. -2 to hearing-based Perception.",
+      "deathSave": 0,
       "quickFix": "Paramedic DV13",
       "treatment": "Surgery DV13"
     },
     {
       "roll": 11,
       "injury": "Crushed Windpipe",
-      "injuryEffect": "You cannot speak. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "You are unable to speak.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV15"
     },
     {
       "roll": 12,
       "injury": "Lost Ear",
-      "injuryEffect": "The lost ear is gone. Whenever you move further than 4m/yds on foot in a Turn, you cannot take a Move Action on your next Turn. Additionally, you take a -4 to Perception Checks involving hearing. Base Death Save Penalty is increased by 1.",
+      "injuryEffect": "After moving more than 4m/yds in a Turn, you lose your next Move Action. -4 to hearing-based Perception.",
+      "deathSave": 1,
       "quickFix": "N/A",
       "treatment": "Surgery DV17"
     }
   ]
 }
+
     </script>
 
     <script>
-      const pdfInput = document.getElementById("pdfInput");
-      const filterInput = document.getElementById("filterInput");
-      const loadStateInput = document.getElementById("loadStateInput");
-      const saveStateBtn = document.getElementById("saveStateBtn");
-      const errorEl = document.getElementById("error");
-      const columnsEl = document.getElementById("columns");
-      const pinnedColumnEls = {
-        col1: document.getElementById("pinnedCol1"),
-        col2: document.getElementById("pinnedCol2"),
-        col3: document.getElementById("pinnedCol3")
-      };
-      const characterNameInput = document.getElementById("characterName");
-      const hpTotalInput = document.getElementById("hpTotal");
-      const hpCurrentInput = document.getElementById("hpCurrent");
-      const bodySpTotalInput = document.getElementById("bodySpTotal");
-      const bodySpCurrentInput = document.getElementById("bodySpCurrent");
-      const headSpTotalInput = document.getElementById("headSpTotal");
-      const headSpCurrentInput = document.getElementById("headSpCurrent");
-      const damageValueInput = document.getElementById("damageValue");
-      const damageCritInput = document.getElementById("damageCrit");
-      const damageApInput = document.getElementById("damageAp");
-      const fireSliderInput = document.getElementById("fireSlider");
-      const fireReadoutBtn = document.getElementById("readoutBtn");
-      const fallbackEl = document.getElementById("clipboardFallback");
-      const fallbackTextEl = document.getElementById("fallbackText");
-      const fallbackSelectBtn = document.getElementById("fallbackSelect");
-      const fallbackCloseBtn = document.getElementById("fallbackClose");
-      const rollCountBackdrop = document.getElementById("rollCountBackdrop");
-      const rollCountTitle = document.getElementById("rollCountTitle");
-      const rollCountSub = document.getElementById("rollCountSub");
-      const rollCountInput = document.getElementById("rollCountInput");
-      const rollCountCancel = document.getElementById("rollCountCancel");
-      const rollCountCopy = document.getElementById("rollCountCopy");
-      const logBackdrop = document.getElementById("logBackdrop");
-        const logOpenBtn = document.getElementById("logOpenBtn");
-        const logCloseBtn = document.getElementById("logCloseBtn");
-        const logSaveBtn = document.getElementById("logSaveBtn");
-        const logClearBtn = document.getElementById("logClearBtn");
-        const logEntries = document.getElementById("logEntries");
-        const logEmpty = document.getElementById("logEmpty");
-        const logPreview = document.getElementById("logPreview");
-      const critOpenBtn = document.getElementById("critOpenBtn");
-      const hpMinus5Btn = document.getElementById("hpMinus5Btn");
-      const critList = document.getElementById("critList");
-      const critBackdrop = document.getElementById("critBackdrop");
-      const critCloseBtn = document.getElementById("critCloseBtn");
-      const critBodyTable = document.getElementById("critBodyTable");
-      const critHeadTable = document.getElementById("critHeadTable");
-      const addWeaponBtn = document.getElementById("addWeaponBtn");
-      const weaponsList = document.getElementById("weaponsList");
-      const weaponBackdrop = document.getElementById("weaponBackdrop");
-      const weaponModalTitle = document.getElementById("weaponModalTitle");
-      const weaponNameInput = document.getElementById("weaponNameInput");
-      const ammoNameInput = document.getElementById("ammoNameInput");
-      const ammoMaxInput = document.getElementById("ammoMaxInput");
-      const ammoCurInput = document.getElementById("ammoCurInput");
-      const addAttackBtn = document.getElementById("addAttackBtn");
-      const weaponModesPreview = document.getElementById("weaponModesPreview");
-      const weaponCancel = document.getElementById("weaponCancel");
-      const weaponSave = document.getElementById("weaponSave");
-      const attackBackdrop = document.getElementById("attackBackdrop");
-      const attackModalTitle = document.getElementById("attackModalTitle");
-      const attackNameInput = document.getElementById("attackNameInput");
-      const attackSkillInput = document.getElementById("attackSkillInput");
-      const attackAmmoUseInput = document.getElementById("attackAmmoUseInput");
-      const attackModsInput = document.getElementById("attackModsInput");
-      const attackCancel = document.getElementById("attackCancel");
-      const attackAdd = document.getElementById("attackAdd");
-      const deleteWeaponBackdrop = document.getElementById("deleteWeaponBackdrop");
-      const deleteWeaponSub = document.getElementById("deleteWeaponSub");
-      const deleteWeaponCancel = document.getElementById("deleteWeaponCancel");
-      const deleteWeaponConfirm = document.getElementById("deleteWeaponConfirm");
-      const startupBackdrop = document.getElementById("startupBackdrop");
-      const startupLoadPdf = document.getElementById("startupLoadPdf");
-      const startupLoadState = document.getElementById("startupLoadState");
-      const startupSkip = document.getElementById("startupSkip");
-      const startupRedlinkChannel = document.getElementById("startupRedlinkChannel");
-      const startupRedlinkChannelInput = document.getElementById("startupRedlinkChannelInput");
-      const addDialog = document.getElementById("addDialog");
-      const addName = document.getElementById("addName");
-      const addBase = document.getElementById("addBase");
-      const addMod = document.getElementById("addMod");
-      const removeGroupDialog = document.getElementById("removeGroupDialog");
-      const removeGroupTitle = document.getElementById("removeGroupTitle");
-      const removeGroupSub = document.getElementById("removeGroupSub");
-      const removeGroupList = document.getElementById("removeGroupList");
-      const removeGroupEmpty = document.getElementById("removeGroupEmpty");
-      const redlinkToggle = document.getElementById("redlinkToggle");
-      const redlinkToggleText = document.getElementById("redlinkToggleText");
-      const redlinkChannelInput = document.getElementById("redlinkChannelInput");
-      const redlinkChannelSet = document.getElementById("redlinkChannelSet");
-      const addPinnedBtn = document.getElementById("addPinnedBtn");
-      const globalModInput = document.getElementById("globalModInput");
-      const luckPlusBtn = document.getElementById("luckPlus");
-      const luckMinusBtn = document.getElementById("luckMinus");
-      const luckNextInput = document.getElementById("luckNextInput");
-      const luckPoolDisplay = document.getElementById("luckPoolDisplay");
-      const luckPoolInput = document.getElementById("luckPoolInput");
-      const luckAfterValue = document.getElementById("luckAfter");
-      const luckTotalInput = document.getElementById("luckTotalInput");
+      (function () {
+        'use strict';
 
-      const BASE_PREFIX = "BASE ";
+        // --- DOM helpers ---
+        const byId = (id) => document.getElementById(id);
+        const reqId = (id) => {
+          const el = byId(id);
+          if (!el) throw new Error(`Missing required element #${id}`);
+          return el;
+        };
+
+        // --- DOM cache ---
+        const ui = {
+          pdfInput: byId('pdfInput'),
+          filterInput: byId('filterInput'),
+          loadStateInput: byId('loadStateInput'),
+          saveStateBtn: byId('saveStateBtn'),
+          errorEl: byId('error'),
+          columnsEl: byId('columns'),
+          pinnedColumnEls: {
+            col1: byId('pinnedCol1'),
+            col2: byId('pinnedCol2'),
+            col3: byId('pinnedCol3')
+          },
+
+          // Status inputs
+          characterNameInput: byId('characterName'),
+          hpTotalInput: byId('hpTotal'),
+          hpCurrentInput: byId('hpCurrent'),
+          bodySpTotalInput: byId('bodySpTotal'),
+          bodySpCurrentInput: byId('bodySpCurrent'),
+          headSpTotalInput: byId('headSpTotal'),
+          headSpCurrentInput: byId('headSpCurrent'),
+
+          // Combat HUD
+          hudHpRow: byId('hudHpRow'),
+          hudHpBar: byId('hudHpBar'),
+          hudHpFill: byId('hudHpFill'),
+          hudHpPreview: byId('hudHpPreview'),
+          hudHpTicks: byId('hudHpTicks'),
+          hudHpCur: byId('hudHpCur'),
+          hudHpMax: byId('hudHpMax'),
+          hudHeadRow: byId('hudHeadRow'),
+          hudHeadTicks: byId('hudHeadTicks'),
+          hudHeadCur: byId('hudHeadCur'),
+          hudHeadMax: byId('hudHeadMax'),
+          hudBodyRow: byId('hudBodyRow'),
+          hudBodyTicks: byId('hudBodyTicks'),
+          hudBodyCur: byId('hudBodyCur'),
+          hudBodyMax: byId('hudBodyMax'),
+
+          // Damage + fire
+          damageValueInput: byId('damageValue'),
+          damageApInput: byId('damageAp'),
+          damageHeadshotInput: byId('damageHeadshot'),
+          damageNoAblateInput: byId('damageNoAblate'),
+          fireSliderInput: byId('fireSlider'),
+          fireReadoutBtn: byId('readoutBtn'),
+
+          // Multi-roll modal
+          rollCountBackdrop: byId('rollCountBackdrop'),
+          rollCountTitle: byId('rollCountTitle'),
+          rollCountSub: byId('rollCountSub'),
+          rollCountNote: byId('rollCountNote'),
+          rollCountModInput: byId('rollCountModInput'),
+          rollCountInput: byId('rollCountInput'),
+          rollCountCancel: byId('rollCountCancel'),
+          rollCountCopy: byId('rollCountCopy'),
+
+          // Log modal
+          logBackdrop: byId('logBackdrop'),
+          logOpenBtn: byId('logOpenBtn'),
+          logCloseBtn: byId('logCloseBtn'),
+          logSaveBtn: byId('logSaveBtn'),
+          logClearBtn: byId('logClearBtn'),
+          logEntries: byId('logEntries'),
+          logEmpty: byId('logEmpty'),
+          logPreview: byId('logPreview'),
+
+          // Critical injuries
+          critOpenBtn: byId('critOpenBtn'),
+          hpMinus5Btn: byId('hpMinus5Btn'),
+          critList: byId('critList'),
+          critBackdrop: byId('critBackdrop'),
+          critCloseBtn: byId('critCloseBtn'),
+          critBodyTable: byId('critBodyTable'),
+          critHeadTable: byId('critHeadTable'),
+
+          // Weapons
+          addWeaponBtn: byId('addWeaponBtn'),
+          weaponsList: byId('weaponsList'),
+          weaponBackdrop: byId('weaponBackdrop'),
+          weaponModalTitle: byId('weaponModalTitle'),
+          weaponNameInput: byId('weaponNameInput'),
+          ammoNameInput: byId('ammoNameInput'),
+          ammoMaxInput: byId('ammoMaxInput'),
+          ammoCurInput: byId('ammoCurInput'),
+          addAttackBtn: byId('addAttackBtn'),
+          weaponModesPreview: byId('weaponModesPreview'),
+          weaponCancel: byId('weaponCancel'),
+          weaponSave: byId('weaponSave'),
+
+          // Attack modal
+          attackBackdrop: byId('attackBackdrop'),
+          attackModalTitle: byId('attackModalTitle'),
+          attackNameInput: byId('attackNameInput'),
+          attackSkillInput: byId('attackSkillInput'),
+          attackAmmoUseInput: byId('attackAmmoUseInput'),
+          attackModsInput: byId('attackModsInput'),
+          attackCancel: byId('attackCancel'),
+          attackAdd: byId('attackAdd'),
+
+          // Delete weapon confirmation
+          deleteWeaponBackdrop: byId('deleteWeaponBackdrop'),
+          deleteWeaponSub: byId('deleteWeaponSub'),
+          deleteWeaponCancel: byId('deleteWeaponCancel'),
+          deleteWeaponConfirm: byId('deleteWeaponConfirm'),
+
+          // Startup
+          startupBackdrop: byId('startupBackdrop'),
+          startupLoadPdf: byId('startupLoadPdf'),
+          startupLoadState: byId('startupLoadState'),
+          startupSkip: byId('startupSkip'),
+          startupRedlinkChannel: byId('startupRedlinkChannel'),
+          startupRedlinkChannelInput: byId('startupRedlinkChannelInput'),
+
+          // Add / remove skill dialogs
+          addDialog: byId('addDialog'),
+          addName: byId('addName'),
+          addBase: byId('addBase'),
+          addMod: byId('addMod'),
+          removeGroupDialog: byId('removeGroupDialog'),
+          removeGroupTitle: byId('removeGroupTitle'),
+          removeGroupSub: byId('removeGroupSub'),
+          removeGroupList: byId('removeGroupList'),
+          removeGroupEmpty: byId('removeGroupEmpty'),
+
+          // REDlink controls
+          redlinkToggle: byId('redlinkToggle'),
+          redlinkToggleText: byId('redlinkToggleText'),
+          redlinkChannelInput: byId('redlinkChannelInput'),
+          redlinkChannelSet: byId('redlinkChannelSet'),
+
+          // Pinned + modifiers + luck
+          addPinnedBtn: byId('addPinnedBtn'),
+          globalModInput: byId('globalModInput'),
+          luckPlusBtn: byId('luckPlus'),
+          luckMinusBtn: byId('luckMinus'),
+          luckNextInput: byId('luckNextInput'),
+          luckPoolDisplay: byId('luckPoolDisplay'),
+          luckPoolInput: byId('luckPoolInput'),
+          luckAfterValue: byId('luckAfter'),
+          luckTotalInput: byId('luckTotalInput'),
+
+          // Stats drawer
+          statsDrawer: byId('statsDrawer'),
+          statsTab: byId('statsTab'),
+          statInt: byId('statInt'),
+          statRef: byId('statRef'),
+          statDex: byId('statDex'),
+          statTech: byId('statTech'),
+          statCool: byId('statCool'),
+          statWill: byId('statWill'),
+          statLuck: byId('statLuck'),
+          statMove: byId('statMove'),
+          statBody: byId('statBody'),
+          statEmp: byId('statEmp'),
+          statHumInput: byId('statHumInput'),
+          statHumMax: byId('statHumMax'),
+          statHumTempInput: byId('statHumTempInput'),
+          statHumTempTotal: byId('statHumTempTotal')
+        };
+
+        // Destructure to keep the rest of the file unchanged (minimizes refactor risk).
+        const {
+          pdfInput,
+          filterInput,
+          loadStateInput,
+          saveStateBtn,
+          errorEl,
+          columnsEl,
+          pinnedColumnEls,
+          characterNameInput,
+          hpTotalInput,
+          hpCurrentInput,
+          bodySpTotalInput,
+          bodySpCurrentInput,
+          headSpTotalInput,
+          headSpCurrentInput,
+          hudHpRow,
+          hudHpBar,
+          hudHpFill,
+          hudHpPreview,
+          hudHpTicks,
+          hudHpCur,
+          hudHpMax,
+          hudHeadRow,
+          hudHeadTicks,
+          hudHeadCur,
+          hudHeadMax,
+          hudBodyRow,
+          hudBodyTicks,
+          hudBodyCur,
+          hudBodyMax,
+          damageValueInput,
+          damageApInput,
+          damageHeadshotInput,
+          damageNoAblateInput,
+          fireSliderInput,
+          fireReadoutBtn,
+          rollCountBackdrop,
+          rollCountTitle,
+          rollCountSub,
+          rollCountNote,
+          rollCountModInput,
+          rollCountInput,
+          rollCountCancel,
+          rollCountCopy,
+          logBackdrop,
+          logOpenBtn,
+          logCloseBtn,
+          logSaveBtn,
+          logClearBtn,
+          logEntries,
+          logEmpty,
+          logPreview,
+          critOpenBtn,
+          hpMinus5Btn,
+          critList,
+          critBackdrop,
+          critCloseBtn,
+          critBodyTable,
+          critHeadTable,
+          addWeaponBtn,
+          weaponsList,
+          weaponBackdrop,
+          weaponModalTitle,
+          weaponNameInput,
+          ammoNameInput,
+          ammoMaxInput,
+          ammoCurInput,
+          addAttackBtn,
+          weaponModesPreview,
+          weaponCancel,
+          weaponSave,
+          attackBackdrop,
+          attackModalTitle,
+          attackNameInput,
+          attackSkillInput,
+          attackAmmoUseInput,
+          attackModsInput,
+          attackCancel,
+          attackAdd,
+          deleteWeaponBackdrop,
+          deleteWeaponSub,
+          deleteWeaponCancel,
+          deleteWeaponConfirm,
+          startupBackdrop,
+          startupLoadPdf,
+          startupLoadState,
+          startupSkip,
+          startupRedlinkChannel,
+          startupRedlinkChannelInput,
+          addDialog,
+          addName,
+          addBase,
+          addMod,
+          removeGroupDialog,
+          removeGroupTitle,
+          removeGroupSub,
+          removeGroupList,
+          removeGroupEmpty,
+          redlinkToggle,
+          redlinkToggleText,
+          redlinkChannelInput,
+          redlinkChannelSet,
+          addPinnedBtn,
+          globalModInput,
+          luckPlusBtn,
+          luckMinusBtn,
+          luckNextInput,
+          luckPoolDisplay,
+          luckPoolInput,
+          luckAfterValue,
+          luckTotalInput,
+          statsDrawer,
+          statsTab,
+          statInt,
+          statRef,
+          statDex,
+          statTech,
+          statCool,
+          statWill,
+          statLuck,
+          statMove,
+          statBody,
+          statEmp,
+          statHumInput,
+          statHumMax,
+          statHumTempInput,
+          statHumTempTotal
+        } = ui;
+
+const BASE_PREFIX = "BASE ";
       const MOD_PREFIX = "MOD ";
 
       const canonicalOrdering = JSON.parse(
@@ -3217,6 +4002,11 @@
           "First Aid"
         ].map((name) => cleanDisplayName(name).toLowerCase())
       );
+      const DEFAULT_PINNED_BY_COLUMN = {
+        col1: ["Concentration", "Perception", "Education"],
+        col2: ["Brawling", "Evasion"],
+        col3: ["Conversation", "Human Perception", "Persuasion", "First Aid"]
+      };
 
       const canonicalMeta = {};
       const canonicalOrder = [];
@@ -3247,15 +4037,16 @@
       const state = {
         characterName: "",
         characterLog: [],
-        hpTotal: "5",
-        hpCurrent: "45",
-        bodySpTotal: "9",
-        bodySpCurrent: "12",
-        headSpTotal: "12",
-        headSpCurrent: "8",
+        hpTotal: 5,
+        hpCurrent: 45,
+        bodySpTotal: 9,
+        bodySpCurrent: 12,
+        headSpTotal: 12,
+        headSpCurrent: 8,
         damageValue: "",
-        damageCrit: false,
         damageAp: false,
+        damageHeadshot: false,
+        damageNoAblate: false,
         fireSeverity: 0,
         skills: {},
         columnSkills: { col1: [], col2: [], col3: [] },
@@ -3265,6 +4056,21 @@
         luckNext: 0,
         luckPool: 0,
         luckTotal: 0,
+        statInt: null,
+        statRef: null,
+        statDex: null,
+        statTech: null,
+        statCool: null,
+        statWill: null,
+        statMove: null,
+        statBody: null,
+        statBodyChargen: null,
+        statEmpCurr: null,
+        statEmpMax: null,
+        statHumCurr: null,
+        statHumMax: null,
+        statHumTemp: 0,
+        statHumTempText: "",
         criticalInjuries: [],
         weapons: [],
         draftWeapon: null,
@@ -3277,9 +4083,14 @@
       const REDLINK_PREFIX = "[REDlink] ";
       const REDLINK_FLASH_MS = 180;
       const REDLINK_DIM_MS = 180;
+      const LOCAL_STATE_KEY = "redwinter.state.v1";
+      const LOCAL_SAVE_DELAY = 250;
       let redlinkEnabled = false;
       let redlinkChannelName = "";
       let redlinkHelperActive = false;
+      let localSaveTimeout = null;
+      let suppressLocalSave = false;
+      let localSaveReady = false;
 
       let dragState = null;
       let pendingMulti = null;
@@ -3350,6 +4161,126 @@
       function initRedlinkChannel() {
         const stored = localStorage.getItem(REDLINK_CHANNEL_KEY) || "";
         setRedlinkChannel(stored, false);
+      }
+
+      function setStatsDrawerOpen(open) {
+        if (!statsDrawer || !statsTab) return;
+        statsDrawer.dataset.open = open ? "true" : "false";
+        statsTab.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+
+      if (statsTab && statsDrawer) {
+        statsTab.addEventListener("click", () => {
+          const next = statsDrawer.dataset.open !== "true";
+          setStatsDrawerOpen(next);
+        });
+      }
+
+      function buildStatePayload() {
+        return {
+          version: 1,
+          characterName: state.characterName,
+          characterLog: state.characterLog,
+          hpTotal: state.hpTotal,
+          hpCurrent: state.hpCurrent,
+          bodySpTotal: state.bodySpTotal,
+          bodySpCurrent: state.bodySpCurrent,
+          headSpTotal: state.headSpTotal,
+          headSpCurrent: state.headSpCurrent,
+          damageValue: state.damageValue,
+          damageAp: state.damageAp,
+          damageHeadshot: state.damageHeadshot,
+          damageNoAblate: state.damageNoAblate,
+          fireSeverity: state.fireSeverity,
+          luckTotal: state.luckTotal,
+          luckPool: state.luckPool,
+          luckNext: state.luckNext,
+          statInt: state.statInt,
+          statRef: state.statRef,
+          statDex: state.statDex,
+          statTech: state.statTech,
+          statCool: state.statCool,
+          statWill: state.statWill,
+          statMove: state.statMove,
+          statBody: state.statBody,
+          statBodyChargen: state.statBodyChargen,
+          statEmpCurr: state.statEmpCurr,
+          statEmpMax: state.statEmpMax,
+          statHumCurr: state.statHumCurr,
+          statHumMax: state.statHumMax,
+          statHumTemp: state.statHumTemp,
+          statHumTempText: state.statHumTempText,
+          criticalInjuries: Array.isArray(state.criticalInjuries) ? state.criticalInjuries : [],
+          weapons: Array.isArray(state.weapons)
+            ? state.weapons.map((weapon) => ({
+                id: weapon.id,
+                name: weapon.name,
+                ammoName: weapon.ammoName,
+                ammoCur: weapon.ammoCur,
+                ammoMax: weapon.ammoMax,
+                attacks: Array.isArray(weapon.attacks)
+                  ? weapon.attacks.map((attack) => ({
+                      id: attack.id,
+                      name: attack.name,
+                      skillKey: attack.skillKey,
+                      ammoUse: attack.ammoUse,
+                      mods: attack.mods
+                    }))
+                  : []
+              }))
+            : [],
+          skills: Object.values(state.skills).map((skill) => ({
+            id: skill.id,
+            displayName: skill.displayName,
+            base: skill.base,
+            mod: skill.mod,
+            canonicalKey: skill.canonicalKey,
+            stat: skill.stat,
+            source: skill.source
+          })),
+          pinnedColumns: state.pinnedColumns,
+          columnSkills: state.columnSkills,
+          canonicalMeta: Object.values(canonicalMeta).map((meta) => ({
+            key: meta.key,
+            displayName: meta.displayName,
+            stat: meta.stat
+          }))
+        };
+      }
+
+      function persistLocalState() {
+        if (suppressLocalSave || !localSaveReady) return;
+        try {
+          const json = JSON.stringify(buildStatePayload());
+          localStorage.setItem(LOCAL_STATE_KEY, json);
+        } catch (error) {
+          console.warn("Local save failed.", error);
+        }
+      }
+
+      function scheduleLocalStateSave() {
+        if (suppressLocalSave || !localSaveReady) return;
+        if (localSaveTimeout) window.clearTimeout(localSaveTimeout);
+        localSaveTimeout = window.setTimeout(persistLocalState, LOCAL_SAVE_DELAY);
+      }
+
+      function loadLocalState() {
+        const raw = localStorage.getItem(LOCAL_STATE_KEY);
+        if (!raw) return false;
+        try {
+          const data = JSON.parse(raw);
+          suppressLocalSave = true;
+          localSaveReady = true;
+          restoreState(data);
+          suppressLocalSave = false;
+          return true;
+        } catch (error) {
+          suppressLocalSave = false;
+          localSaveReady = false;
+          localStorage.removeItem(LOCAL_STATE_KEY);
+          console.warn("Discarded invalid local state.", error);
+          return false;
+        }
       }
 
       function buildRedlinkPayload(baseCommand) {
@@ -3458,6 +4389,7 @@
         luckPoolInput.value = current > 0 ? String(current) : "";
         luckAfterValue.textContent = String(after);
         luckPoolDisplay.dataset.active = state.luckNext > 0 ? "true" : "false";
+        renderStatsPanel();
       }
 
       function updateLuckNextInputDisplay() {
@@ -3468,6 +4400,7 @@
       function updateLuckTotalInputDisplay() {
         if (!luckTotalInput) return;
         luckTotalInput.value = state.luckTotal > 0 ? String(state.luckTotal) : "";
+        renderStatsPanel();
       }
 
       function updateLuckModHints() {
@@ -3476,6 +4409,20 @@
           el.textContent = luckText;
           el.dataset.empty = luckText ? "false" : "true";
         });
+        renderWeapons();
+        renderWeaponModesPreview();
+        updateRollCountLuckNote();
+      }
+
+      function updateRollCountLuckNote() {
+        if (!rollCountNote) return;
+        if (state.luckNext > 0) {
+          rollCountNote.textContent = `Luck (+${state.luckNext}) is ignored for !rr rolls.`;
+          rollCountNote.hidden = false;
+          return;
+        }
+        rollCountNote.textContent = "";
+        rollCountNote.hidden = true;
       }
 
       function setLuckNext(value) {
@@ -3656,6 +4603,10 @@
 
       function extractCharacterName(valueByFieldNameLower) {
         const keys = Object.keys(valueByFieldNameLower || {});
+        const knownNameFields = ["text field176"];
+        const known = knownNameFields.find((field) => keys.includes(field));
+        if (known) return normalizeFreeTextName(valueByFieldNameLower[known]);
+
         const preferred = keys.find((key) => key.includes("character") && key.includes("name"));
         if (preferred) return normalizeFreeTextName(valueByFieldNameLower[preferred]);
 
@@ -3693,6 +4644,46 @@
           names.push(value);
         });
         return names;
+      }
+
+      function extractWeaponsFromSheet(fields) {
+        const weaponNameFields = [
+          "WeaponTxt1",
+          "WeaponTxt6",
+          "WeaponTxt11",
+          "WeaponTxt16",
+          "WeaponTxt21",
+          "WeaponTxt26",
+          "WeaponTxt31",
+          "WeaponTxt35"
+        ];
+        const normalizeFieldKey = (name) => String(name || "").replace(/\s+/g, "").toLowerCase();
+        const fieldsByName = new Map();
+        (fields || []).forEach((field) => {
+          const rawName = String(field.getName?.() ?? "").trim();
+          if (!rawName) return;
+          fieldsByName.set(normalizeFieldKey(rawName), field);
+        });
+
+        const weapons = [];
+        weaponNameFields.forEach((nameFieldName) => {
+          const nameField = fieldsByName.get(normalizeFieldKey(nameFieldName));
+          if (!nameField) return;
+          const name = normalizeFreeTextName(getFieldValue(nameField));
+          if (!name) return;
+          if (/^weapon name\s*\d+$/i.test(name)) return;
+
+          const match = String(nameFieldName).match(/WeaponTxt(\d+)/i);
+          const baseIndex = match ? Number(match[1]) : NaN;
+          const maxFieldName = Number.isFinite(baseIndex) ? `WeaponTxt${baseIndex + 2}` : "";
+          const maxField = maxFieldName ? fieldsByName.get(normalizeFieldKey(maxFieldName)) : null;
+          const rawMax = maxField ? normalizeValue(getFieldValue(maxField)) : "";
+          const ammoMax = Math.max(0, Number.parseInt(String(rawMax || "").trim(), 10) || 0);
+
+          weapons.push({ name, ammoMax });
+        });
+
+        return weapons;
       }
 
       function setCharacterName(name) {
@@ -3856,10 +4847,11 @@
         updated.splice(insertAt, 0, newSkillId);
       }
 
-      function buildRollText(skill, isMulti, rollCount) {
+      function buildRollText(skill, isMulti, rollCount, extraMod) {
         const base = String(skill.base || "").trim() || "0";
-        const luckMod = state.luckNext > 0 ? String(state.luckNext) : "";
-        const mod = buildCombinedModifier(skill.mod, state.globalMod, luckMod);
+        const luckMod = !isMulti && state.luckNext > 0 ? String(state.luckNext) : "";
+        const multiMod = isMulti ? String(extraMod || "").replace(/\s+/g, "") : extraMod;
+        const mod = buildCombinedModifier(skill.mod, state.globalMod, luckMod, multiMod);
         const skillName = skill.displayName;
         if (isMulti) {
           return `!rr ${rollCount} 1d10+${base}${mod} ${skillName}`;
@@ -3871,7 +4863,9 @@
         pendingMulti = { ...config, flashEl };
         rollCountTitle.textContent = config.label;
         rollCountSub.textContent = "Enter the number of rolls.";
+        if (rollCountModInput) rollCountModInput.value = "";
         rollCountInput.value = "2";
+        updateRollCountLuckNote();
         rollCountBackdrop.dataset.open = "true";
         setTimeout(() => {
           rollCountInput.focus();
@@ -3892,7 +4886,8 @@
           rollCountInput.focus();
           return;
         }
-        const text = pendingMulti.buildText(count);
+        const extraMod = rollCountModInput ? rollCountModInput.value : "";
+        const text = pendingMulti.buildText(count, extraMod);
         await copyRollText(text, pendingMulti.flashEl);
         if (pendingMulti.afterCopy) {
           pendingMulti.afterCopy(count);
@@ -3911,10 +4906,6 @@
           }
           return true;
         } catch {
-          fallbackTextEl.value = getClipboardText(text);
-          fallbackEl.hidden = false;
-          fallbackTextEl.focus();
-          fallbackTextEl.select();
           return false;
         }
       }
@@ -3963,7 +4954,7 @@
         });
       }
 
-      function prunePinnedColumns() {
+      function removeInvalidPinnedSkills() {
         ensurePinnedColumns();
         Object.keys(state.pinnedColumns).forEach((col) => {
           state.pinnedColumns[col] = state.pinnedColumns[col].filter((id) => state.skills[id]);
@@ -3982,7 +4973,7 @@
         removePinned(skillId);
       }
 
-      function ensureSkillInColumn(skillId, columnId) {
+      function addSkillToColumnIfMissing(skillId, columnId) {
         if (!state.columnSkills[columnId].includes(skillId)) {
           state.columnSkills[columnId].push(skillId);
         }
@@ -4041,6 +5032,81 @@
         });
       }
 
+      const STAT_EMPTY = "--";
+      const formatStatValue = (value) => {
+        if (value === null || value === undefined || value === "") return STAT_EMPTY;
+        const num = Number(value);
+        return Number.isFinite(num) ? String(num) : String(value);
+      };
+
+      const formatStatPair = (current, max) => {
+        const curText = formatStatValue(current);
+        const maxText = formatStatValue(max);
+        if (curText === STAT_EMPTY && maxText === STAT_EMPTY) return STAT_EMPTY;
+        return `${curText}/${maxText}`;
+      };
+
+      const setStatPair = (el, current, max) => {
+        if (!el) return;
+        const curText = formatStatValue(current);
+        const maxText = formatStatValue(max);
+        if (curText === STAT_EMPTY && maxText === STAT_EMPTY) {
+          el.textContent = STAT_EMPTY;
+          return;
+        }
+        el.textContent = "";
+        const main = document.createElement("span");
+        main.className = "stat-main";
+        main.textContent = curText;
+        const divider = document.createElement("span");
+        divider.className = "stat-divider";
+        divider.textContent = "/";
+        const sub = document.createElement("span");
+        sub.className = "stat-subvalue";
+        sub.textContent = maxText;
+        el.append(main, divider, sub);
+      };
+
+      function renderStatsPanel() {
+        if (!statInt) return;
+        statInt.textContent = formatStatValue(state.statInt);
+        statRef.textContent = formatStatValue(state.statRef);
+        statDex.textContent = formatStatValue(state.statDex);
+        statTech.textContent = formatStatValue(state.statTech);
+        statCool.textContent = formatStatValue(state.statCool);
+        statWill.textContent = formatStatValue(state.statWill);
+        statMove.textContent = formatStatValue(state.statMove);
+        setStatPair(statBody, state.statBody, state.statBodyChargen);
+        const luckVisible = (state.luckPool || 0) > 0 || (state.luckTotal || 0) > 0;
+        if (luckVisible) {
+          setStatPair(statLuck, state.luckPool, state.luckTotal);
+        } else {
+          statLuck.textContent = STAT_EMPTY;
+        }
+        const humCurr = Numbers.toNullableInt(state.statHumCurr);
+        const humTemp = Numbers.toNullableInt(state.statHumTemp) || 0;
+        const humEffective = humCurr === null ? null : humCurr + humTemp;
+        const empCurrent = humEffective === null ? null : Math.floor(humEffective / 10);
+
+        setStatPair(statEmp, empCurrent, state.statEmpMax);
+
+        if (statHumInput && document.activeElement !== statHumInput) {
+          statHumInput.value = humCurr === null ? "" : String(humCurr);
+        }
+        if (statHumMax) {
+          statHumMax.textContent = formatStatValue(state.statHumMax);
+        }
+        if (statHumTempInput && document.activeElement !== statHumTempInput) {
+          const tempText = (state.statHumTempText || "").trim();
+          statHumTempInput.value = tempText || (humTemp ? String(humTemp) : "");
+        }
+        if (statHumTempTotal) {
+          const hasTemp = Boolean((state.statHumTempText || "").trim());
+          statHumTempTotal.textContent =
+            humEffective === null || !hasTemp ? "" : `(${formatStatValue(humEffective)})`;
+        }
+      }
+
       function render() {
         const needle = filterInput.value.trim().toLowerCase();
         const visibleSkillIds = new Set();
@@ -4050,11 +5116,13 @@
           visibleSkillIds.add(skill.id);
         });
 
+        renderStatsPanel();
         renderCharacterLog();
         renderCriticalInjuries();
         renderWeapons();
         renderPinned();
         renderColumns(visibleSkillIds, needle.length === 0);
+        scheduleLocalStateSave();
       }
 
         function renderCharacterLog() {
@@ -4174,37 +5242,113 @@
       }
 
       const WEAPON_SKILL_KEYS = [
+		toKey("Handgun"),		
         toKey("Melee Weapon"),
         toKey("Archery"),
-        toKey("Autofire"),
-        toKey("Handgun"),
+        toKey("Autofire"),        
         toKey("Shoulder Arms"),
-        toKey("Heavy Weapons")
+        toKey("Heavy Weapons"),
+		toKey("Brawling"),
+		toKey("Athletics")
       ];
 
-      function normalizeWeaponSkillKey(value) {
-        const key = toKey(value);
+      const WEAPON_SKILL_SELECTION_ID_PREFIX = "id:";
+
+      function normalizeWeaponSkillSelection(value) {
+        const raw = String(value || "").trim();
+        if (raw.startsWith(WEAPON_SKILL_SELECTION_ID_PREFIX)) {
+          const id = raw.slice(WEAPON_SKILL_SELECTION_ID_PREFIX.length);
+          if (state.skills && state.skills[id]) return raw;
+        }
+        const key = toKey(raw);
         if (key === toKey("melee")) return toKey("Melee Weapon");
         if (WEAPON_SKILL_KEYS.includes(key)) return key;
         return WEAPON_SKILL_KEYS[0];
       }
 
-      function getWeaponSkillLabel(skillKey) {
-        const meta = canonicalMeta[skillKey];
-        return meta ? meta.displayName : skillKey;
+      function getWeaponSkillLabel(selection) {
+        const normalized = normalizeWeaponSkillSelection(selection);
+        if (normalized.startsWith(WEAPON_SKILL_SELECTION_ID_PREFIX)) {
+          const id = normalized.slice(WEAPON_SKILL_SELECTION_ID_PREFIX.length);
+          const skill = state.skills && state.skills[id];
+          return skill ? formatSkillLabel(skill) : "Unknown Skill";
+        }
+        const meta = canonicalMeta[normalized];
+        return meta ? meta.displayName : normalized;
       }
 
-      function getWeaponSkillBase(skillKey) {
-        const key = normalizeWeaponSkillKey(skillKey);
-        const skill = Object.values(state.skills).find((entry) => entry.canonicalKey === key);
+      function getWeaponSkillBase(selection) {
+        const normalized = normalizeWeaponSkillSelection(selection);
+        if (normalized.startsWith(WEAPON_SKILL_SELECTION_ID_PREFIX)) {
+          const id = normalized.slice(WEAPON_SKILL_SELECTION_ID_PREFIX.length);
+          const skill = state.skills && state.skills[id];
+          const base = String(skill?.base ?? "").trim();
+          return base || "0";
+        }
+        const skill = Object.values(state.skills).find((entry) => entry.canonicalKey === normalized);
         const base = String(skill?.base ?? "").trim();
         return base || "0";
+      }
+
+      function getWeaponSkillModRaw(selection) {
+        const normalized = normalizeWeaponSkillSelection(selection);
+        if (normalized.startsWith(WEAPON_SKILL_SELECTION_ID_PREFIX)) {
+          const id = normalized.slice(WEAPON_SKILL_SELECTION_ID_PREFIX.length);
+          const skill = state.skills && state.skills[id];
+          return String(skill?.mod ?? "").trim();
+        }
+        const skill = Object.values(state.skills).find((entry) => entry.canonicalKey === normalized);
+        return String(skill?.mod ?? "").trim();
+      }
+
+      function getWeaponSkillModValue(selection) {
+        const raw = getWeaponSkillModRaw(selection);
+        if (!raw || raw === "0") return "";
+        return raw;
+      }
+
+      function getWeaponSkillModDisplay(selection) {
+        const raw = getWeaponSkillModRaw(selection);
+        return raw || "0";
+      }
+
+      function parseLooseNumeric(value) {
+        const text = String(value ?? "").trim();
+        if (!text) return null;
+        const match = text.match(/[-+]?\d+(?:\.\d+)?/);
+        if (!match) return null;
+        const num = Number(match[0]);
+        return Number.isFinite(num) ? num : null;
+      }
+
+      function normalizeModifierExpression(value) {
+        const text = String(value ?? "").trim().replace(/\s+/g, "");
+        if (!text || /^[-+]?0+(?:\.0+)?$/.test(text)) return "";
+        if (text.startsWith("+") || text.startsWith("-")) return text;
+        return `+${text}`;
+      }
+
+      function buildWeaponAttackExpression(skillKey) {
+        const baseText = getWeaponSkillBase(skillKey);
+        const baseNum = parseLooseNumeric(baseText) ?? 0;
+        const parts = [String(baseNum)];
+        const mods = [
+          getWeaponSkillModValue(skillKey),
+          state.globalMod,
+          state.luckNext > 0 ? `+${state.luckNext}` : ""
+        ];
+        mods.forEach((mod) => {
+          const normalized = normalizeModifierExpression(mod);
+          if (!normalized) return;
+          parts.push(normalized);
+        });
+        return parts.join("");
       }
 
       function formatWeaponRollLabel(weapon, attack) {
         const weaponName = String(weapon?.name || "").trim();
         const attackName = String(attack?.name || "").trim();
-        const skillLabel = getWeaponSkillLabel(normalizeWeaponSkillKey(attack?.skillKey || ""));
+        const skillLabel = getWeaponSkillLabel(attack?.skillKey || "");
         const core = [weaponName, attackName].filter(Boolean).join(" - ");
         if (!core) return skillLabel || "Weapon Attack";
         return skillLabel ? `${core} (${skillLabel})` : core;
@@ -4212,86 +5356,137 @@
 
       function ensureWeaponSkillOptions() {
         if (!attackSkillInput) return;
+        const previous = attackSkillInput.value;
         attackSkillInput.textContent = "";
+
+        // Core weapon skills
         WEAPON_SKILL_KEYS.forEach((key) => {
           const option = document.createElement("option");
           option.value = key;
           option.textContent = getWeaponSkillLabel(key);
           attackSkillInput.appendChild(option);
         });
-      }
 
-      function normalizeCriticalInjury(item) {
-        if (!item || typeof item !== "object") return null;
-        const location = item.location === "head" ? "head" : "body";
-        const roll = Number(item.roll);
-        const injury = String(item.injury || "").trim();
-        if (!injury || !Number.isFinite(roll)) return null;
-        return {
-          location,
-          roll,
-          injury,
-          injuryEffect: String(item.injuryEffect || "").trim(),
-          quickFix: String(item.quickFix || "").trim(),
-          treatment: String(item.treatment || "").trim()
-        };
-      }
-
-      function addCriticalInjury(item) {
-        const normalized = normalizeCriticalInjury(item);
-        if (!normalized) return;
-        if (!Array.isArray(state.criticalInjuries)) state.criticalInjuries = [];
-        const exists = state.criticalInjuries.some(
-          (ci) => ci && ci.location === normalized.location && Number(ci.roll) === normalized.roll
-        );
-        if (!exists) {
-          state.criticalInjuries.push(normalized);
-        }
-        renderCriticalInjuries();
-      }
-
-      function removeCriticalInjury(index) {
-        if (!Array.isArray(state.criticalInjuries)) return;
-        state.criticalInjuries.splice(index, 1);
-        renderCriticalInjuries();
-      }
-
-      function renderCriticalInjuries() {
-        if (!critList) return;
-        const list = Array.isArray(state.criticalInjuries) ? state.criticalInjuries : [];
-        critList.textContent = "";
-        if (list.length === 0) {
-          const empty = document.createElement("div");
-          empty.className = "modalSub";
-          empty.textContent = "No critical injuries tracked.";
-          critList.appendChild(empty);
-          return;
+        // Martial Arts: allow user-added subskills (e.g., "Martial Arts: Karate") to be selected.
+        const martialArtsKey = toKey("Martial Arts");
+        const martialArtsChildren = getGroupedSkillsInOrder(martialArtsKey);
+        if (martialArtsChildren.length > 0) {
+          const group = document.createElement("optgroup");
+          group.label = "Martial Arts";
+          martialArtsChildren.forEach((skill) => {
+            const option = document.createElement("option");
+            option.value = `${WEAPON_SKILL_SELECTION_ID_PREFIX}${skill.id}`;
+            option.textContent = formatSkillLabel(skill);
+            group.appendChild(option);
+          });
+          attackSkillInput.appendChild(group);
         }
 
-        list.forEach((ci, idx) => {
-          const item = normalizeCriticalInjury(ci);
-          if (!item) return;
-          const el = document.createElement("div");
-          el.className = "crit-item";
-          const locationLabel = item.location === "head" ? "Head" : "Body";
-          el.innerHTML = `
-            <div class="crit-item-title">
-              <strong>${escapeHtml(item.injury)}</strong>
-              <span class="crit-item-meta">${escapeHtml(locationLabel)} ·  Treatment: ${escapeHtml(item.treatment || "")}</span>
-              
-              
-              
-              </div>
-            <div class="crit-item-body"><strong>Effect:</strong> ${escapeHtml(item.injuryEffect || "")}</div>
-             <div class="crit-item-body"><strong>Quickfix: ${escapeHtml(item.quickFix || "")}</div>
-            <div class="crit-item-actions">
-              <button class="crit-remove" type="button" aria-label="Remove critical injury">Remove</button>
-            </div>
-          `;
-          el.querySelector(".crit-remove")?.addEventListener("click", () => removeCriticalInjury(idx));
-          critList.appendChild(el);
-        });
+        // Restore selection if possible
+        const normalizedPrev = normalizeWeaponSkillSelection(previous);
+        attackSkillInput.value = normalizedPrev;
       }
+// Rolls that increase Base Death Save Penalty by 1
+const DEATHSAVE_ROLLS = {
+  body: new Set([2, 3, 4, 10, 12]),
+  head: new Set([2, 3, 8, 9, 11, 12])
+};
+
+function normalizeCriticalInjury(item) {
+  if (!item || typeof item !== "object") return null;
+
+  const location = item.location === "head" ? "head" : "body";
+  const roll = Number(item.roll);
+  const injury = String(item.injury || "").trim();
+
+  if (!injury || !Number.isFinite(roll)) return null;
+
+  // Prefer explicit deathSave if provided, otherwise infer from (location, roll)
+  let deathSave;
+  if (item.deathSave === 1 || item.deathSave === "1" || item.deathSave === true) {
+    deathSave = 1;
+  } else if (item.deathSave === 0 || item.deathSave === "0" || item.deathSave === false) {
+    deathSave = 0;
+  } else {
+    deathSave = DEATHSAVE_ROLLS[location].has(roll) ? 1 : 0;
+  }
+
+  return {
+    location,
+    roll,
+    injury,
+    deathSave,
+    injuryEffect: String(item.injuryEffect || "").trim(),
+    quickFix: String(item.quickFix || "").trim(),
+    treatment: String(item.treatment || "").trim()
+  };
+}
+
+function addCriticalInjury(item) {
+  const normalized = normalizeCriticalInjury(item);
+  if (!normalized) return;
+
+  if (!Array.isArray(state.criticalInjuries)) state.criticalInjuries = [];
+
+  const exists = state.criticalInjuries.some(
+    (ci) => ci && ci.location === normalized.location && Number(ci.roll) === normalized.roll
+  );
+
+  if (!exists) state.criticalInjuries.push(normalized);
+
+  renderCriticalInjuries();
+}
+
+function removeCriticalInjury(index) {
+  if (!Array.isArray(state.criticalInjuries)) return;
+  state.criticalInjuries.splice(index, 1);
+  renderCriticalInjuries();
+}
+
+function renderCriticalInjuries() {
+  if (!critList) return;
+
+  // Normalize + migrate old entries so deathSave starts appearing immediately
+  const raw = Array.isArray(state.criticalInjuries) ? state.criticalInjuries : [];
+  const list = raw.map(normalizeCriticalInjury).filter(Boolean);
+  state.criticalInjuries = list;
+
+  critList.textContent = "";
+
+  if (list.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "modalSub";
+    empty.textContent = "No critical injuries tracked.";
+    critList.appendChild(empty);
+    return;
+  }
+
+  list.forEach((item, idx) => {
+    const el = document.createElement("div");
+    el.className = "crit-item";
+
+    const locationLabel = item.location === "head" ? "Head" : "Body";
+    const deathSaveText = item.deathSave === 1 ? "Death Save: +1" : "Death Save: +0";
+
+    el.innerHTML = `
+      <div class="crit-item-title">
+        <strong>${escapeHtml(item.injury || "")}</strong>
+        <span class="crit-item-meta">${escapeHtml(locationLabel)} · Treatment: ${escapeHtml(item.treatment || "")}</span>
+        </div>
+
+      <div class="crit-item-body"><strong>Effect:</strong> ${escapeHtml(item.injuryEffect || "")}</div>
+      <div class="crit-item-body"><strong>Quickfix:</strong> ${escapeHtml(item.quickFix || "")}</div>
+      <div class="crit-item-body">${escapeHtml(deathSaveText)}</div>
+      </div>
+      <div class="crit-item-actions">
+        <button class="crit-remove" type="button" aria-label="Remove critical injury">Remove</button>
+      </div>
+    `;
+
+    el.querySelector(".crit-remove")?.addEventListener("click", () => removeCriticalInjury(idx));
+    critList.appendChild(el);
+  });
+}
 
       function weaponNameKey(name) {
         return normalizeFreeTextName(name).toLowerCase();
@@ -4301,7 +5496,7 @@
         if (!attack || typeof attack !== "object") return null;
         const name = normalizeFreeTextName(attack.name);
         if (!name) return null;
-        const skillKey = normalizeWeaponSkillKey(
+        const skillKey = normalizeWeaponSkillSelection(
           attack.skillKey || attack.skill || attack.skillName || ""
         );
         const ammoUse = Math.max(0, Number(attack.ammoUse ?? 0));
@@ -4357,6 +5552,54 @@
         });
       }
 
+      function addWeaponsFromSheet(weaponsFromSheet) {
+        if (!Array.isArray(weaponsFromSheet)) return;
+        if (!Array.isArray(state.weapons)) state.weapons = [];
+        const existing = new Set(state.weapons.map((w) => weaponNameKey(w.name)));
+
+        weaponsFromSheet.forEach((entry) => {
+          const cleanedName = normalizeFreeTextName(entry?.name);
+          if (!cleanedName) return;
+          const key = weaponNameKey(cleanedName);
+          if (existing.has(key)) return;
+
+          const ammoMax = Math.max(0, Number(entry?.ammoMax ?? 0));
+          state.weapons.push({
+            id: uid(),
+            name: cleanedName,
+            ammoName: "",
+            ammoCur: ammoMax,
+            ammoMax: ammoMax,
+            attacks: []
+          });
+          existing.add(key);
+        });
+      }
+
+      function addWeaponsFromSheet(sheetWeapons) {
+        if (!Array.isArray(sheetWeapons)) return;
+        if (!Array.isArray(state.weapons)) state.weapons = [];
+        const existing = new Set(state.weapons.map((w) => weaponNameKey(w.name)));
+
+        sheetWeapons.forEach((entry) => {
+          const cleaned = normalizeFreeTextName(entry?.name);
+          if (!cleaned) return;
+          const key = weaponNameKey(cleaned);
+          if (existing.has(key)) return;
+
+          const ammoMax = Math.max(0, Number(entry?.ammoMax ?? 0));
+          state.weapons.push({
+            id: uid(),
+            name: cleaned,
+            ammoName: "",
+            ammoCur: ammoMax,
+            ammoMax,
+            attacks: []
+          });
+          existing.add(key);
+        });
+      }
+
       function setBackdropOpen(backdrop, isOpen) {
         if (!backdrop) return;
         backdrop.dataset.open = isOpen ? "true" : "false";
@@ -4386,8 +5629,9 @@
 
           const meta = document.createElement("div");
           meta.className = "weapon-mode-meta";
-          const skillLabel = getWeaponSkillLabel(normalizeWeaponSkillKey(attack.skillKey));
-          meta.textContent = `Skill: ${skillLabel} · Ammo/use: ${attack.ammoUse}`;
+          const skillLabel = getWeaponSkillLabel(attack.skillKey);
+          const expression = buildWeaponAttackExpression(attack.skillKey);
+          meta.textContent = `${skillLabel} (${expression}) · Ammo/use: ${attack.ammoUse}`;
           line.appendChild(meta);
 
           if (attack.mods) {
@@ -4421,7 +5665,6 @@
         }
         if (weaponNameInput) weaponNameInput.value = state.draftWeapon.name;
         if (ammoNameInput) ammoNameInput.value = state.draftWeapon.ammoName;
-        if (ammoCurInput) ammoCurInput.value = state.draftWeapon.ammoCur;
         if (ammoMaxInput) ammoMaxInput.value = state.draftWeapon.ammoMax;
         renderWeaponModesPreview();
         setBackdropOpen(weaponBackdrop, true);
@@ -4430,8 +5673,10 @@
       function saveWeaponFromModal() {
         const name = weaponNameInput?.value.trim() || "";
         const ammoName = ammoNameInput?.value.trim() || "";
-        const ammoCur = Number(ammoCurInput?.value || 0);
         const ammoMax = Number(ammoMaxInput?.value || 0);
+        // Current ammo is not edited in the modal.
+        // New weapons start fully loaded; existing weapons retain their current ammo.
+        const ammoCur = state.editingWeaponId ? Number(state.draftWeapon?.ammoCur ?? 0) : ammoMax;
 
         if (!name) {
           alert("Weapon name is required.");
@@ -4470,7 +5715,7 @@
           if (!attack) return;
           if (attackModalTitle) attackModalTitle.textContent = "Edit Attack";
           if (attackNameInput) attackNameInput.value = attack.name;
-          if (attackSkillInput) attackSkillInput.value = normalizeWeaponSkillKey(attack.skillKey || fallbackKey);
+          if (attackSkillInput) attackSkillInput.value = normalizeWeaponSkillSelection(attack.skillKey || fallbackKey);
           if (attackAmmoUseInput) attackAmmoUseInput.value = attack.ammoUse;
           if (attackModsInput) attackModsInput.value = attack.mods || "";
           if (attackAdd) attackAdd.textContent = "Save";
@@ -4489,7 +5734,7 @@
       function addAttackFromModal() {
         if (!state.draftWeapon) return;
         const name = attackNameInput?.value.trim() || "";
-        const skillKey = normalizeWeaponSkillKey(attackSkillInput?.value || "");
+        const skillKey = normalizeWeaponSkillSelection(attackSkillInput?.value || "");
         const ammoUse = Math.max(0, Number(attackAmmoUseInput?.value || 0));
         const mods = attackModsInput?.value.trim() || "";
 
@@ -4568,9 +5813,16 @@
         weapon.ammoMax = max;
       }
 
-      function buildWeaponRollText(weapon, attack, rollCount) {
+      function buildWeaponRollText(weapon, attack, rollCount, extraMod) {
         const base = getWeaponSkillBase(attack.skillKey);
-        const mod = buildCombinedModifier(attack.mods);
+        const luckMod = !rollCount && state.luckNext > 0 ? `+${state.luckNext}` : "";
+        const mod = buildCombinedModifier(
+          getWeaponSkillModValue(attack.skillKey),
+          state.globalMod,
+          luckMod,
+          attack.mods,
+          extraMod
+        );
         const label = formatWeaponRollLabel(weapon, attack);
         if (rollCount) {
           return `!rr ${rollCount} 1d10+${base}${mod} ${label}`;
@@ -4579,9 +5831,10 @@
       }
 
       async function handleWeaponRoll(weapon, attack, rollCount, flashEl) {
-        const text = buildWeaponRollText(weapon, attack, rollCount > 1 ? rollCount : null);
+        const text = buildWeaponRollText(weapon, attack, null);
         await copyRollText(text, flashEl);
         consumeWeaponAmmo(weapon, attack, rollCount);
+        consumeLuckForRoll();
         renderWeapons();
       }
 
@@ -4605,43 +5858,24 @@
           const row = document.createElement("div");
           row.className = "weapon-row";
 
-          const nameCell = document.createElement("div");
-          const name = document.createElement("div");
-          name.className = "weapon-name";
-          name.textContent = weapon.name;
-          name.title = weapon.name;
-          nameCell.appendChild(name);
+          // Hide name if unspecified
+          if (weapon.name && weapon.name.trim() !== "") {
+            const nameCell = document.createElement("div");
+            const name = document.createElement("div");
+            name.className = "weapon-name";
+            name.textContent = weapon.name;
+            name.title = weapon.name;
+            nameCell.appendChild(name);
+            row.appendChild(nameCell);
+          }
 
-          const ammoCell = document.createElement("div");
-          ammoCell.className = "ammo-counts";
-
-          const ammoCur = document.createElement("input");
-          ammoCur.type = "number";
-          ammoCur.min = "0";
-          ammoCur.step = "1";
-          ammoCur.value = String(weapon.ammoCur ?? 0);
-          ammoCur.dataset.role = "ammo-cur";
-          ammoCur.dataset.id = weapon.id;
-
-          const ammoLabel = document.createElement("div");
-          ammoLabel.className = "weapon-meta";
-          ammoLabel.textContent = "Max";
-
-          const ammoMax = document.createElement("input");
-          ammoMax.type = "number";
-          ammoMax.min = "0";
-          ammoMax.step = "1";
-          ammoMax.value = String(weapon.ammoMax ?? 0);
-          ammoMax.dataset.role = "ammo-max";
-          ammoMax.dataset.id = weapon.id;
-
-          ammoCell.appendChild(ammoCur);
-          ammoCell.appendChild(ammoLabel);
-          ammoCell.appendChild(ammoMax);
-
-          const metaCell = document.createElement("div");
-          metaCell.className = "weapon-meta";
-          metaCell.textContent = `Type: ${weapon.ammoName || "Unspecified"}`;
+          // Hide type if unspecified
+          if (weapon.ammoName && weapon.ammoName.trim() !== "") {
+            const metaCell = document.createElement("div");
+            metaCell.className = "weapon-meta";
+            metaCell.textContent = `Type: ${weapon.ammoName}`;
+            row.appendChild(metaCell);
+          }
 
           const actions = document.createElement("div");
           actions.className = "weapon-actions";
@@ -4650,40 +5884,64 @@
             <button class="btn-mini btn-danger" data-action="delete" data-id="${escapeHtml(weapon.id)}" type="button">Delete</button>
           `;
 
-          row.appendChild(nameCell);
-          row.appendChild(ammoCell);
-          row.appendChild(metaCell);
+          // Show ammo inputs inside the action stack so they stay aligned
+          if (weapon.ammoMax && weapon.ammoMax > 0) {
+            const ammoCell = document.createElement("div");
+            ammoCell.className = "ammo-counts";
+
+            const ammoCur = document.createElement("input");
+            ammoCur.type = "number";
+            ammoCur.min = "0";
+            ammoCur.step = "1";
+            ammoCur.value = String(weapon.ammoCur ?? 0);
+            ammoCur.dataset.role = "ammo-cur";
+            ammoCur.dataset.id = weapon.id;
+
+            const reloadBtn = document.createElement("button");
+            reloadBtn.type = "button";
+            reloadBtn.className = "btn-mini btn-reload";
+            reloadBtn.textContent = "Reload";
+            reloadBtn.dataset.action = "reload";
+            reloadBtn.dataset.id = weapon.id;
+
+            const ammoLabel = document.createElement("div");
+            ammoLabel.className = "weapon-meta";
+            ammoLabel.textContent = "Max";
+
+            const ammoMax = document.createElement("input");
+            ammoMax.type = "number";
+            ammoMax.min = "0";
+            ammoMax.step = "1";
+            ammoMax.value = String(weapon.ammoMax ?? 0);
+            ammoMax.dataset.role = "ammo-max";
+            ammoMax.dataset.id = weapon.id;
+
+            ammoCell.appendChild(ammoCur);
+            ammoCell.appendChild(reloadBtn);
+            ammoCell.appendChild(ammoLabel);
+            ammoCell.appendChild(ammoMax);
+            actions.insertBefore(ammoCell, actions.firstChild);
+          }
+
           row.appendChild(actions);
           card.appendChild(row);
 
           const attackTable = document.createElement("div");
           attackTable.className = "attack-table";
 
-          const head = document.createElement("div");
-          head.className = "attack-row attack-row-head";
-          head.innerHTML = `
-            <div>R</div>
-            <div>RR</div>
-            <div>Attack</div>
-            <div>Skill Base</div>
-            <div>Ammo/Atk</div>
-            <div>Mods</div>
-          `;
-          attackTable.appendChild(head);
-
           const attacks = Array.isArray(weapon.attacks) ? weapon.attacks : [];
           if (attacks.length) {
             attacks.forEach((attack) => {
               const rowEl = document.createElement("div");
               rowEl.className = "attack-row";
-              const skillKey = normalizeWeaponSkillKey(attack.skillKey);
+              const skillKey = normalizeWeaponSkillSelection(attack.skillKey);
               const skillLabel = getWeaponSkillLabel(skillKey);
-              const base = getWeaponSkillBase(skillKey);
+              const expression = buildWeaponAttackExpression(skillKey);
               rowEl.innerHTML = `
                 <button class="btn-roll" type="button" data-action="weapon-roll" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!r</button>
                 <button class="btn-roll" type="button" data-action="weapon-roll-multi" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!rr</button>
                 <div class="attack-name" title="${escapeHtml(attack.name)}">${escapeHtml(attack.name)}</div>
-                <div class="attack-meta">${escapeHtml(`${skillLabel} (Base ${base})`)}</div>
+                <div class="attack-meta">${escapeHtml(`${skillLabel} (${expression})`)}</div>
                 <div class="attack-meta">${escapeHtml(String(attack.ammoUse || 0))}</div>
                 <input class="mods-input" data-role="attack-mods" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}" type="text" value="${escapeHtml(attack.mods || "")}" placeholder="+/- mods" />
               `;
@@ -4716,6 +5974,13 @@
           return;
         }
 
+        if (target.dataset.action === "reload") {
+          const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+          if (!weapon) return;
+          updateWeaponInline(weapon.id, { ammoCur: Number(weapon.ammoMax ?? 0) });
+          return;
+        }
+
         if (target.dataset.action === "weapon-roll") {
           const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
           const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
@@ -4731,7 +5996,7 @@
           openRollCountModal(
             {
               label: formatWeaponRollLabel(weapon, attack),
-              buildText: (count) => buildWeaponRollText(weapon, attack, count),
+              buildText: (count, extraMod) => buildWeaponRollText(weapon, attack, count, extraMod),
               afterCopy: (count) => {
                 consumeWeaponAmmo(weapon, attack, count);
                 renderWeapons();
@@ -5088,6 +6353,8 @@
 
         const nameEl = document.createElement("div");
         nameEl.className = "skill-name";
+        nameEl.draggable = true;
+        nameEl.setAttribute("draggable", "true");
         const displayNameRaw = config.nameOverride ? config.nameOverride : String(skill.displayName || "");
         const statText = config.nameOverride ? "" : String(skill.stat || "").trim();
         let baseName = displayNameRaw;
@@ -5126,6 +6393,8 @@
         baseInput.addEventListener("input", () => {
           skill.base = baseInput.value;
           syncSkillInputs(skill.id, "base", baseInput.value, row);
+          renderWeapons();
+          renderWeaponModesPreview();
         });
 
         const modInput = document.createElement("input");
@@ -5135,6 +6404,8 @@
         modInput.addEventListener("input", () => {
           skill.mod = modInput.value;
           syncSkillInputs(skill.id, "mod", modInput.value, row);
+          renderWeapons();
+          renderWeaponModesPreview();
         });
         modInput.addEventListener("keydown", async (event) => {
           if (event.key !== "Enter") return;
@@ -5163,8 +6434,6 @@
         pinBtn.className = "btn-pin";
         pinBtn.type = "button";
         pinBtn.textContent = "[ ]";
-        pinBtn.draggable = true;
-        pinBtn.setAttribute("draggable", "true");
         if (isPinned(skill.id)) {
           pinBtn.classList.add("active");
           pinBtn.textContent = "[■]";
@@ -5194,8 +6463,7 @@
           openRollCountModal(
             {
               label: formatSkillLabel(skill),
-              buildText: (count) => buildRollText(skill, true, count),
-              afterCopy: () => consumeLuckForRoll()
+              buildText: (count, extraMod) => buildRollText(skill, true, count, extraMod)
             },
             row
           );
@@ -5239,8 +6507,8 @@
           }, 0);
         };
 
-        pinBtn.addEventListener("dragstart", startPinDrag);
-        pinBtn.addEventListener("dragend", endPinDrag);
+        nameEl.addEventListener("dragstart", startPinDrag);
+        nameEl.addEventListener("dragend", endPinDrag);
 
         row.appendChild(rollGroup);
         row.appendChild(nameEl);
@@ -5466,6 +6734,12 @@
       rollCountInput.addEventListener("focus", () => {
         rollCountInput.select();
       });
+      if (rollCountModInput) {
+        rollCountModInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") submitRollCount();
+          if (event.key === "Escape") closeRollCountModal();
+        });
+      }
 
       if (logBackdrop) {
         logBackdrop.addEventListener("click", (event) => {
@@ -5517,6 +6791,7 @@
 
       if (hpMinus5Btn && hpCurrentInput) {
         hpMinus5Btn.addEventListener("click", () => {
+          clearHudPreview();
           const raw = String(hpCurrentInput.value || "").trim();
           const current = Number.parseInt(raw, 10);
           const safeCurrent = Number.isFinite(current) ? current : 0;
@@ -5597,15 +6872,6 @@
         weaponModesPreview.addEventListener("click", handleWeaponModesPreviewEvents);
       }
 
-      fallbackSelectBtn.addEventListener("click", () => {
-        fallbackTextEl.focus();
-        fallbackTextEl.select();
-      });
-
-      fallbackCloseBtn.addEventListener("click", () => {
-        fallbackEl.hidden = true;
-      });
-
       startupLoadPdf.addEventListener("click", () => {
         pdfInput.click();
       });
@@ -5616,6 +6882,23 @@
 
       startupSkip.addEventListener("click", () => {
         setStartupPromptOpen(false);
+      });
+
+      document.addEventListener("input", () => {
+        localSaveReady = true;
+        scheduleLocalStateSave();
+      });
+      document.addEventListener("change", () => {
+        localSaveReady = true;
+        scheduleLocalStateSave();
+      });
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!target) return;
+        if (target.closest("button")) {
+          localSaveReady = true;
+          scheduleLocalStateSave();
+        }
       });
 
       redlinkToggle.addEventListener("click", () => {
@@ -5662,6 +6945,8 @@
           el.textContent = state.globalMod;
           el.dataset.empty = state.globalMod ? "false" : "true";
         });
+        renderWeapons();
+        renderWeaponModesPreview();
       });
 
       luckPlusBtn.addEventListener("click", () => {
@@ -5737,10 +7022,40 @@
         state.characterName = characterNameInput.value.trim();
       });
 
+      // --- Modules: Numbers + numeric state normalization ---
+      const Numbers = (() => {
+        const toInt = (value, fallback = 0) => {
+          const n = Number.parseInt(String(value ?? "").trim(), 10);
+          return Number.isFinite(n) ? n : fallback;
+        };
+
+        const toNullableInt = (value) => {
+          const s = String(value ?? "").trim();
+          if (s === "") return null;
+          const n = Number.parseInt(s, 10);
+          return Number.isFinite(n) ? n : null;
+        };
+
+        const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+        return { toInt, toNullableInt, clamp };
+      })();
+
+      const NUMERIC_STATUS_KEYS = new Set([
+        "hpTotal",
+        "hpCurrent",
+        "bodySpTotal",
+        "bodySpCurrent",
+        "headSpTotal",
+        "headSpCurrent"
+      ]);
+
       function bindStatusField(input, key) {
         if (!input) return;
         input.addEventListener("input", () => {
-          state[key] = input.value.trim();
+          const raw = input.value;
+          state[key] = NUMERIC_STATUS_KEYS.has(key) ? Numbers.toNullableInt(raw) : raw.trim();
+          if (HUD_SYNC_KEYS && HUD_SYNC_KEYS.has(key)) renderCombatHud();
         });
       }
 
@@ -5773,15 +7088,40 @@
       bindStatusField(headSpCurrentInput, "headSpCurrent");
       bindStatusField(damageValueInput, "damageValue");
 
-      if (damageCritInput) {
-        damageCritInput.addEventListener("change", () => {
-          state.damageCrit = damageCritInput.checked;
+      if (statHumInput) {
+        statHumInput.addEventListener("input", () => {
+          state.statHumCurr = Numbers.toNullableInt(statHumInput.value);
+          renderStatsPanel();
+          scheduleLocalStateSave();
+        });
+      }
+
+      if (statHumTempInput) {
+        statHumTempInput.addEventListener("input", () => {
+          const raw = statHumTempInput.value.trim();
+          state.statHumTempText = raw;
+          const parsed = Numbers.toNullableInt(raw);
+          state.statHumTemp = parsed === null ? 0 : parsed;
+          renderStatsPanel();
+          scheduleLocalStateSave();
         });
       }
 
       if (damageApInput) {
         damageApInput.addEventListener("change", () => {
           state.damageAp = damageApInput.checked;
+        });
+      }
+
+      if (damageHeadshotInput) {
+        damageHeadshotInput.addEventListener("change", () => {
+          state.damageHeadshot = damageHeadshotInput.checked;
+        });
+      }
+
+      if (damageNoAblateInput) {
+        damageNoAblateInput.addEventListener("change", () => {
+          state.damageNoAblate = damageNoAblateInput.checked;
         });
       }
 
@@ -5801,19 +7141,529 @@
       }
 
       function syncStatusInputs() {
-        if (hpTotalInput) hpTotalInput.value = state.hpTotal || "";
-        if (hpCurrentInput) hpCurrentInput.value = state.hpCurrent || "";
-        if (bodySpTotalInput) bodySpTotalInput.value = state.bodySpTotal || "";
-        if (bodySpCurrentInput) bodySpCurrentInput.value = state.bodySpCurrent || "";
-        if (headSpTotalInput) headSpTotalInput.value = state.headSpTotal || "";
-        if (headSpCurrentInput) headSpCurrentInput.value = state.headSpCurrent || "";
+        if (hpTotalInput) hpTotalInput.value = state.hpTotal === null ? "" : String(state.hpTotal);
+        if (hpCurrentInput) hpCurrentInput.value = state.hpCurrent === null ? "" : String(state.hpCurrent);
+        if (bodySpTotalInput) bodySpTotalInput.value = state.bodySpTotal === null ? "" : String(state.bodySpTotal);
+        if (bodySpCurrentInput) bodySpCurrentInput.value = state.bodySpCurrent === null ? "" : String(state.bodySpCurrent);
+        if (headSpTotalInput) headSpTotalInput.value = state.headSpTotal === null ? "" : String(state.headSpTotal);
+        if (headSpCurrentInput) headSpCurrentInput.value = state.headSpCurrent === null ? "" : String(state.headSpCurrent);
         if (damageValueInput) damageValueInput.value = state.damageValue || "";
-        if (damageCritInput) damageCritInput.checked = Boolean(state.damageCrit);
         if (damageApInput) damageApInput.checked = Boolean(state.damageAp);
+        if (damageHeadshotInput) damageHeadshotInput.checked = Boolean(state.damageHeadshot);
+        if (damageNoAblateInput) damageNoAblateInput.checked = Boolean(state.damageNoAblate);
+
+        // Keep the HUD visuals in sync whenever state is hydrated.
+        renderCombatHud();
       }
 
       syncStatusInputs();
       syncFireSeverity();
+      bindCombatHudEditables();
+
+
+      function parseIntSafe(value, fallback = 0) {
+        const n = Number.parseInt(String(value ?? "").trim(), 10);
+        return Number.isFinite(n) ? n : fallback;
+      }
+
+      const HUD_SYNC_KEYS = new Set([
+        "hpTotal",
+        "hpCurrent",
+        "bodySpTotal",
+        "bodySpCurrent",
+        "headSpTotal",
+        "headSpCurrent"
+      ]);
+
+      function hudFlash(el) {
+        if (!el) return;
+        el.classList.remove("hud-flash");
+        // restart animation
+        void el.offsetWidth;
+        el.classList.add("hud-flash");
+        window.setTimeout(() => el.classList.remove("hud-flash"), 460);
+      }
+
+      function setSpanIfNotActive(span, text) {
+        if (!span) return;
+        if (document.activeElement === span) return;
+        const next = String(text ?? "");
+        if (span.textContent !== next) span.textContent = next;
+      }
+
+      function ensureChildren(container, count, cls) {
+        if (!container) return;
+        if (container.children.length === count) return;
+        container.innerHTML = "";
+        for (let i = 0; i < count; i += 1) {
+          const el = document.createElement("span");
+          el.className = cls;
+          container.appendChild(el);
+        }
+      }
+
+      function renderHpTicks(fill01) {
+        if (!hudHpTicks) return;
+        const total = 10;
+        ensureChildren(hudHpTicks, total, "hud-hp-tick");
+        const on = Math.max(0, Math.min(total, Math.round(fill01 * total)));
+        Array.from(hudHpTicks.children).forEach((child, idx) => {
+          child.classList.toggle("on", idx < on);
+        });
+      }
+
+      function renderSpTicks(container, maxValue, curValue) {
+        if (!container) return;
+        const MAX_TICKS = 20;
+        const max = Math.max(0, parseIntSafe(maxValue, 0));
+        const cur = Math.max(0, Math.min(max, parseIntSafe(curValue, 0)));
+
+        if (max <= 0) {
+          container.innerHTML = "";
+          container.style.gridTemplateColumns = `repeat(${MAX_TICKS}, var(--sp-tick-w))`;
+          container.dataset.scale = "1";
+          return;
+        }
+
+        let scale = 1;
+        let tickCount = Math.min(MAX_TICKS, max);
+        if (max > MAX_TICKS) {
+          scale = Math.ceil(max / MAX_TICKS);
+          tickCount = MAX_TICKS;
+        }
+        container.dataset.scale = String(scale);
+        container.style.gridTemplateColumns = `repeat(${tickCount}, var(--sp-tick-w))`;
+        ensureChildren(container, tickCount, "hud-sp-tick");
+        const on = scale === 1 ? cur : Math.ceil(cur / scale);
+        Array.from(container.children).forEach((child, idx) => {
+          child.classList.toggle("on", idx < on);
+        });
+      }
+
+      function renderCombatHud() {
+        // HP
+        const hpMax = Math.max(0, parseIntSafe(hpTotalInput?.value, 0));
+        const hpCur = Math.max(0, Math.min(hpMax || 999999, parseIntSafe(hpCurrentInput?.value, 0)));
+        const hpFill = hpMax > 0 ? Math.max(0, Math.min(1, hpCur / hpMax)) : 0;
+        if (hudHpFill) hudHpFill.style.width = `${hpFill * 100}%`;
+        if (hudHpBar) {
+          hudHpBar.setAttribute("aria-valuemin", "0");
+          hudHpBar.setAttribute("aria-valuemax", String(hpMax));
+          hudHpBar.setAttribute("aria-valuenow", String(hpCur));
+        }
+        renderHpTicks(hpFill);
+        setSpanIfNotActive(hudHpCur, hpCur);
+        setSpanIfNotActive(hudHpMax, hpMax);
+
+        // SP (Head/Body)
+        renderSpTicks(hudHeadTicks, headSpTotalInput?.value, headSpCurrentInput?.value);
+        renderSpTicks(hudBodyTicks, bodySpTotalInput?.value, bodySpCurrentInput?.value);
+        setSpanIfNotActive(hudHeadMax, parseIntSafe(headSpTotalInput?.value, 0));
+        setSpanIfNotActive(hudHeadCur, parseIntSafe(headSpCurrentInput?.value, 0));
+        setSpanIfNotActive(hudBodyMax, parseIntSafe(bodySpTotalInput?.value, 0));
+        setSpanIfNotActive(hudBodyCur, parseIntSafe(bodySpCurrentInput?.value, 0));
+      }
+
+
+
+      // --- HUD hover-preview helpers (HP/SP loss previews) ---
+      function clearHudPreview() {
+        if (hudHpPreview) {
+          hudHpPreview.classList.remove("active");
+          hudHpPreview.style.left = "0%";
+          hudHpPreview.style.width = "0%";
+        }
+        [hudHeadTicks, hudBodyTicks].forEach((ticks) => {
+          if (!ticks) return;
+          Array.from(ticks.children).forEach((child) => child.classList.remove("preview"));
+        });
+      }
+
+      function showHpPreview(hpLoss) {
+        if (!hudHpPreview) return;
+        const loss = Math.max(0, parseIntSafe(hpLoss, 0));
+        const hpMax = Math.max(0, parseIntSafe(hpTotalInput?.value, 0));
+        const hpCur = Math.max(0, Math.min(hpMax || 999999, parseIntSafe(hpCurrentInput?.value, 0)));
+        if (!loss || hpMax <= 0 || hpCur <= 0) {
+          hudHpPreview.classList.remove("active");
+          return;
+        }
+        const after = Math.max(0, hpCur - loss);
+        const start01 = Math.max(0, Math.min(1, after / hpMax));
+        const end01 = Math.max(0, Math.min(1, hpCur / hpMax));
+        const w01 = Math.max(0, end01 - start01);
+        if (w01 <= 0) {
+          hudHpPreview.classList.remove("active");
+          return;
+        }
+        hudHpPreview.style.left = `${start01 * 100}%`;
+        hudHpPreview.style.width = `${w01 * 100}%`;
+        hudHpPreview.classList.add("active");
+      }
+
+      function showSpPreview(ticksContainer, spLoss, spCurValue) {
+        if (!ticksContainer) return;
+        const loss = Math.max(0, parseIntSafe(spLoss, 0));
+        if (!loss) return;
+
+        // Ensure ticks exist and are in a known state.
+        renderCombatHud();
+
+        const scale = Math.max(1, parseIntSafe(ticksContainer.dataset.scale, 1));
+        const spCur = Math.max(0, parseIntSafe(spCurValue, 0));
+        const curTicks = scale === 1 ? spCur : Math.ceil(spCur / scale);
+        const lossTicks = scale === 1 ? loss : Math.max(1, Math.ceil(loss / scale));
+
+        const start = Math.max(0, curTicks - lossTicks);
+        const end = Math.max(0, curTicks);
+        const children = Array.from(ticksContainer.children);
+        for (let i = start; i < end && i < children.length; i += 1) {
+          // Only highlight ticks that are currently "on" (i.e., would actually be removed).
+          if (children[i].classList.contains("on")) children[i].classList.add("preview");
+        }
+      }
+
+      function computeWedgeImpact(mode) {
+        const dmg = parseIntSafe(damageValueInput?.value, 0);
+        if (!dmg || dmg <= 0) return null;
+
+        const isHead = Boolean(damageHeadshotInput?.checked);
+        const hpCur = parseIntSafe(hpCurrentInput?.value, 0);
+        const spCurInput = isHead ? headSpCurrentInput : bodySpCurrentInput;
+        const spCurBefore = parseIntSafe(spCurInput?.value, 0);
+
+        let spEffective = spCurBefore;
+        if (mode === "half") spEffective = Math.ceil(spCurBefore / 2);
+        if (mode === "bypass") spEffective = 0;
+
+        const penetration = Math.max(0, dmg - spEffective);
+        const hpLoss = isHead && penetration > 0 ? penetration * 2 : penetration;
+
+        const noAblate = Boolean(damageNoAblateInput?.checked);
+        let ablate = 0;
+        if (!noAblate && penetration > 0) {
+          ablate = damageApInput?.checked ? 2 : 1;
+        }
+
+        return {
+          isHead,
+          hpLoss,
+          spLoss: ablate,
+          spCurBefore,
+          hpCur
+        };
+      }
+
+      function bindHudPreview(el, getImpact) {
+        if (!el || typeof getImpact !== "function") return;
+
+        const start = () => {
+          clearHudPreview();
+          const impact = getImpact();
+          if (!impact) return;
+          const hpLoss = Math.max(0, parseIntSafe(impact.hpLoss, 0));
+          const spLoss = Math.max(0, parseIntSafe(impact.spLoss, 0));
+          if (hpLoss) showHpPreview(hpLoss);
+          if (spLoss) {
+            const ticks = impact.isHead ? hudHeadTicks : hudBodyTicks;
+            showSpPreview(ticks, spLoss, impact.spCurBefore);
+          }
+        };
+
+        const end = () => clearHudPreview();
+
+        el.addEventListener("mouseenter", start);
+        el.addEventListener("mouseleave", end);
+        el.addEventListener("focus", start);
+        el.addEventListener("blur", end);
+        el.addEventListener("click", () => clearHudPreview());
+      }
+      function selectAllText(el) {
+        try {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch {
+          // ignore
+        }
+      }
+
+      function commitHudEditable(span, input, opts = {}) {
+        if (!span || !input) return;
+        const min = Number.isFinite(opts.min) ? opts.min : 0;
+        const max = Number.isFinite(opts.max) ? opts.max : 999999;
+        const raw = String(span.textContent ?? "").trim();
+        const parsed = parseIntSafe(raw, NaN);
+        const safe = Number.isFinite(parsed) ? parsed : parseIntSafe(input.value, 0);
+        const clamped = Math.max(min, Math.min(max, safe));
+        input.value = String(clamped);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+        renderCombatHud();
+      }
+
+      function bindHudEditable(span, input, opts = {}) {
+        if (!span || !input) return;
+        if (span.dataset.bound === "true") return;
+        span.dataset.bound = "true";
+        span.addEventListener("focus", () => {
+          // Select on next frame to avoid selection glitches.
+          window.setTimeout(() => selectAllText(span), 0);
+        });
+        span.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            span.blur();
+          }
+          if (e.key === "Escape") {
+            e.preventDefault();
+            span.textContent = String(input.value ?? "");
+            span.blur();
+          }
+        });
+        span.addEventListener("blur", () => commitHudEditable(span, input, opts));
+      }
+
+      function bindCombatHudEditables() {
+        bindHudEditable(hudHpMax, hpTotalInput, { min: 0, max: 9999 });
+        bindHudEditable(hudHpCur, hpCurrentInput, { min: 0, max: 9999 });
+        bindHudEditable(hudHeadMax, headSpTotalInput, { min: 0, max: 99 });
+        bindHudEditable(hudHeadCur, headSpCurrentInput, { min: 0, max: 99 });
+        bindHudEditable(hudBodyMax, bodySpTotalInput, { min: 0, max: 99 });
+        bindHudEditable(hudBodyCur, bodySpCurrentInput, { min: 0, max: 99 });
+      }
+
+      function flashElement(el) {
+        if (!el) return;
+        el.classList.remove("flash");
+        // restart animation
+        void el.offsetWidth;
+        el.classList.add("flash");
+        window.setTimeout(() => el.classList.remove("flash"), 460);
+      }
+
+      function appendCharacterLogEntry(text) {
+        if (!text) return;
+        if (!Array.isArray(state.characterLog)) state.characterLog = [];
+        const stamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        state.characterLog.push(`${stamp} ${text}`);
+        if (state.characterLog.length > 200) state.characterLog = state.characterLog.slice(-200);
+        // Update preview + modal content if open.
+        if (typeof renderCharacterLog === "function") renderCharacterLog();
+      }
+
+      // Clicking the fire readout applies that amount directly to HP (e.g. "-2" subtracts 2 HP).
+      if (fireReadoutBtn && hpCurrentInput) {
+        fireReadoutBtn.addEventListener("click", () => {
+          clearHudPreview();
+          const delta = parseIntSafe(fireReadoutBtn.textContent, 0); // typically 0, -2, -4, -6
+          const loss = Math.max(0, Math.abs(delta));
+          if (!loss) {
+            hudFlash(hudHpRow);
+            return;
+          }
+
+          const hpCur = parseIntSafe(hpCurrentInput.value, 0);
+          const hpMax = parseIntSafe(hpTotalInput.value, 0);
+          const hpAfter = Math.max(0, Math.min(hpMax || 999999, hpCur - loss));
+
+          state.hpCurrent = String(hpAfter);
+          hpCurrentInput.value = state.hpCurrent;
+          hpCurrentInput.dispatchEvent(new Event("input", { bubbles: true }));
+
+          renderCombatHud();
+          hudFlash(hudHpRow);
+          appendCharacterLogEntry(`FIRE HP ${hpCur}→${hpAfter} (${delta || 0})`);
+        });
+      }
+
+
+      function applyDamageFromWedge(mode) {
+        const dmg = parseIntSafe(damageValueInput?.value, 0);
+        if (!dmg || dmg <= 0) {
+          flashElement(damageValueInput);
+          return;
+        }
+
+        const isHead = Boolean(damageHeadshotInput?.checked);
+        const locLabel = isHead ? "HEAD" : "BODY";
+
+        const hpCur = parseIntSafe(hpCurrentInput?.value, 0);
+        const hpMax = parseIntSafe(hpTotalInput?.value, 0);
+
+        const spCurInput = isHead ? headSpCurrentInput : bodySpCurrentInput;
+        const spCurBefore = parseIntSafe(spCurInput?.value, 0);
+
+        let spEffective = spCurBefore;
+        if (mode === "half") spEffective = Math.ceil(spCurBefore / 2);
+        if (mode === "bypass") spEffective = 0;
+
+        // Penetration is always calculated first; headshots double only the damage that gets through.
+        const penetration = Math.max(0, dmg - spEffective);
+        const hpLoss = isHead && penetration > 0 ? penetration * 2 : penetration;
+        const hpAfter = Math.max(0, Math.min(hpMax || 999999, hpCur - hpLoss));
+
+        // Ablation: user requested that BYPASS also ablates. Provide an opt-out toggle.
+        const noAblate = Boolean(damageNoAblateInput?.checked);
+        let ablate = 0;
+        if (!noAblate && penetration > 0) {
+          ablate = damageApInput?.checked ? 2 : 1;
+        }
+        const spAfter = Math.max(0, spCurBefore - ablate);
+
+        // Commit values
+        state.hpCurrent = String(hpAfter);
+        if (hpCurrentInput) hpCurrentInput.value = state.hpCurrent;
+
+        if (isHead) {
+          state.headSpCurrent = String(spAfter);
+          if (headSpCurrentInput) headSpCurrentInput.value = state.headSpCurrent;
+          hudFlash(hudHeadRow);
+        } else {
+          state.bodySpCurrent = String(spAfter);
+          if (bodySpCurrentInput) bodySpCurrentInput.value = state.bodySpCurrent;
+          hudFlash(hudBodyRow);
+        }
+
+        // Refresh HUD visuals and flash the affected meters.
+        renderCombatHud();
+        hudFlash(hudHpRow);
+
+        // Build log entry
+        const tags = [];
+        if (damageApInput?.checked) tags.push("AP");
+        if (damageNoAblateInput?.checked) tags.push("NOABL");
+        const tagText = tags.length ? ` (${tags.join(",")})` : "";
+
+        const modeText = mode === "full" ? "FULL" : mode === "half" ? "HALF" : "BYPASS";
+        let detail = `DMG ${locLabel} ${modeText}${tagText} ${dmg}`;
+        if (penetration === 0) {
+          detail += ` | absorbed (SP eff ${spEffective})`;
+        } else {
+          // Always show SP delta when it ablates (including BYPASS), unless no-ablate is enabled.
+          if (ablate > 0) {
+            detail += ` | SP ${spCurBefore}→${spAfter}`;
+            if (ablate === 2) detail += " | ablate x2";
+          }
+          // Show HP delta; note headshots implicitly double penetration.
+          detail += ` | HP ${hpCur}→${hpAfter}`;
+          if (isHead) detail += ` (x2)`;
+        }
+        appendCharacterLogEntry(detail);
+
+        // Clear damage field to prevent accidental double-apply.
+        state.damageValue = "";
+        if (damageValueInput) damageValueInput.value = "";
+
+        // Headshots are intentional and momentary.
+        state.damageHeadshot = false;
+        if (damageHeadshotInput) damageHeadshotInput.checked = false;
+
+        // Briefly mark the clicked wedge as hot (teaches clickability).
+        const btn = document.querySelector(`.wedge-btn[data-mode="${mode}"]`);
+        if (btn) {
+          btn.dataset.hot = "true";
+          window.setTimeout(() => (btn.dataset.hot = "false"), 220);
+        }
+      }
+
+      // Wire wedge buttons.
+      const damageFullBtn = document.getElementById("damageFullBtn");
+      const damageHalfBtn = document.getElementById("damageHalfBtn");
+      const damageBypassBtn = document.getElementById("damageBypassBtn");
+
+      if (damageFullBtn) damageFullBtn.addEventListener("click", () => applyDamageFromWedge("full"));
+      if (damageHalfBtn) damageHalfBtn.addEventListener("click", () => applyDamageFromWedge("half"));
+      if (damageBypassBtn) damageBypassBtn.addEventListener("click", () => applyDamageFromWedge("bypass"));
+
+
+      // Hover/focus previews: light up the amount that would be subtracted from HP/SP.
+      bindHudPreview(fireReadoutBtn, () => {
+        const delta = parseIntSafe(fireReadoutBtn?.textContent, 0);
+        const loss = Math.max(0, Math.abs(delta));
+        if (!loss) return null;
+        return { isHead: false, hpLoss: loss, spLoss: 0, spCurBefore: 0, hpCur: parseIntSafe(hpCurrentInput?.value, 0) };
+      });
+
+      bindHudPreview(hpMinus5Btn, () => ({ isHead: false, hpLoss: 5, spLoss: 0, spCurBefore: 0, hpCur: parseIntSafe(hpCurrentInput?.value, 0) }));
+
+      bindHudPreview(damageFullBtn, () => computeWedgeImpact("full"));
+      bindHudPreview(damageHalfBtn, () => computeWedgeImpact("half"));
+      bindHudPreview(damageBypassBtn, () => computeWedgeImpact("bypass"));
+
+      function syncGlobalModDisplay() {
+        if (globalModInput) globalModInput.value = state.globalMod;
+        document.querySelectorAll(".mod-global").forEach((el) => {
+          el.textContent = state.globalMod.trim();
+          el.dataset.empty = state.globalMod.trim() ? "false" : "true";
+        });
+      }
+
+      function resetStateForNewSheet() {
+        suppressLocalSave = true;
+        setCharacterName("");
+        state.characterLog = [];
+        state.hpTotal = null;
+        state.hpCurrent = null;
+        state.bodySpTotal = null;
+        state.bodySpCurrent = null;
+        state.headSpTotal = null;
+        state.headSpCurrent = null;
+        state.damageValue = "";
+        state.damageAp = false;
+        state.damageHeadshot = false;
+        state.damageNoAblate = false;
+        state.fireSeverity = 0;
+        state.skills = {};
+        state.columnSkills = { col1: [], col2: [], col3: [] };
+        state.pinnedColumns = { col1: [], col2: [], col3: [] };
+        state.customCounter = 0;
+        state.globalMod = "";
+        state.luckNext = 0;
+        state.luckPool = 0;
+        state.luckTotal = 0;
+        state.statInt = null;
+        state.statRef = null;
+        state.statDex = null;
+        state.statTech = null;
+        state.statCool = null;
+        state.statWill = null;
+        state.statMove = null;
+        state.statBody = null;
+        state.statBodyChargen = null;
+        state.statEmpCurr = null;
+        state.statEmpMax = null;
+        state.statHumCurr = null;
+        state.statHumMax = null;
+        state.statHumTemp = 0;
+        state.statHumTempText = "";
+        state.criticalInjuries = [];
+        state.weapons = [];
+        state.draftWeapon = null;
+        state.editingWeaponId = null;
+        state.deleteWeaponId = null;
+        state.editingAttackId = null;
+
+        setBackdropOpen(weaponBackdrop, false);
+        setBackdropOpen(attackBackdrop, false);
+        setBackdropOpen(deleteWeaponBackdrop, false);
+
+        syncStatusInputs();
+        syncFireSeverity();
+        updateLuckTotalInputDisplay();
+        updateLuckNextInputDisplay();
+        updateLuckPoolDisplay();
+        updateLuckModHints();
+        syncGlobalModDisplay();
+        renderStatsPanel();
+        renderCharacterLog();
+        renderCriticalInjuries();
+        renderWeapons();
+
+        suppressLocalSave = false;
+        localSaveReady = true;
+      }
 
       async function parsePdf(file) {
         setError("");
@@ -5839,6 +7689,8 @@
           valueByFieldNameLower[fieldName.toLowerCase()] = getFieldValue(field);
         });
 
+        resetStateForNewSheet();
+
         const characterName = extractCharacterName(valueByFieldNameLower);
         if (characterName) setCharacterName(characterName);
         const hpTotalValue = String(normalizeValue(valueByFieldNameLower["hpmax"])).trim();
@@ -5859,7 +7711,50 @@
         const luckPoolValue = String(normalizeValue(valueByFieldNameLower["luck-c"])).trim();
         if (luckTotalValue !== "") setLuckTotal(luckTotalValue, luckPoolValue === "");
         if (luckPoolValue !== "") setLuckPool(luckPoolValue);
-        const weaponNames = extractWeaponNames(fields);
+
+        const statFieldMap = {
+          int: "statInt",
+          ref: "statRef",
+          dex: "statDex",
+          tech: "statTech",
+          cool: "statCool",
+          will: "statWill",
+          move: "statMove",
+          body: "statBody",
+          "body-chargen": "statBodyChargen"
+        };
+
+        Object.entries(statFieldMap).forEach(([fieldName, stateKey]) => {
+          const rawValue = String(normalizeValue(valueByFieldNameLower[fieldName])).trim();
+          if (rawValue === "") return;
+          const parsed = Numbers.toNullableInt(rawValue);
+          state[stateKey] = parsed === null ? rawValue : parsed;
+        });
+
+        const empCurrValue = String(normalizeValue(valueByFieldNameLower["emp curr"])).trim();
+        if (empCurrValue !== "") {
+          const parsed = Numbers.toNullableInt(empCurrValue);
+          state.statEmpCurr = parsed === null ? empCurrValue : parsed;
+        }
+
+        const empMaxValue = String(normalizeValue(valueByFieldNameLower["emp max"])).trim();
+        if (empMaxValue !== "") {
+          const parsed = Numbers.toNullableInt(empMaxValue);
+          state.statEmpMax = parsed === null ? empMaxValue : parsed;
+        }
+
+        const humCurrValue = String(normalizeValue(valueByFieldNameLower["humanitycurr"])).trim();
+        if (humCurrValue !== "") {
+          const parsed = Numbers.toNullableInt(humCurrValue);
+          state.statHumCurr = parsed === null ? humCurrValue : parsed;
+        }
+
+        const humMaxValue = String(normalizeValue(valueByFieldNameLower["humanitymax"])).trim();
+        if (humMaxValue !== "") {
+          const parsed = Numbers.toNullableInt(humMaxValue);
+          state.statHumMax = parsed === null ? humMaxValue : parsed;
+        }
+        const weaponsFromSheet = extractWeaponsFromSheet(fields);
 
         const parsedSkills = [];
         fields.forEach((field) => {
@@ -5898,17 +7793,28 @@
 
         buildDefaultLayout();
 
-        prunePinnedColumns();
+        removeInvalidPinnedSkills();
 
-        // Pin emphasized skills
+        // Pin emphasized skills into the default quick bar columns.
+        state.pinnedColumns = { col1: [], col2: [], col3: [] };
+        const skillIdByName = new Map();
         Object.values(state.skills).forEach((skill) => {
           const normalizedName = cleanDisplayName(skill.displayName).toLowerCase();
-          if (EMPHASIZED_SKILLS.has(normalizedName)) {
-            addPinned(skill.id);
+          if (!skillIdByName.has(normalizedName)) {
+            skillIdByName.set(normalizedName, skill.id);
           }
         });
+        Object.entries(DEFAULT_PINNED_BY_COLUMN).forEach(([columnId, names]) => {
+          names.forEach((name) => {
+            const normalizedName = cleanDisplayName(name).toLowerCase();
+            const skillId = skillIdByName.get(normalizedName);
+            if (skillId) {
+              addPinned(skillId, columnId);
+            }
+          });
+        });
 
-        addWeaponsFromNames(weaponNames);
+        addWeaponsFromSheet(weaponsFromSheet);
         syncStatusInputs();
         render();
       }
@@ -5924,61 +7830,7 @@
         }
       });
       async function saveState() {
-        const payload = {
-          version: 1,
-          characterName: state.characterName,
-          characterLog: state.characterLog,
-          hpTotal: state.hpTotal,
-          hpCurrent: state.hpCurrent,
-          bodySpTotal: state.bodySpTotal,
-          bodySpCurrent: state.bodySpCurrent,
-          headSpTotal: state.headSpTotal,
-          headSpCurrent: state.headSpCurrent,
-          damageValue: state.damageValue,
-          damageCrit: state.damageCrit,
-          damageAp: state.damageAp,
-          fireSeverity: state.fireSeverity,
-          luckTotal: state.luckTotal,
-          luckPool: state.luckPool,
-          luckNext: state.luckNext,
-          criticalInjuries: Array.isArray(state.criticalInjuries) ? state.criticalInjuries : [],
-          weapons: Array.isArray(state.weapons)
-            ? state.weapons.map((weapon) => ({
-                id: weapon.id,
-                name: weapon.name,
-                ammoName: weapon.ammoName,
-                ammoCur: weapon.ammoCur,
-                ammoMax: weapon.ammoMax,
-                attacks: Array.isArray(weapon.attacks)
-                  ? weapon.attacks.map((attack) => ({
-                      id: attack.id,
-                      name: attack.name,
-                      skillKey: attack.skillKey,
-                      ammoUse: attack.ammoUse,
-                      mods: attack.mods
-                    }))
-                  : []
-              }))
-            : [],
-          skills: Object.values(state.skills).map((skill) => ({
-            id: skill.id,
-            displayName: skill.displayName,
-            base: skill.base,
-            mod: skill.mod,
-            canonicalKey: skill.canonicalKey,
-            stat: skill.stat,
-            source: skill.source
-          })),
-          pinnedColumns: state.pinnedColumns,
-          columnSkills: state.columnSkills,
-          canonicalMeta: Object.values(canonicalMeta).map((meta) => ({
-            key: meta.key,
-            displayName: meta.displayName,
-            stat: meta.stat
-          }))
-        };
-
-        const json = JSON.stringify(payload, null, 2);
+        const json = JSON.stringify(buildStatePayload(), null, 2);
         const suggested = buildSuggestedFileName();
 
         if (window.showSaveFilePicker) {
@@ -6043,20 +7895,17 @@
         if (!data || typeof data !== "object") return;
         setCharacterName(data.characterName || "");
         state.characterLog = Array.isArray(data.characterLog) ? [...data.characterLog] : [];
-        state.hpTotal = data.hpTotal !== undefined && data.hpTotal !== null ? String(data.hpTotal) : "";
-        state.hpCurrent = data.hpCurrent !== undefined && data.hpCurrent !== null ? String(data.hpCurrent) : "";
-        state.bodySpTotal =
-          data.bodySpTotal !== undefined && data.bodySpTotal !== null ? String(data.bodySpTotal) : "";
-        state.bodySpCurrent =
-          data.bodySpCurrent !== undefined && data.bodySpCurrent !== null ? String(data.bodySpCurrent) : "";
-        state.headSpTotal =
-          data.headSpTotal !== undefined && data.headSpTotal !== null ? String(data.headSpTotal) : "";
-        state.headSpCurrent =
-          data.headSpCurrent !== undefined && data.headSpCurrent !== null ? String(data.headSpCurrent) : "";
+        state.hpTotal = Numbers.toNullableInt(data.hpTotal);
+        state.hpCurrent = Numbers.toNullableInt(data.hpCurrent);
+        state.bodySpTotal = Numbers.toNullableInt(data.bodySpTotal);
+        state.bodySpCurrent = Numbers.toNullableInt(data.bodySpCurrent);
+        state.headSpTotal = Numbers.toNullableInt(data.headSpTotal);
+        state.headSpCurrent = Numbers.toNullableInt(data.headSpCurrent);
         state.damageValue =
           data.damageValue !== undefined && data.damageValue !== null ? String(data.damageValue) : "";
-        state.damageCrit = Boolean(data.damageCrit);
         state.damageAp = Boolean(data.damageAp);
+        state.damageHeadshot = Boolean(data.damageHeadshot);
+        state.damageNoAblate = Boolean(data.damageNoAblate);
         state.fireSeverity = clampFireSeverity(data.fireSeverity);
         syncStatusInputs();
         syncFireSeverity();
@@ -6071,6 +7920,22 @@
         updateLuckNextInputDisplay();
         updateLuckPoolDisplay();
         updateLuckModHints();
+        state.statInt = Numbers.toNullableInt(data.statInt);
+        state.statRef = Numbers.toNullableInt(data.statRef);
+        state.statDex = Numbers.toNullableInt(data.statDex);
+        state.statTech = Numbers.toNullableInt(data.statTech);
+        state.statCool = Numbers.toNullableInt(data.statCool);
+        state.statWill = Numbers.toNullableInt(data.statWill);
+        state.statMove = Numbers.toNullableInt(data.statMove);
+        state.statBody = Numbers.toNullableInt(data.statBody);
+        state.statBodyChargen = Numbers.toNullableInt(data.statBodyChargen);
+        state.statEmpCurr = Numbers.toNullableInt(data.statEmpCurr);
+        state.statEmpMax = Numbers.toNullableInt(data.statEmpMax);
+        state.statHumCurr = Numbers.toNullableInt(data.statHumCurr);
+        state.statHumMax = Numbers.toNullableInt(data.statHumMax);
+        state.statHumTemp = Numbers.toNullableInt(data.statHumTemp) || 0;
+        state.statHumTempText = typeof data.statHumTempText === "string" ? data.statHumTempText : "";
+        renderStatsPanel();
         state.criticalInjuries = Array.isArray(data.criticalInjuries)
           ? data.criticalInjuries.map(normalizeCriticalInjury).filter(Boolean)
           : [];
@@ -6111,7 +7976,7 @@
             col3: []
           };
         }
-        prunePinnedColumns();
+        removeInvalidPinnedSkills();
 
         const assigned = new Set([
           ...state.columnSkills.col1,
@@ -6125,6 +7990,7 @@
           const column = defaultColumnForSkill(skill);
           state.columnSkills[column].push(skill.id);
         });
+        scheduleLocalStateSave();
       }
 
       window.addEventListener("error", (e) => {
@@ -6143,12 +8009,16 @@
 
       initRedlinkState();
       initRedlinkChannel();
+      const localStateLoaded = loadLocalState();
       render();
       updateLuckTotalInputDisplay();
       updateLuckNextInputDisplay();
       updateLuckPoolDisplay();
       updateLuckModHints();
-      setStartupPromptOpen(true);
+      setStartupPromptOpen(!localStateLoaded);
+      window.addEventListener("beforeunload", persistLocalState);
+    
+      })();
     </script>
   </body>
 </html>
