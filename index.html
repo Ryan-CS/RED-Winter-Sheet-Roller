@@ -68,7 +68,7 @@
         --noise: rgba(255, 255, 255, 0.035);
         --base-input: calc(2.6ch + 4px);
         --level-input: calc(3.5ch + 4px);
-        --mod-input: calc(6ch + 6px);
+        --mod-input: calc(8ch + 8px);
         --roll-col: 64px;
         --pin-col: 32px;
         --sp-tick-w: 6px;
@@ -189,6 +189,10 @@
         flex-direction: column;
         gap: 6px;
         min-width: 190px;
+      }
+      .inline-control label {
+        margin-bottom: -5px;
+        letter-spacing: 0.16em;
       }
 
       .inline-character {
@@ -1445,7 +1449,7 @@
         color: #ffffff;
       }
 
-      .fire-minus5 {
+      .minus5 {
 
         margin-left: 0;
         align-self: end;
@@ -1496,7 +1500,7 @@
         letter-spacing: 0.16em;
         text-transform: uppercase;
         color: var(--ink-muted);
-        margin-bottom: 6px;
+        
         font-family: var(--mono);
       }
 
@@ -1611,7 +1615,11 @@
         display: grid;
         gap: 2px;
       }
-
+      .luck-col label {
+        margin-bottom: 0px;
+        text-align: center;
+      }
+      
       .luck-use {
         display: flex;
         align-items: center;
@@ -1624,19 +1632,26 @@
         color: var(--ink-muted);
         align-self: center;
         padding-top: 0;
+        transform: rotate(-90deg);
       }
 
       .luck-btn {
-        padding: 2px 4px;
+        padding: 3px 0px 3px 3px;
         min-width: 22px;
         text-align: center;
+        vertical-align: middle;
         line-height: 1;
+        font-size: 15px;
+      }
+      .luck-btn:hover {
+        filter: brightness(1.4);
+        background-color: rgba(110, 255, 245, 0.295);
       }
 
       .luck-input {
         padding: 0 1px;
         text-align: center;
-        font-size: 11px;
+        font-size: 15px;
         line-height: 1;
         width: 4ch;
         min-width: 4ch;
@@ -1661,6 +1676,7 @@
         min-width: 4.5ch;
         max-width: 4.5ch;
       }
+
 
       .luck-pool {
         border: 0;
@@ -1720,6 +1736,7 @@
         font-size: 12px;
         color: var(--ink-muted);
       }
+
 
       .pinned-list {
         display: grid;
@@ -1790,7 +1807,7 @@
           var(--roll-col)
           minmax(0, 1fr)
           var(--level-input)
-          var(--base-input)
+          var(--base-input) 
           var(--mod-input)
           var(--pin-col);
         align-items: center;
@@ -1819,11 +1836,14 @@
       .section-head.lvl,
       .section-head.base,
       .section-head.mod,
+
       .section-head.pin {
         text-align: center;
         padding-left: 0;
       }
-
+      .section-head.base, .section-head.lvl {
+        margin-right: -30px;
+      }
       .section-list {
         padding: 6px 6px 2px;
         display: grid;
@@ -1847,6 +1867,19 @@
         border: 1px solid var(--border);
         background: var(--panel2);
         width: 100%;
+      .skill-row.custom-roll-row .command-input {
+        font-family: var(--mono);
+        text-align: center;
+        opacity: 0.95;
+      }
+
+      .skill-row.custom-roll-row .command-input:disabled {
+        color: var(--ink);
+        -webkit-text-fill-color: var(--ink);
+        opacity: 0.95;
+        cursor: default;
+      }
+
       }
 
       .skill-name[draggable="true"] {
@@ -1856,19 +1889,59 @@
       .skill-row.dragging {
         opacity: 0.45;
       }
+/* Stop drawing ↳ inside the name cell */
+.skill-row.group-child .skill-name {
+  padding-left: 0px;
+  position: static;
+}
+.skill-row.group-child .skill-name::before {
+  content: none;
+}
 
-      .skill-row.group-child .skill-name {
-        padding-left: 16px;
-        position: relative;
-        
-      }
+/* Make sure the arrow can stick out to the left */
+.skill-row,
+.skill-row .roll-group {
+  overflow: visible;
+}
 
-      .skill-row.group-child .skill-name::before {
-        content: "↳";
-        position: absolute;
-        left: 2px;
-        color: var(--ink-muted);
-            }
+/* Anchor ↳ to the roll button cluster so it lines up with !r */
+.skill-row.group-child .roll-group {
+  position: relative;
+  transform: translateX(20px);
+}
+.skill-row.group-child .skill-name {
+  transform: translateX(20px);
+  
+}
+.skill-row.group-child .roll-group::before {
+  content: "↳";
+  position: absolute;
+
+  /* tweak these two values to taste */
+  left: -12px;          /* horizontal placement just left of !r */
+  font-size: 20px;;
+  top: 30%;
+  font-weight: 100;
+  transform: translateY(-50%);
+
+  color: var(--ink-muted);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.skill-row.group-child .level-input,
+.skill-row.group-child .base-value,
+.skill-row.group-child .mod-input{
+  transform: translateX(5px);
+  
+}
+.skill-row.group-child .btn-pin {
+  margin-left: 10px;
+}
+
+
+
+
 
       .skill-group-row {
         display: grid;
@@ -1903,12 +1976,19 @@
       }
 
       .skill-group-label {
-        font-size: 12px;
-        font-weight: 700;
+        font-size: 14px;
+        
+        font-weight: 200;
+        margin-left: -70px;
         letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: var(--accent);
+        
+        color: var(--base-input);
       }
+      .skill-group-label .skill-stat {
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
 
       .skill-name {
         font-size: 14px;
@@ -1948,10 +2028,15 @@
         border-color: rgba(110, 255, 246, 0.26);
       }
 
-      .base-value {
-        font-size: 13px;
+      .base-value {      
+        font-size: 15px;
+   
+        width: var(--base-input);
+        
         line-height: 1.1;
         text-align: center;
+        padding-right: 2px;
+  
         letter-spacing: 0.08em;
       }
 
@@ -2018,6 +2103,7 @@
         align-items: center;
         width: 100%;
         justify-content: center;
+        margin-left: -5px;
       }
 
       .btn-roll {
@@ -2099,6 +2185,9 @@
         font-size: 10px;
         letter-spacing: 0.08em;
       }
+      .btn-mini:hover {
+        filter: brightness(2);
+      }
 
       .btn-warn {
         background: rgba(255, 212, 80, 0.12);
@@ -2131,6 +2220,7 @@
       .btn-pin {
         background: var(--panel2);
         font-size: 10px;
+        margin-right: -8px;
         letter-spacing: 0.08em;
         padding: 2px 5px;
         border: none;
@@ -2142,7 +2232,7 @@
         border: 1px solid var(--border-strong);
         font-size: 10px;
         letter-spacing: 0.06em;
-        padding: 2px 6px;
+        padding: 3px 4px;
         min-width: 22px;
         line-height: 1.1;
       }
@@ -2158,10 +2248,20 @@
         border: 1px solid rgba(255, 59, 106, 0.6);
         font-size: 10px;
         letter-spacing: 0.06em;
-        padding: 2px 6px;
+        padding: 3px 4px;
         min-width: 22px;
         line-height: 1.1;
       }
+
+    .btn-add-sub,
+    .btn-remove-sub {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transform: translateX(50%);
+    }
+
 
       .btn-remove-sub:hover {
         box-shadow: var(--glowD);
@@ -2169,10 +2269,18 @@
       }
 
       .group-action-wrap {
-        display: inline-flex;
+              display: flex;
+      align-items: left;
+      justify-content: left;
+     
         align-items: center;
-        gap: 4px;
+        gap: 0px;
       }
+      .btn-remove-sub {
+         
+         transform: translateY(1px);
+      }
+
 
       .dialog-title {
         margin: 0 0 6px;
@@ -2685,7 +2793,7 @@
 
       .ammo-counts input {
         text-align: center;
-        padding: 4px 6px;
+        padding: 3px 2px 3px 2px;
         width: 50px;
         max-width: 50px;
       }
@@ -3004,7 +3112,7 @@
             <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
           </div>
           <div class="inline-control inline-clear">
-            <label for="clearSheetBtn">Clear Sheet</label>
+            <!-- <label for="clearSheetBtn">Clear Sheet</label> -->
             <button id="clearSheetBtn" type="button">Clear Sheet</button>
           </div>
           <div class="inline-control">
@@ -3016,7 +3124,7 @@
             <input id="loadStateInput" type="file" accept="application/json,.json" />
           </div>
           <div class="inline-control inline-save">
-            <label for="saveStateBtn">Save State</label>
+            <!-- <label for="saveStateBtn">Save State</label> -->
             <button id="saveStateBtn" type="button">Save State</button>
           </div>
         </div>
@@ -3188,7 +3296,7 @@
                 <div class="status-title">Critical Injuries</div>
                 <div class="status-critical-actions">
                   <button id="critOpenBtn" type="button">Add</button>
-                  <button id="hpMinus5Btn" class="fire-minus5" type="button">-5 HP</button>
+                  <button id="hpMinus5Btn" class="minus5" type="button">-5 HP</button>
                 </div>
               </div>
               <div id="critList" class="crit-list" aria-live="polite"></div>
@@ -3221,7 +3329,7 @@
           <div class="modifier-toggles">
             <div class="modifier-toggle-head">
               <span class="status-title">Modifier Toggles</span>
-              <button id="editModifiersBtn" class="btn-mini" type="button">Edit</button>
+              <button id="editModifiersBtn" class="btn-mini" type="button" title="Customize Modifiers">Add/Edit</button>
             </div>
             <div id="modifierToggleList" class="mod-toggle-list" aria-live="polite"></div>
           </div>
@@ -3233,7 +3341,7 @@
                 <div class="luck-col">
                   <label for="luckNextInput">Use</label>
                   <div class="luck-use">
-                    <button id="luckPlus" class="luck-btn" type="button" aria-label="Add luck to next roll">+</button>
+                    <button id="luckMinus" class="luck-btn" type="button" aria-label="Remove luck from next roll">-</button>
                     <input
                       id="luckNextInput"
                       class="luck-input luck-digit"
@@ -3241,12 +3349,13 @@
                       inputmode="numeric"
                       aria-label="Luck to add on the next roll"
                     />
-                    <button id="luckMinus" class="luck-btn" type="button" aria-label="Remove luck from next roll">-</button>
+                    <button id="luckPlus" class="luck-btn" type="button" aria-label="Add luck to next roll">+</button>
+                    
                   </div>
                 </div>
 
                 <div class="luck-col">
-                  <label for="luckPoolInput">Remaining</label>
+                  <label for="luckPoolInput">Current</label>
                   <div id="luckPoolDisplay" class="luck-pool" aria-live="polite">
                     <span id="luckAfter" class="luck-after">0</span>
                     <span class="luck-sep">-&gt;</span>
@@ -3263,7 +3372,7 @@
                 <div class="luck-outof">out of</div>
 
                 <div class="luck-col">
-                  <label for="luckTotalInput">Starting</label>
+                  <label for="luckTotalInput">MAX</label>
                   <input
                     id="luckTotalInput"
                     class="luck-input luck-digit"
@@ -3281,7 +3390,7 @@
       <section class="pinned">
         <div class="pinned-head">
           <div class="pinned-title">Pinned Skills Quick Bar</div>
-          <button id="addPinnedBtn" type="button">Add Custom Roll</button>
+          <button id="addPinnedBtn" type="button" class="btn">Add Custom Roll</button>
         </div>
         <div class="pinned-grid">
           <div class="pinned-column">
@@ -3422,6 +3531,26 @@
       </div>
     </div>
 
+
+    <div id="customRollBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" data-label="Custom Roll" role="dialog" aria-modal="true" aria-labelledby="customRollTitle">
+        <h2 id="customRollTitle" class="modalTitle">Add Custom Roll</h2>
+        <p class="modalSub">Creates a pinned quick bar button that copies a REDice command.</p>
+        <div class="modalField">
+          <label for="customRollName">Name</label>
+          <input id="customRollName" type="text" placeholder="Initiative" />
+        </div>
+        <div class="modalField">
+          <label for="customRollCommand">Command</label>
+          <input id="customRollCommand" type="text" placeholder="1d10+8" />
+        </div>
+        <div class="modalActions">
+          <button id="customRollCancel" type="button">Cancel</button>
+          <button id="customRollAdd" class="right" type="button">Add</button>
+        </div>
+      </div>
+    </div>
+
     <div id="logBackdrop" class="modalBackdrop" data-open="false">
       <div class="modal log-modal" data-label="Log" role="dialog" aria-modal="true" aria-labelledby="logTitle">
         <h2 id="logTitle" class="modalTitle">Log</h2>
@@ -3487,7 +3616,7 @@
             <input id="ammoNameInput" type="text" placeholder="Heavy pistol" />
           </div>
           <div class="modalField">
-            <label for="ammoMaxInput">Max ammo</label>
+            <label for="ammoMaxInput">Magazine Size</label>
             <input id="ammoMaxInput" class="ammo-input" type="number" min="0" step="1" value="0" />
           </div>
         </div>
@@ -3614,17 +3743,11 @@
           <input id="addName" type="text" required />
         </div>
         <div>
-          <label for="addLevel">LVL</label>
+          <label for="addLevel">Level</label>
           <input id="addLevel" type="text" />
         </div>
-        <div>
-          <label for="addBase">BASE</label>
-          <input id="addBase" type="text" />
-        </div>
-        <div>
-          <label for="addMod">MOD</label>
-          <input id="addMod" type="text" />
-        </div>
+
+
         <div class="dialog-actions">
           <button id="addCancel" type="reset">Cancel</button>
           <button id="addConfirm" type="submit">Add</button>
@@ -4103,8 +4226,8 @@
           addDialog: byId('addDialog'),
           addName: byId('addName'),
           addLevel: byId('addLevel'),
-          addBase: byId('addBase'),
-          addMod: byId('addMod'),
+          
+          
           removeGroupDialog: byId('removeGroupDialog'),
           removeGroupTitle: byId('removeGroupTitle'),
           removeGroupSub: byId('removeGroupSub'),
@@ -4120,6 +4243,12 @@
 
           // Pinned + modifiers + luck
           addPinnedBtn: byId('addPinnedBtn'),
+customRollBackdrop: byId('customRollBackdrop'),
+customRollName: byId('customRollName'),
+customRollCommand: byId('customRollCommand'),
+customRollCancel: byId('customRollCancel'),
+customRollAdd: byId('customRollAdd'),
+
           editModifiersBtn: byId('editModifiersBtn'),
           modifierToggleList: byId('modifierToggleList'),
           globalModInput: byId('globalModInput'),
@@ -4272,6 +4401,11 @@
           redlinkChannelSet,
           clearSheetBtn,
           addPinnedBtn,
+          customRollBackdrop,
+          customRollName,
+          customRollCommand,
+          customRollCancel,
+          customRollAdd,
           editModifiersBtn,
           modifierToggleList,
           globalModInput,
@@ -4482,12 +4616,12 @@ const BASE_PREFIX = "BASE ";
       const state = {
         characterName: "",
         characterLog: [],
-        hpTotal: 5,
-        hpCurrent: 45,
-        bodySpTotal: 9,
-        bodySpCurrent: 12,
-        headSpTotal: 12,
-        headSpCurrent: 8,
+        hpTotal: 0,
+        hpCurrent: 0,
+        bodySpTotal: 0,
+        bodySpCurrent: 0,
+        headSpTotal: 0,
+        headSpCurrent: 0,
         damageValue: "",
         damageAp: false,
         damageHeadshot: false,
@@ -4792,7 +4926,7 @@ const BASE_PREFIX = "BASE ";
         const text = buildRollText(skill, false);
         await copyRollText(text, row);
         appendCharacterLogEntry(buildSkillRollLog(skill));
-        consumeLuckForRoll();
+        if (skill.source !== "custom-roll") consumeLuckForRoll();
       }
 
       function setError(message) {
@@ -5652,6 +5786,18 @@ const BASE_PREFIX = "BASE ";
         return `${base}${suffix}`;
       }
 
+     function formatNameWithStatHtml(name, stat) {
+          const base = String(name || "").trim();
+          const trimmedStat = String(stat || "").trim();
+          if (!trimmedStat) return escapeHtml(base);
+
+          const suffix = ` (${trimmedStat})`;
+          // Avoid duplicating the suffix if it's already present in the name
+          if (base.toUpperCase().endsWith(suffix.toUpperCase())) return escapeHtml(base);
+
+          return `${escapeHtml(base)} <span class="skill-stat">(${escapeHtml(trimmedStat)})</span>`;
+        }
+
       function formatSkillLabel(skill) {
         return formatNameWithStat(skill.displayName, skill.stat);
       }
@@ -5754,7 +5900,8 @@ const BASE_PREFIX = "BASE ";
       function formatGroupHeaderLabel(canonicalKey) {
         const meta = canonicalMeta[canonicalKey];
         if (!meta) return groupedPrefixForKey(canonicalKey) || "Group";
-        return formatNameWithStat(meta.displayName, meta.stat);
+        return formatNameWithStatHtml(meta.displayName, meta.stat);
+
       }
 
       function buildGroupedDisplayName(canonicalKey, rawInput) {
@@ -5801,6 +5948,15 @@ const BASE_PREFIX = "BASE ";
       }
 
       function buildRollText(skill, isMulti, rollCount, extraMod) {
+if (skill && skill.source === "custom-roll" && String(skill.command || "").trim()) {
+  const cmd = String(skill.command || "").trim();
+  const name = String(skill.displayName || "").trim();
+  if (isMulti) {
+    return `!rr ${rollCount} ${cmd} ${name}`.trim();
+  }
+  return `!r ${cmd} ${name}`.trim();
+}
+
         const base = String(skill.base || "").trim() || "0";
         const luckMod = !isMulti && state.luckNext > 0 ? String(state.luckNext) : "";
         const multiMod = isMulti ? String(extraMod || "").replace(/\s+/g, "") : extraMod;
@@ -7158,7 +7314,7 @@ function renderCriticalInjuries() {
 
             const ammoLabel = document.createElement("div");
             ammoLabel.className = "weapon-meta";
-            ammoLabel.textContent = "Max";
+            ammoLabel.textContent = "Mag:";
 
             const ammoMax = document.createElement("input");
             ammoMax.type = "number";
@@ -7201,16 +7357,43 @@ function renderCriticalInjuries() {
               const toggleParts = getAttackModifierParts(weapon, attack).attacks;
               const toggleMod = formatModifierParts(toggleParts, " ");
               rowEl.innerHTML = `
-                <button class="btn-roll" type="button" data-action="weapon-roll" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!r</button>
-                <button class="btn-roll" type="button" data-action="weapon-roll-multi" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!rr</button>
-                <div class="attack-name" title="${escapeHtml(attack.name)}">${escapeHtml(attack.name)}</div>
-                <div class="attack-meta">${escapeHtml(`${skillLabel} (${expression})`)}</div>
-                <div class="attack-meta">${escapeHtml(String(attack.ammoUse || 0))}</div>
+                <button class="btn-roll" type="button" data-action="weapon-roll"
+                  data-wid="${escapeHtml(weapon.id)}"
+                  data-aid="${escapeHtml(attack.id)}">!r</button>
+
+                <button class="btn-roll" type="button" data-action="weapon-roll-multi"
+                  data-wid="${escapeHtml(weapon.id)}"
+                  data-aid="${escapeHtml(attack.id)}">!rr</button>
+
+                <div class="attack-name" title="${escapeHtml(attack.name)}">
+                  ${escapeHtml(attack.name)}
+                </div>
+
+                <div class="attack-meta">
+                  ${escapeHtml(`${skillLabel} (${expression})`)}
+                </div>
+
+                ${attack.ammoUse > 0
+                    ? `<div class="attack-meta">Ammo Used: ${escapeHtml(String(attack.ammoUse))}</div>`
+                    : `<div class="attack-meta"></div>`
+                }
+
                 <div class="mods-wrap">
-                  <input class="mods-input" data-role="attack-mods" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}" type="text" value="${escapeHtml(attack.mods || "")}" placeholder="+/- mods" />
-                  <span class="mods-hint" data-empty="${toggleMod ? "false" : "true"}">${escapeHtml(toggleMod)}</span>
+                  <input
+                    class="mods-input"
+                    data-role="attack-mods"
+                    data-wid="${escapeHtml(weapon.id)}"
+                    data-aid="${escapeHtml(attack.id)}"
+                    type="text"
+                    value="${escapeHtml(attack.mods || "")}"
+                    placeholder="+/- mods"
+                  />
+                  <span class="mods-hint" data-empty="${toggleMod ? "false" : "true"}">
+                    ${escapeHtml(toggleMod)}
+                  </span>
                 </div>
               `;
+
               const modsInput = rowEl.querySelector(".mods-input");
               if (modsInput) modsInput.dataset.logValue = modsInput.value;
               attackTable.appendChild(rowEl);
@@ -7218,8 +7401,9 @@ function renderCriticalInjuries() {
           } else {
             const empty = document.createElement("div");
             empty.className = "empty-state";
-            empty.textContent = "No attacks set for this weapon yet. Use EDIT button to add attacks and set skills used.";
+            empty.textContent = "No attacks set for this weapon yet. Use EDIT button to add attacks and set skills used.";            
             attackTable.appendChild(empty);
+            
           }
 
           card.appendChild(attackTable);
@@ -7227,108 +7411,51 @@ function renderCriticalInjuries() {
         });
       }
 
-      function handleWeaponListEvents(event) {
-        const target = event.target;
-        if (!target) return;
+    function handleWeaponListEvents(event) {
+      const target = event.target;
+      if (!target) return;
 
-        if (target.dataset.action === "edit") {
-          const weapon = state.weapons.find((w) => w.id === target.dataset.id);
-          if (weapon) openWeaponModal("edit", weapon);
-          return;
-        }
-
-        if (target.dataset.action === "delete") {
-          openDeleteWeaponModal(target.dataset.id);
-          return;
-        }
-
-        if (target.dataset.action === "reload") {
+      // BLUR: only handle inline edits; never trigger action buttons from blur.
+      if (event.type === "blur") {
+        if (target.dataset.role === "ammo-cur") {
           const weapon = state.weapons.find((w) => w.id === target.dataset.id);
           if (!weapon) return;
-          const beforeCur = Number(weapon.ammoCur ?? 0);
-          updateWeaponInline(weapon.id, { ammoCur: Number(weapon.ammoMax ?? 0) });
-          const afterCur = Number(weapon.ammoCur ?? 0);
-          if (beforeCur !== afterCur) {
-            const weaponLabel = weapon?.name || "Weapon";
-            appendCharacterLogEntry(
-              `AMMO Reload ${weaponLabel} ${beforeCur}->${afterCur}`
-            );
-          }
-          return;
-        }
 
-        if (target.dataset.action === "weapon-roll") {
-          const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
-          const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
-          if (!weapon || !attack) return;
-          handleWeaponRoll(weapon, attack, 1, target);
-          return;
-        }
-
-        if (target.dataset.action === "weapon-roll-multi") {
-          const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
-          const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
-          if (!weapon || !attack) return;
-          openRollCountModal(
-            {
-              label: formatWeaponRollLabel(weapon, attack),
-              buildText: (count, extraMod) => buildWeaponRollText(weapon, attack, count, extraMod),
-              logEntry: (count, extraMod) =>
-                buildWeaponRollLog(weapon, attack, { isMulti: true, rollCount: count, extraMod }),
-              afterCopy: (count) => {
-                const ammoResult = consumeWeaponAmmo(weapon, attack, count);
-                if (ammoResult) {
-                  const weaponLabel = weapon?.name || "Weapon";
-                  appendCharacterLogEntry(
-                    `AMMO ${weaponLabel} ${ammoResult.before}->${ammoResult.after} (-${ammoResult.used})`
-                  );
-                }
-                renderWeapons();
-              }
-            },
-            target
-          );
-          return;
-        }
-
-        if (event.type === "blur" && target.dataset.role === "ammo-cur") {
-          const weapon = state.weapons.find((w) => w.id === target.dataset.id);
-          if (!weapon) return;
           const before = Number(weapon.ammoCur ?? 0);
           updateWeaponInline(target.dataset.id, { ammoCur: Number(target.value || 0) });
           const after = Number(weapon.ammoCur ?? 0);
+
           if (before !== after) {
             const weaponLabel = weapon?.name || "Weapon";
-            appendCharacterLogEntry(
-              `AMMO Cur ${weaponLabel} ${before}->${after}`
-            );
+            appendCharacterLogEntry(`AMMO Cur ${weaponLabel} ${before}->${after}`);
           }
           return;
         }
 
-        if (event.type === "blur" && target.dataset.role === "ammo-max") {
+        if (target.dataset.role === "ammo-max") {
           const weapon = state.weapons.find((w) => w.id === target.dataset.id);
           if (!weapon) return;
+
           const beforeCur = Number(weapon.ammoCur ?? 0);
           const beforeMax = Number(weapon.ammoMax ?? 0);
           updateWeaponInline(target.dataset.id, { ammoMax: Number(target.value || 0) });
           const afterCur = Number(weapon.ammoCur ?? 0);
           const afterMax = Number(weapon.ammoMax ?? 0);
+
           if (beforeCur !== afterCur || beforeMax !== afterMax) {
             const changes = [];
             if (beforeMax !== afterMax) changes.push(`Max ${beforeMax}->${afterMax}`);
             if (beforeCur !== afterCur) changes.push(`Cur ${beforeCur}->${afterCur}`);
             const weaponLabel = weapon?.name || "Weapon";
-            appendCharacterLogEntry(
-              `AMMO ${weaponLabel} ${changes.join(" | ")}`
-            );
+            appendCharacterLogEntry(`AMMO ${weaponLabel} ${changes.join(" | ")}`);
           }
           return;
         }
 
-        if (event.type === "blur" && target.dataset.role === "attack-mods") {
+        if (target.dataset.role === "attack-mods") {
           const before = target.dataset.logValue ?? "";
           const after = target.value;
+
           if (before !== after) {
             const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
             const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
@@ -7338,9 +7465,85 @@ function renderCriticalInjuries() {
               );
             }
           }
+
           target.dataset.logValue = after;
+          return;
         }
+
+        return; // ignore all other blur targets
       }
+
+      // CLICK: only handle action buttons.
+      if (event.type !== "click") return;
+
+      if (target.dataset.action === "edit") {
+        const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+        if (weapon) openWeaponModal("edit", weapon);
+        return;
+      }
+
+      if (target.dataset.action === "delete") {
+        openDeleteWeaponModal(target.dataset.id);
+        return;
+      }
+
+      if (target.dataset.action === "reload") {
+        const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+        if (!weapon) return;
+
+        const beforeCur = Number(weapon.ammoCur ?? 0);
+        updateWeaponInline(weapon.id, { ammoCur: Number(weapon.ammoMax ?? 0) });
+        const afterCur = Number(weapon.ammoCur ?? 0);
+
+        if (beforeCur !== afterCur) {
+          const weaponLabel = weapon?.name || "Weapon";
+          appendCharacterLogEntry(`AMMO Reload ${weaponLabel} ${beforeCur}->${afterCur}`);
+        }
+        return;
+      }
+
+      if (target.dataset.action === "weapon-roll") {
+        const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
+        const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
+        if (!weapon || !attack) return;
+
+        handleWeaponRoll(weapon, attack, 1, target);
+        return;
+      }
+
+      if (target.dataset.action === "weapon-roll-multi") {
+        const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
+        const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
+        if (!weapon || !attack) return;
+
+        openRollCountModal(
+          {
+            label: formatWeaponRollLabel(weapon, attack),
+            buildText: (count, extraMod) =>
+              buildWeaponRollText(weapon, attack, count, extraMod),
+            logEntry: (count, extraMod) =>
+              buildWeaponRollLog(weapon, attack, {
+                isMulti: true,
+                rollCount: count,
+                extraMod,
+              }),
+            afterCopy: (count) => {
+              const ammoResult = consumeWeaponAmmo(weapon, attack, count);
+              if (ammoResult) {
+                const weaponLabel = weapon?.name || "Weapon";
+                appendCharacterLogEntry(
+                  `AMMO ${weaponLabel} ${ammoResult.before}->${ammoResult.after} (-${ammoResult.used})`
+                );
+              }
+              renderWeapons();
+            },
+          },
+          target
+        );
+        return;
+      }
+    }
+
 
       function handleWeaponListInput(event) {
         const target = event.target;
@@ -7555,7 +7758,8 @@ function renderCriticalInjuries() {
               const rollCell = document.createElement("div");
               const nameCell = document.createElement("div");
               nameCell.className = "skill-group-label";
-              nameCell.textContent = formatGroupHeaderLabel(canonicalKey);
+              nameCell.innerHTML = formatGroupHeaderLabel(canonicalKey);
+
               const levelCell = document.createElement("div");
               const baseCell = document.createElement("div");
               const modCell = document.createElement("div");
@@ -7579,9 +7783,9 @@ function renderCriticalInjuries() {
                 };
                 addName.value = "";
                 addLevel.value = "";
-                addBase.value = "";
-                addMod.value = "";
-                addName.placeholder = `New ${groupedPrefixForKey(canonicalKey)}...`;
+                
+                
+                addName.placeholder = `New ${groupedPrefixForKey(canonicalKey)} Skill...`;
                 addDialog.showModal();
               });
               const removeBtn = document.createElement("button");
@@ -7763,6 +7967,112 @@ function renderCriticalInjuries() {
           row.classList.add("group-child");
         }
 
+        const pinBtn = document.createElement("button");
+        pinBtn.className = "btn-pin";
+        pinBtn.type = "button";
+        pinBtn.textContent = "[ ]";
+        if (isPinned(skill.id)) {
+          pinBtn.classList.add("active");
+          pinBtn.textContent = "[■]";
+        }
+
+        rollBtn.addEventListener("click", async () => {
+          if (redlinkEnabled) {
+            if (rollBtn.classList.contains("roll-armed")) {
+              await activateRollButton(rollBtn, row, skill);
+              return;
+            }
+            armRollButton(rollBtn);
+            return;
+          }
+          const text = buildRollText(skill, false);
+          await copyRollText(text, row);
+          appendCharacterLogEntry(buildSkillRollLog(skill));
+          if (skill.source !== "custom-roll") consumeLuckForRoll();
+        });
+
+        rollBtn.addEventListener("dblclick", async (event) => {
+          if (!redlinkEnabled) return;
+          event.preventDefault();
+          await activateRollButton(rollBtn, row, skill);
+        });
+
+        multiBtn.addEventListener("click", () => {
+          openRollCountModal(
+            {
+              label: formatSkillLabel(skill),
+              buildText: (count, extraMod) => buildRollText(skill, true, count, extraMod),
+              logEntry: (count, extraMod) =>
+                buildSkillRollLog(skill, { isMulti: true, rollCount: count, extraMod })
+            },
+            row
+          );
+        });
+
+        pinBtn.addEventListener("click", () => {
+          if (suppressPinClick) return;
+          const isPinnedNow = isPinned(skill.id);
+          if (isPinnedNow) {
+            removePinned(skill.id);
+            if (skill.source === "custom" || skill.source === "custom-roll") {
+              removeSkill(skill.id);
+            }
+          } else {
+            addPinned(skill.id);
+          }
+          pinBtn.textContent = isPinned(skill.id) ? "[■]" : "[ ]";
+          render();
+        });
+
+        const startPinDrag = (event) => {
+          if (dragState) return;
+          suppressPinClick = true;
+          const isPinnedSkill = isPinned(skill.id);
+          dragState = {
+            skillId: skill.id,
+            source: isPinnedSkill ? "pinned" : "column",
+            pinnedColumnId: row.dataset.pinnedColumnId || getPinnedColumn(skill.id) || ""
+          };
+          row.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+          try {
+            event.dataTransfer.setData("text/plain", skill.id);
+          } catch {}
+        };
+
+        const endPinDrag = () => {
+          row.classList.remove("dragging");
+          setTimeout(() => {
+            dragState = null;
+            suppressPinClick = false;
+          }, 0);
+        };
+
+        nameEl.addEventListener("dragstart", startPinDrag);
+        nameEl.addEventListener("dragend", endPinDrag);
+
+        // Custom rolls render as: Roll buttons | Name | Command | Pin
+        if (skill && skill.source === "custom-roll") {
+          row.classList.add("custom-roll-row");
+
+          const cmdInput = document.createElement("input");
+          cmdInput.type = "text";
+          cmdInput.className = "skill-input command-input";
+          cmdInput.value = String(skill.command || "");
+          cmdInput.disabled = true;
+          cmdInput.title = "Command";
+          cmdInput.style.gridColumn = "3 / 6";
+
+          pinBtn.style.gridColumn = "6";
+
+          row.appendChild(rollGroup);
+          row.appendChild(nameEl);
+          row.appendChild(cmdInput);
+          row.appendChild(pinBtn);
+
+          return row;
+        }
+
         const levelInput = document.createElement("input");
         levelInput.type = "text";
         levelInput.className = "skill-input level-input";
@@ -7801,6 +8111,7 @@ function renderCriticalInjuries() {
           renderWeapons();
           renderWeaponModesPreview();
         });
+
         modInput.addEventListener("blur", () => {
           logValueChange(`${formatSkillLabel(skill)} mod`, modInput.dataset.logValue, modInput.value);
           modInput.dataset.logValue = modInput.value;
@@ -7834,90 +8145,6 @@ function renderCriticalInjuries() {
         modToggle.textContent = toggleText;
         modToggle.dataset.empty = toggleText ? "false" : "true";
 
-        const pinBtn = document.createElement("button");
-        pinBtn.className = "btn-pin";
-        pinBtn.type = "button";
-        pinBtn.textContent = "[ ]";
-        if (isPinned(skill.id)) {
-          pinBtn.classList.add("active");
-          pinBtn.textContent = "[■]";
-        }
-
-        rollBtn.addEventListener("click", async () => {
-          if (redlinkEnabled) {
-            if (rollBtn.classList.contains("roll-armed")) {
-              await activateRollButton(rollBtn, row, skill);
-              return;
-            }
-            armRollButton(rollBtn);
-            return;
-          }
-          const text = buildRollText(skill, false);
-          await copyRollText(text, row);
-          appendCharacterLogEntry(buildSkillRollLog(skill));
-          consumeLuckForRoll();
-        });
-
-      rollBtn.addEventListener("dblclick", async (event) => {
-        if (!redlinkEnabled) return;
-        event.preventDefault();
-        await activateRollButton(rollBtn, row, skill);
-      });
-
-        multiBtn.addEventListener("click", () => {
-          openRollCountModal(
-            {
-              label: formatSkillLabel(skill),
-              buildText: (count, extraMod) => buildRollText(skill, true, count, extraMod),
-              logEntry: (count, extraMod) =>
-                buildSkillRollLog(skill, { isMulti: true, rollCount: count, extraMod })
-            },
-            row
-          );
-        });
-
-        pinBtn.addEventListener("click", () => {
-          if (suppressPinClick) return;
-          const isPinnedNow = isPinned(skill.id);
-          if (isPinnedNow) {
-            removePinned(skill.id);
-            if (skill.source === "custom") {
-              removeSkill(skill.id);
-            }
-          } else {
-            addPinned(skill.id);
-          }
-          pinBtn.textContent = isPinned(skill.id) ? "[■]" : "[ ]";
-          render();
-        });
-
-        const startPinDrag = (event) => {
-          if (dragState) return;
-          suppressPinClick = true;
-          const isPinnedSkill = isPinned(skill.id);
-          dragState = {
-            skillId: skill.id,
-            source: isPinnedSkill ? "pinned" : "column",
-            pinnedColumnId: row.dataset.pinnedColumnId || getPinnedColumn(skill.id) || ""
-          };
-          row.classList.add("dragging");
-          event.dataTransfer.effectAllowed = "move";
-          try {
-            event.dataTransfer.setData("text/plain", skill.id);
-          } catch {}
-        };
-
-        const endPinDrag = () => {
-          row.classList.remove("dragging");
-          setTimeout(() => {
-            dragState = null;
-            suppressPinClick = false;
-          }, 0);
-        };
-
-        nameEl.addEventListener("dragstart", startPinDrag);
-        nameEl.addEventListener("dragend", endPinDrag);
-
         row.appendChild(rollGroup);
         row.appendChild(nameEl);
         row.appendChild(levelInput);
@@ -7932,6 +8159,7 @@ function renderCriticalInjuries() {
 
         return row;
       }
+
 
       function handlePinnedDrop(columnId, targetSkillId) {
         if (!dragState) return;
@@ -8059,15 +8287,25 @@ function renderCriticalInjuries() {
         handleColumnDrop(columnId, sectionId, targetSkillId);
       });
 
-      addPinnedBtn.addEventListener("click", () => {
-        pendingAddContext = { mode: "pinned" };
-        addName.value = "";
-        addLevel.value = "";
-        addBase.value = "";
-        addMod.value = "";
-        addName.placeholder = "";
-        addDialog.showModal();
-      });
+      function openCustomRollModal() {
+  if (!customRollBackdrop) return;
+  if (customRollName) customRollName.value = "";
+  if (customRollCommand) customRollCommand.value = "";
+  customRollBackdrop.dataset.open = "true";
+  setTimeout(() => {
+    if (customRollName) customRollName.focus();
+  }, 0);
+}
+
+function closeCustomRollModal() {
+  if (!customRollBackdrop) return;
+  customRollBackdrop.dataset.open = "false";
+}
+
+addPinnedBtn.addEventListener("click", () => {
+  openCustomRollModal();
+});
+
 
       addDialog.addEventListener("close", () => {
         if (addDialog.returnValue !== "") return;
@@ -8082,7 +8320,7 @@ function renderCriticalInjuries() {
           const id = `custom-${Date.now()}-${state.customCounter++}`;
           const meta = canonicalMeta[canonicalKey];
           const levelText = addLevel.value.trim();
-          let baseText = addBase.value.trim();
+          let baseText = "";
           if (!baseText) {
             const computed = computeBaseFromLevel(levelText, meta?.stat);
             if (computed !== "") baseText = computed;
@@ -8092,7 +8330,7 @@ function renderCriticalInjuries() {
             displayName,
             base: baseText,
             level: levelText,
-            mod: addMod.value.trim(),
+            mod: "",
             canonicalKey,
             stat: meta ? meta.stat : "",
             source: "custom"
@@ -8107,13 +8345,16 @@ function renderCriticalInjuries() {
           return;
         }
 
+
+
+
         const name = cleanDisplayName(addName.value);
         if (!name) return;
         const id = `custom-${Date.now()}-${state.customCounter++}`;
         const canonicalKey = guessCanonicalKey(name);
         const meta = canonicalMeta[canonicalKey];
         const levelText = addLevel.value.trim();
-        let baseText = addBase.value.trim();
+        let baseText = "";
         if (!baseText) {
           const computed = computeBaseFromLevel(levelText, meta?.stat);
           if (computed !== "") baseText = computed;
@@ -8123,7 +8364,7 @@ function renderCriticalInjuries() {
           displayName: name,
           base: baseText,
           level: levelText,
-          mod: addMod.value.trim(),
+          mod: "",
           canonicalKey: canonicalKey || "",
           stat: meta ? meta.stat : "",
           source: "custom"
@@ -8158,6 +8399,64 @@ function renderCriticalInjuries() {
         if (event.key === "Enter") submitRollCount();
         if (event.key === "Escape") closeRollCountModal();
       });
+
+if (customRollBackdrop) {
+  customRollBackdrop.addEventListener("click", (event) => {
+    if (event.target === customRollBackdrop) {
+      closeCustomRollModal();
+    }
+  });
+}
+
+if (customRollCancel) customRollCancel.addEventListener("click", closeCustomRollModal);
+
+if (customRollAdd) {
+  customRollAdd.addEventListener("click", () => {
+    const name = cleanDisplayName(customRollName ? customRollName.value : "");
+    const command = String(customRollCommand ? customRollCommand.value : "").trim();
+    if (!name) {
+      if (customRollName) customRollName.focus();
+      return;
+    }
+    if (!command) {
+      if (customRollCommand) customRollCommand.focus();
+      return;
+    }
+    const id = `customroll-${Date.now()}-${state.customCounter++}`;
+    addSkill({
+      id,
+      displayName: name,
+      base: "",
+      level: "",
+      mod: "",
+      canonicalKey: "",
+      stat: "",
+      source: "custom-roll",
+      command
+    });
+    appendCharacterLogEntry(`Custom Roll Added ${name}`);
+    addPinned(id);
+    closeCustomRollModal();
+    render();
+  });
+}
+
+if (customRollCommand) {
+  customRollCommand.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (customRollAdd) customRollAdd.click();
+    }
+    if (event.key === "Escape") closeCustomRollModal();
+  });
+}
+
+if (customRollName) {
+  customRollName.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeCustomRollModal();
+  });
+}
+
       rollCountInput.addEventListener("focus", () => {
         rollCountInput.select();
       });
@@ -9065,6 +9364,13 @@ function renderCriticalInjuries() {
       }
 
       function buildSkillRollLog(skill, opts = {}) {
+if (skill && skill.source === "custom-roll" && String(skill.command || "").trim()) {
+  const { isMulti = false, rollCount = 1 } = opts;
+  const rollLabel = isMulti ? `!rr x${rollCount}` : "!r";
+  const cmd = String(skill.command || "").trim();
+  return buildRollLogEntry(String(skill.displayName || "Custom Roll"), rollLabel, [`cmd ${cmd}`]);
+}
+
         const { isMulti = false, rollCount = 1, extraMod = "" } = opts;
         const rollLabel = isMulti ? `!rr x${rollCount}` : "!r";
         const parts = [];
