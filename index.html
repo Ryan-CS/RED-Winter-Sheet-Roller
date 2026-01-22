@@ -7401,7 +7401,16 @@ function renderCriticalInjuries() {
           } else {
             const empty = document.createElement("div");
             empty.className = "empty-state";
-            empty.textContent = "No attacks set for this weapon yet. Use EDIT button to add attacks and set skills used.";            
+            empty.innerHTML = `
+                      <span>No attacks set for this weapon yet.</span>
+                    <button
+                      class="btn-mini"
+                      type="button"
+                      data-action="add-attack"
+                      data-id="${escapeHtml(weapon.id)}"
+                    >ADD ATTACK</button>
+                  `;
+        
             attackTable.appendChild(empty);
             
           }
@@ -7501,6 +7510,19 @@ function renderCriticalInjuries() {
         }
         return;
       }
+
+      if (target.dataset.action === "add-attack") {
+        const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+        if (!weapon) return;
+
+        // Must open weapon modal first to populate state.draftWeapon
+        openWeaponModal("edit", weapon);
+
+        // Now open the attack modal in "add" mode (null = new attack)
+        openAttackModal(null);
+        return;
+      }
+
 
       if (target.dataset.action === "weapon-roll") {
         const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
