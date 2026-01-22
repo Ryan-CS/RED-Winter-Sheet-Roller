@@ -3,6 +3,365 @@
 ## 2026-01-21
 
 ### Summary
+- Hide empty scope previews in Edit Modifiers when the modifier value is zero/blank.
+
+### User-Facing Changes
+- Scope preview text no longer shows "ALL" when no modifier value is set.
+
+### Technical Changes
+- Scope preview helper now returns an empty string when the normalized value is blank.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Added modifier value previews to the Edit Modifiers scope selections.
+
+### User-Facing Changes
+- Edit Modifiers now shows value + selection previews like "-2 ALL" or "+2 COOL, WILL" under each scope selector.
+
+### Technical Changes
+- Added a scope preview helper to combine normalized modifier values with selection summaries.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Removed per-modifier global input and shifted default global modifiers into all-skills selections.
+
+### User-Facing Changes
+- Edit Modifiers no longer shows a Global +/- input field.
+- Default modifiers (Seriously Wounded, Mortally Wounded, In a Grapple) now live under Select Skills -> All Skills.
+- Existing modifier globals migrate to All Skills on load.
+
+### Technical Changes
+- Dropped per-modifier global values from modifier state persistence and roll math.
+- Migrated legacy modifier globals into the skills scope during normalization.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Show stat modifiers inside the stat boxes.
+
+### User-Facing Changes
+- Stats drawer stat boxes now show modifier totals with the + or - styling.
+
+### Technical Changes
+- Render stat modifiers for INT/DEX/TECH using the same stat box modifier formatting.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Added a confirmation modal before clearing the sheet state.
+
+### User-Facing Changes
+- Clear Sheet now prompts with a warning and explicit confirm/cancel buttons.
+
+### Technical Changes
+- Added a clear-sheet confirmation modal and routed the clear action through it.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Enabled dragging any master-list skill into the pinned quick bar.
+
+### User-Facing Changes
+- Unpinned skills can now be dragged from the all-skills list into the pinned quick bar.
+
+### Technical Changes
+- Treat master-list drags as column moves so pinned drops accept them.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Added a Clear Sheet utility action to reset the page and wipe stored state.
+
+### User-Facing Changes
+- New Clear Sheet button clears local storage and reloads the page to a fresh start.
+
+### Technical Changes
+- Hooked a utility-bar button to clear localStorage and reset modifiers/templates.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Expanded the character log to capture rolls, modifiers, and key state changes.
+
+### User-Facing Changes
+- Skill and weapon rolls now log the applied modifiers (skill, global, toggle, weapon, luck, multi-roll).
+- Ammo changes (reloads, manual edits, roll consumption) appear in the log.
+- HP, SP, luck, global mod, and key toggles now log on blur or button actions.
+
+### Technical Changes
+- Added shared log helpers for roll detail formatting and value-change tracking.
+- Weapon ammo consumption now returns usage details for logging.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Modifier toggles edit button now sits next to the label.
+
+### User-Facing Changes
+- The Modifier Toggles "Edit" button hugs the section label instead of the far edge.
+
+### Technical Changes
+- Adjusted modifier toggle header flex alignment and spacing.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Luck remaining now shows 0 instead of an empty field.
+
+### User-Facing Changes
+- The Luck "Remaining" input displays 0 when the pool is empty.
+
+### Technical Changes
+- Always render the luck pool value in the remaining input display.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Separated modifier toggle values in roll strings and attack skill expressions for clearer output.
+
+### User-Facing Changes
+- Skill and weapon rolls now list each active modifier toggle value instead of collapsing them into totals.
+- Weapon attack skill expressions now include active skill/global modifier toggles with the base + skill mod display.
+- Attack modifier hints now show only attack-scoped toggle values.
+
+### Technical Changes
+- Added modifier-part helpers to keep toggle values distinct through roll building and UI hints.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Skill-scoped modifier toggles now apply to weapon attack rolls that use the same skill.
+
+### User-Facing Changes
+- Weapon attack modifier hints and roll strings now include active skill-scoped modifiers when the attack uses that skill.
+
+### Technical Changes
+- Added skill-scope modifier totals to weapon attack modifier calculations.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Refined weapon ammo controls to remove spinners and tighten layout.
+
+### User-Facing Changes
+- Ammo count inputs no longer show spinner buttons and still support typing and arrow-key adjustments.
+- Reload now sits directly to the left of the current ammo input, with Max aligned tightly to its field.
+- Arrow key adjustments now update current/max ammo in weapon panels immediately.
+- Weapon ammo inputs no longer drop focus on click.
+- Weapon ammo inputs now keep focus across arrow key adjustments before clamping on blur.
+- Luck, HUD numeric fields, skill levels, and modifier amount inputs now defer heavy re-renders until blur.
+- Arrow keys now increment/decrement luck, damage, skill levels, HUD values, and modifier amounts without defocus.
+
+### Technical Changes
+- Reworked ammo count DOM layout into grouped controls for tighter spacing.
+- Added ammo input styling to hide native number spinners.
+- Updated weapon ammo inputs to persist on `input` events.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Added modifier toggles with a dedicated editor, selection modals, and stat modifier displays.
+
+### User-Facing Changes
+- Luck & Modifiers panel now shows quick modifier toggles plus an Edit modal for detailed setups.
+- Added preset modifier templates (wounded states, grapple, smash, synthcoke, primetime).
+- Stat drawer now shows modifier deltas and totals for REF, COOL, WILL, and MOVE when active.
+- Skill rows display active toggle modifiers alongside global and luck hints.
+- Modifier effects apply to skill rolls, attack rolls, and stat displays based on their targeting.
+- Modifier editor now includes selection modals for skills, stats, and attack modes.
+- Weapon attack rows now show active toggle modifier totals next to attack modifiers.
+
+### Technical Changes
+- Added modifier model state with persistence in save/load and local storage.
+- Integrated modifier totals into roll building for skills and weapons.
+- Added modal rendering logic to add/edit/delete modifier templates.
+- Expanded stats rendering to include modifier totals and deltas.
+- Added scoped selection modal rendering for skills, stats, and weapon attack modes.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
+- Added skill level parsing and updated skill row layout to show LVL/Base/Mod separately.
+
+### User-Facing Changes
+- Skill rows now include a LVL column and show BASE derived from LVL + stat while MOD remains editable.
+- Group headers align with the new LVL/BASE/MOD/PIN layout.
+- Add-skill dialog now includes a LVL field and can auto-calc BASE when omitted.
+
+### Technical Changes
+- Parsed LVL fields from Test_Sheet acroform data and persisted skill levels in saved state.
+- Updated skill-row grid templates and DOM construction to include level cells.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-21
+
+### Summary
 - Normalized multi-roll modifier input so space-separated values roll correctly.
 
 ### User-Facing Changes

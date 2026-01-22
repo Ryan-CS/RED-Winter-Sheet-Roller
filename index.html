@@ -66,7 +66,9 @@
 
         --scanline: rgba(190, 255, 245, 0.03);
         --noise: rgba(255, 255, 255, 0.035);
-        --base-input: calc(5.5ch + 4px);
+        --base-input: calc(2.6ch + 4px);
+        --level-input: calc(3.5ch + 4px);
+        --mod-input: calc(6ch + 6px);
         --roll-col: 64px;
         --pin-col: 32px;
         --sp-tick-w: 6px;
@@ -390,9 +392,43 @@
 
       .modifiers-grid {
         display: grid;
-        grid-template-columns: minmax(260px, 1fr) minmax(240px, 360px);
+        grid-template-columns: minmax(220px, 260px) minmax(360px, 1fr) minmax(220px, 260px);
         gap: 16px;
         align-items: start;
+      }
+
+      .modifier-toggles {
+        display: grid;
+        gap: 8px;
+      }
+
+      .modifier-toggle-head {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 6px;
+      }
+
+      .mod-toggle-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 6px 12px;
+      }
+
+      .mod-toggle-item {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+      }
+
+      .mod-toggle-item input {
+        margin: 0;
       }
 
       .stats-drawer {
@@ -523,6 +559,28 @@
         color: var(--text);
         font-variant-numeric: tabular-nums;
         white-space: nowrap;
+      }
+
+      .stat-value--mod {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        font-family: var(--mono);
+        font-size: 15px;
+        letter-spacing: 0.08em;
+      }
+
+      .stat-mod {
+        font-size: 11px;
+        color: var(--accent-2);
+        letter-spacing: 0.12em;
+      }
+
+      .stat-mod-total {
+        font-size: 12px;
+        color: var(--ink-muted);
+        letter-spacing: 0.12em;
       }
 
       .stat-value--slim {
@@ -1728,7 +1786,13 @@
 
       .section-title-row {
         display: grid;
-        grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
+        grid-template-columns:
+          var(--roll-col)
+          minmax(0, 1fr)
+          var(--level-input)
+          var(--base-input)
+          var(--mod-input)
+          var(--pin-col);
         align-items: center;
         gap: 8px;
       }
@@ -1741,33 +1805,23 @@
         font-weight: 700;
       }
 
-      .section-head:not(.roll)::before {
-        content: "";
-        position: absolute;
-        left: -6px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2px;
-        height: 78%;
-        background: rgba(140, 255, 255, 0.7);
-      }
-
       .section-head.name {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding-left: 8px;
+        padding-left: 0;
         
         font-size: 12px;
         letter-spacing: 0.16em;
       }
 
       .section-head.roll,
+      .section-head.lvl,
       .section-head.base,
       .section-head.mod,
       .section-head.pin {
         text-align: center;
-        padding-left: 8px;
+        padding-left: 0;
       }
 
       .section-list {
@@ -1780,15 +1834,19 @@
 
       .skill-row {
         display: grid;
-        grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
+        grid-template-columns:
+          var(--roll-col)
+          minmax(0, 1fr)
+          var(--level-input)
+          var(--base-input)
+          var(--mod-input)
+          var(--pin-col);
         align-items: center;
         gap: 0px;
         padding: 2px 6px;
         border: 1px solid var(--border);
         background: var(--panel2);
         width: 100%;
-        
-        
       }
 
       .skill-name[draggable="true"] {
@@ -1814,21 +1872,18 @@
 
       .skill-group-row {
         display: grid;
-        grid-template-columns: var(--roll-col) minmax(0, 1fr) var(--base-input) calc(var(--base-input) * 2) var(--pin-col);
+        grid-template-columns:
+          var(--roll-col)
+          minmax(0, 1fr)
+          var(--level-input)
+          var(--base-input)
+          var(--mod-input)
+          calc(var(--pin-col) * 2);
         align-items: center;
         gap: 8px;
         padding: 2px 6px;
         border: none;
         background: rgba(44, 246, 232, 0.08);
-      }
-
-      .skill-group-row {
-        grid-template-columns:
-          var(--roll-col)
-          minmax(0, 1fr)
-          var(--base-input)
-          calc(var(--base-input) * 2)
-          calc(var(--pin-col) * 2);
       }
 
       .group-action-cell {
@@ -1886,29 +1941,46 @@
         height: 20px;
       }
 
+      .skill-input[readonly] {
+        cursor: default;
+        background: rgba(8, 14, 26, 0.85);
+        color: var(--ink);
+        border-color: rgba(110, 255, 246, 0.26);
+      }
+
+      .base-value {
+        font-size: 13px;
+        line-height: 1.1;
+        text-align: center;
+        letter-spacing: 0.08em;
+      }
+
       .mod-wrap {
         position: relative;
         display: flex;
         align-items: center;
+        justify-content: flex-start;
+        width: 100%;
       }
 
-      .base-input {
-        width: var(--base-input);
-        min-width: var(--base-input);
-        max-width: var(--base-input);
+      .level-input {
+        width: var(--level-input);
+        min-width: var(--level-input);
+        max-width: var(--level-input);
       }
 
       .mod-input {
-        width: calc(var(--base-input) * 2);
-        min-width: calc(var(--base-input) * 2);
-        max-width: calc(var(--base-input) * 2);
-        text-align: center;
-        padding-right: 46px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        text-align: left;
+        padding-left: 6px;
+        padding-right: 48px;
       }
 
       .mod-hints {
         position: absolute;
-        right: 6px;
+        right: 4px;
         display: flex;
         gap: 4px;
         align-items: baseline;
@@ -1924,12 +1996,19 @@
         opacity: 0.9;
       }
 
+      .mod-toggle {
+        font-size: 11px;
+        color: var(--accent-2);
+        opacity: 0.85;
+      }
+
       .mod-luck {
         opacity: 0.7;
       }
 
       .mod-global[data-empty="true"],
-      .mod-luck[data-empty="true"] {
+      .mod-luck[data-empty="true"],
+      .mod-toggle[data-empty="true"] {
         display: none;
       }
 
@@ -2250,6 +2329,158 @@
         gap: 12px;
       }
 
+      .modifiers-modal {
+        width: min(760px, 92vw);
+      }
+
+      .modifier-list {
+        margin-top: 12px;
+        display: grid;
+        gap: 12px;
+        max-height: 62vh;
+        overflow: auto;
+        padding-right: 6px;
+      }
+
+      .modifier-row {
+        border: 1px solid var(--border);
+        background: rgba(8, 14, 26, 0.6);
+        padding: 10px;
+      }
+
+      .modifier-row-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .modifier-name {
+        flex: 1;
+        min-width: 0;
+        max-width: 420px;
+      }
+
+      .modifier-grid {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+      }
+
+      .modifier-grid .btn-mini {
+        min-width: 92px;
+        width: auto;
+      }
+
+      .modifier-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+      }
+
+      .modifier-field label {
+        font-size: 10px;
+        letter-spacing: 0.14em;
+      }
+
+      .modifier-scope {
+        display: grid;
+        grid-template-columns: 60px auto;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .modifier-amount {
+        text-align: center;
+        font-family: var(--mono);
+        width: 60px;
+        max-width: 60px;
+      }
+
+      .modifier-amount-wrap {
+        position: relative;
+      }
+
+      .modifier-amount-label {
+        position: absolute;
+        top: -10px;
+        left: 10px;
+        padding: 0 4px;
+        font-family: var(--mono);
+        font-size: 9px;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        background: var(--panel);
+      }
+
+      .modifier-summary {
+        margin-top: 4px;
+        font-size: 11px;
+        color: var(--ink-muted);
+        font-family: var(--mono);
+      }
+
+      .selection-grid {
+        margin-top: 12px;
+        display: grid;
+        gap: 12px;
+        max-height: 62vh;
+        overflow: auto;
+        padding-right: 6px;
+      }
+
+      .selection-columns {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .selection-column {
+        display: grid;
+        gap: 10px;
+        align-content: start;
+      }
+
+      .selection-group {
+        display: grid;
+        gap: 6px;
+      }
+
+      .selection-group-title {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+      }
+
+      .selection-group-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 6px;
+      }
+
+      .select-button {
+        padding: 6px 8px;
+        border: 1px solid var(--border);
+        background: rgba(8, 14, 26, 0.6);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        min-width: 88px;
+      }
+
+      .select-button.active {
+        border-color: rgba(255, 212, 80, 0.65);
+        color: var(--accent-2);
+        box-shadow: var(--glowW);
+      }
+
       .crit-col {
         border: 1px solid var(--border);
         background: var(--panel2);
@@ -2440,9 +2671,8 @@
       }
 
       .ammo-counts {
-        display: grid;
-        grid-template-columns: 60px 74px 32px 60px;
-        gap: 8px;
+        display: flex;
+        gap: 12px;
         align-items: center;
       }
 
@@ -2458,6 +2688,22 @@
         padding: 4px 6px;
         width: 50px;
         max-width: 50px;
+      }
+
+      .ammo-counts-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .ammo-input[type="number"] {
+        -moz-appearance: textfield;
+      }
+
+      .ammo-input[type="number"]::-webkit-outer-spin-button,
+      .ammo-input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
 
       .weapon-actions {
@@ -2510,6 +2756,25 @@
         height: 28px;
         padding: 4px 8px;
         font-size: 12px;
+      }
+
+      .mods-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .mods-hint {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--accent-2);
+        opacity: 0.85;
+        white-space: nowrap;
+      }
+
+      .mods-hint[data-empty="true"] {
+        display: none;
       }
 
       .weapon-select {
@@ -2681,7 +2946,7 @@
           grid-template-columns: 1fr;
         }
         .skill-row {
-          grid-template-columns: auto 1fr auto auto auto;
+          grid-template-columns: auto 1fr auto auto auto auto;
         }
         .stats-drawer {
           top: 92px;
@@ -2700,7 +2965,7 @@
           text-align: left;
         }
         .skill-row {
-          grid-template-columns: auto 1fr auto auto auto;
+          grid-template-columns: auto 1fr auto auto auto auto;
           gap: 6px;
         }
         .stats-drawer {
@@ -2736,6 +3001,10 @@
               aria-label="REDlink channel name"
             />
             <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
+          </div>
+          <div class="inline-control inline-clear">
+            <label for="clearSheetBtn">Clear Sheet</label>
+            <button id="clearSheetBtn" type="button">Clear Sheet</button>
           </div>
           <div class="inline-control">
             <label for="pdfInput">Load PDF</label>
@@ -2943,6 +3212,19 @@
       <section class="modifiers-panel" aria-label="Luck and global modifiers">
         <div class="status-title">Luck &amp; Modifiers</div>
         <div class="modifiers-grid">
+          <div class="global-mod-field">
+            <label for="globalModInput">Global Modifier</label>
+            <input id="globalModInput" type="text" placeholder="Applies to all skills" />
+          </div>
+
+          <div class="modifier-toggles">
+            <div class="modifier-toggle-head">
+              <span class="status-title">Modifier Toggles</span>
+              <button id="editModifiersBtn" class="btn-mini" type="button">Edit</button>
+            </div>
+            <div id="modifierToggleList" class="mod-toggle-list" aria-live="polite"></div>
+          </div>
+
           <div class="luck-section">
             <fieldset class="luck-box">
               <legend>Luck</legend>
@@ -2992,11 +3274,6 @@
               </div>
             </fieldset>
           </div>
-
-          <div class="global-mod-field">
-            <label for="globalModInput">Global Modifier</label>
-            <input id="globalModInput" type="text" placeholder="Applies to all skills" />
-          </div>
         </div>
       </section>
 
@@ -3036,27 +3313,27 @@
         <div class="stats-grid">
           <div class="stat-row">
             <span class="stat-label">INT</span>
-            <span id="statInt" class="stat-value">--</span>
+            <span id="statInt" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">REF</span>
-            <span id="statRef" class="stat-value">--</span>
+            <span id="statRef" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">DEX</span>
-            <span id="statDex" class="stat-value">--</span>
+            <span id="statDex" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">TECH</span>
-            <span id="statTech" class="stat-value">--</span>
+            <span id="statTech" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">COOL</span>
-            <span id="statCool" class="stat-value">--</span>
+            <span id="statCool" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">WILL</span>
-            <span id="statWill" class="stat-value">--</span>
+            <span id="statWill" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row stat-row--pair">
             <span class="stat-label">LUCK</span>
@@ -3064,7 +3341,7 @@
           </div>
           <div class="stat-row">
             <span class="stat-label">MOVE</span>
-            <span id="statMove" class="stat-value">--</span>
+            <span id="statMove" class="stat-value stat-value--mod">--</span>
           </div>
           <div class="stat-row">
             <span class="stat-label">BODY</span>
@@ -3210,7 +3487,7 @@
           </div>
           <div class="modalField">
             <label for="ammoMaxInput">Max ammo</label>
-            <input id="ammoMaxInput" type="number" min="0" step="1" value="0" />
+            <input id="ammoMaxInput" class="ammo-input" type="number" min="0" step="1" value="0" />
           </div>
         </div>
 
@@ -3264,6 +3541,47 @@
       </div>
     </div>
 
+    <div id="modifierBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal modifiers-modal" data-label="Modifiers" role="dialog" aria-modal="true" aria-labelledby="modifierTitle">
+        <h2 id="modifierTitle" class="modalTitle">Edit Modifiers</h2>
+        <p class="modalSub">Select skills, stats, or attacks to target. Empty selections apply to all.</p>
+        <div id="modifierList" class="modifier-list" aria-live="polite"></div>
+        <div class="modalActions">
+          <button id="modifierAdd" type="button">Add Modifier</button>
+          <button id="modifierClose" class="right" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="modifierSelectBackdrop" class="modalBackdrop" data-open="false">
+      <div
+        class="modal modifiers-modal"
+        data-label="Select"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modifierSelectTitle"
+      >
+        <h2 id="modifierSelectTitle" class="modalTitle">Select</h2>
+        <p id="modifierSelectSub" class="modalSub"></p>
+        <div id="modifierSelectList" class="selection-grid" aria-live="polite"></div>
+        <div class="modalActions">
+          <div class="modifier-scope">
+            <div class="modifier-amount-wrap">
+              <span class="modifier-amount-label">+/-</span>
+              <input
+                id="modifierSelectAmount"
+                class="modifier-amount"
+                type="text"
+                placeholder="+1"
+                aria-label="Modifier amount"
+              />
+            </div>
+          </div>
+          <button id="modifierSelectClose" class="right" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+
     <div id="deleteWeaponBackdrop" class="modalBackdrop" data-open="false">
       <div class="modal" data-label="Confirm" role="dialog" aria-modal="true" aria-labelledby="deleteWeaponTitle">
         <h2 id="deleteWeaponTitle" class="modalTitle">Permanently Deletes Weapon</h2>
@@ -3275,11 +3593,28 @@
       </div>
     </div>
 
+    <div id="clearSheetBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" data-label="Confirm" role="dialog" aria-modal="true" aria-labelledby="clearSheetTitle">
+        <h2 id="clearSheetTitle" class="modalTitle">CLEAN SHEET</h2>
+        <p class="modalSub" id="clearSheetSub">
+          ALL DATA AND WORK WILL BE DELETED. NO SAVED PRESETS OR MODIFICATIONS
+        </p>
+        <div class="modalActions">
+          <button id="clearSheetCancel" type="button">CANCEL</button>
+          <button id="clearSheetConfirm" class="right btn-danger" type="button">CONFIRM</button>
+        </div>
+      </div>
+    </div>
+
     <dialog id="addDialog">
       <form method="dialog">
         <div>
           <label for="addName">Skill name</label>
           <input id="addName" type="text" required />
+        </div>
+        <div>
+          <label for="addLevel">LVL</label>
+          <input id="addLevel" type="text" />
         </div>
         <div>
           <label for="addBase">BASE</label>
@@ -3750,6 +4085,10 @@
           deleteWeaponSub: byId('deleteWeaponSub'),
           deleteWeaponCancel: byId('deleteWeaponCancel'),
           deleteWeaponConfirm: byId('deleteWeaponConfirm'),
+          clearSheetBackdrop: byId('clearSheetBackdrop'),
+          clearSheetSub: byId('clearSheetSub'),
+          clearSheetCancel: byId('clearSheetCancel'),
+          clearSheetConfirm: byId('clearSheetConfirm'),
 
           // Startup
           startupBackdrop: byId('startupBackdrop'),
@@ -3762,6 +4101,7 @@
           // Add / remove skill dialogs
           addDialog: byId('addDialog'),
           addName: byId('addName'),
+          addLevel: byId('addLevel'),
           addBase: byId('addBase'),
           addMod: byId('addMod'),
           removeGroupDialog: byId('removeGroupDialog'),
@@ -3775,9 +4115,12 @@
           redlinkToggleText: byId('redlinkToggleText'),
           redlinkChannelInput: byId('redlinkChannelInput'),
           redlinkChannelSet: byId('redlinkChannelSet'),
+          clearSheetBtn: byId('clearSheetBtn'),
 
           // Pinned + modifiers + luck
           addPinnedBtn: byId('addPinnedBtn'),
+          editModifiersBtn: byId('editModifiersBtn'),
+          modifierToggleList: byId('modifierToggleList'),
           globalModInput: byId('globalModInput'),
           luckPlusBtn: byId('luckPlus'),
           luckMinusBtn: byId('luckMinus'),
@@ -3786,6 +4129,18 @@
           luckPoolInput: byId('luckPoolInput'),
           luckAfterValue: byId('luckAfter'),
           luckTotalInput: byId('luckTotalInput'),
+
+          // Modifiers modal
+          modifierBackdrop: byId('modifierBackdrop'),
+          modifierList: byId('modifierList'),
+          modifierAdd: byId('modifierAdd'),
+          modifierClose: byId('modifierClose'),
+          modifierSelectBackdrop: byId('modifierSelectBackdrop'),
+          modifierSelectTitle: byId('modifierSelectTitle'),
+          modifierSelectSub: byId('modifierSelectSub'),
+          modifierSelectList: byId('modifierSelectList'),
+          modifierSelectAmount: byId('modifierSelectAmount'),
+          modifierSelectClose: byId('modifierSelectClose'),
 
           // Stats drawer
           statsDrawer: byId('statsDrawer'),
@@ -3890,6 +4245,10 @@
           deleteWeaponSub,
           deleteWeaponCancel,
           deleteWeaponConfirm,
+          clearSheetBackdrop,
+          clearSheetSub,
+          clearSheetCancel,
+          clearSheetConfirm,
           startupBackdrop,
           startupLoadPdf,
           startupLoadState,
@@ -3898,6 +4257,7 @@
           startupRedlinkChannelInput,
           addDialog,
           addName,
+          addLevel,
           addBase,
           addMod,
           removeGroupDialog,
@@ -3909,7 +4269,10 @@
           redlinkToggleText,
           redlinkChannelInput,
           redlinkChannelSet,
+          clearSheetBtn,
           addPinnedBtn,
+          editModifiersBtn,
+          modifierToggleList,
           globalModInput,
           luckPlusBtn,
           luckMinusBtn,
@@ -3918,6 +4281,16 @@
           luckPoolInput,
           luckAfterValue,
           luckTotalInput,
+          modifierBackdrop,
+          modifierList,
+          modifierAdd,
+          modifierClose,
+          modifierSelectBackdrop,
+          modifierSelectTitle,
+          modifierSelectSub,
+          modifierSelectList,
+          modifierSelectAmount,
+          modifierSelectClose,
           statsDrawer,
           statsTab,
           statInt,
@@ -3937,6 +4310,7 @@
         } = ui;
 
 const BASE_PREFIX = "BASE ";
+      const LVL_PREFIX = "LVL ";
       const MOD_PREFIX = "MOD ";
 
       const canonicalOrdering = JSON.parse(
@@ -4034,6 +4408,76 @@ const BASE_PREFIX = "BASE ";
         });
       });
 
+      const DEFAULT_MODIFIERS = [
+        {
+          id: "seriously-wounded",
+          name: "Seriously Wounded",
+          skills: { value: "-2", applyAll: true }
+        },
+        {
+          id: "mortally-wounded",
+          name: "Mortally Wounded",
+          skills: { value: "-4", applyAll: true },
+          stats: { value: "-6", targets: ["MOVE"] }
+        },
+        {
+          id: "in-a-grapple",
+          name: "In a Grapple",
+          skills: { value: "-2", applyAll: true }
+        },
+        {
+          id: "smash",
+          name: "Smash",
+          skills: {
+            value: "+2",
+            targets: ["Dance", "Contortionist", "Conversation", "Human Perception", "Persuasion", "Acting"]
+          }
+        },
+        {
+          id: "synthcoke",
+          name: "Synthcoke",
+          stats: { value: "+1", targets: ["REF"] }
+        },
+        {
+          id: "synthcoke-addiction",
+          name: "Synthcoke Addiction",
+          stats: { value: "-2", targets: ["REF"] }
+        },
+        {
+          id: "primetime",
+          name: "Primetime",
+          stats: { value: "+2", targets: ["COOL", "WILL"] }
+        },
+        {
+          id: "primetime-addiction",
+          name: "Primetime Addiction",
+          stats: { value: "-2", targets: ["COOL"] }
+        }
+      ];
+
+      function createDefaultModifiers() {
+        return DEFAULT_MODIFIERS.map((entry) => ({
+          id: entry.id,
+          name: entry.name,
+          active: false,
+          skills: {
+            value: entry.skills?.value || "",
+            targets: Array.isArray(entry.skills?.targets) ? [...entry.skills.targets] : [],
+            applyAll: Boolean(entry.skills?.applyAll)
+          },
+          stats: {
+            value: entry.stats?.value || "",
+            targets: Array.isArray(entry.stats?.targets) ? [...entry.stats.targets] : [],
+            applyAll: Boolean(entry.stats?.applyAll)
+          },
+          attacks: {
+            value: entry.attacks?.value || "",
+            targets: Array.isArray(entry.attacks?.targets) ? [...entry.attacks.targets] : [],
+            applyAll: Boolean(entry.attacks?.applyAll)
+          }
+        }));
+      }
+
       const state = {
         characterName: "",
         characterLog: [],
@@ -4053,6 +4497,7 @@ const BASE_PREFIX = "BASE ";
         pinnedColumns: { col1: [], col2: [], col3: [] },
         customCounter: 0,
         globalMod: "",
+        modifiers: createDefaultModifiers(),
         luckNext: 0,
         luckPool: 0,
         luckTotal: 0,
@@ -4195,6 +4640,26 @@ const BASE_PREFIX = "BASE ";
           luckTotal: state.luckTotal,
           luckPool: state.luckPool,
           luckNext: state.luckNext,
+          modifiers: ensureModifierState().map((mod) => ({
+            id: mod.id,
+            name: mod.name,
+            active: mod.active,
+            skills: {
+              value: mod.skills?.value || "",
+              targets: [...(mod.skills?.targets || [])],
+              applyAll: Boolean(mod.skills?.applyAll)
+            },
+            stats: {
+              value: mod.stats?.value || "",
+              targets: [...(mod.stats?.targets || [])],
+              applyAll: Boolean(mod.stats?.applyAll)
+            },
+            attacks: {
+              value: mod.attacks?.value || "",
+              targets: [...(mod.attacks?.targets || [])],
+              applyAll: Boolean(mod.attacks?.applyAll)
+            }
+          })),
           statInt: state.statInt,
           statRef: state.statRef,
           statDex: state.statDex,
@@ -4233,6 +4698,7 @@ const BASE_PREFIX = "BASE ";
             id: skill.id,
             displayName: skill.displayName,
             base: skill.base,
+            level: skill.level,
             mod: skill.mod,
             canonicalKey: skill.canonicalKey,
             stat: skill.stat,
@@ -4324,6 +4790,7 @@ const BASE_PREFIX = "BASE ";
         flashRollButton(button);
         const text = buildRollText(skill, false);
         await copyRollText(text, row);
+        appendCharacterLogEntry(buildSkillRollLog(skill));
         consumeLuckForRoll();
       }
 
@@ -4355,6 +4822,72 @@ const BASE_PREFIX = "BASE ";
         return text.startsWith("+") ? text.slice(1) : text;
       }
 
+      function normalizeLevelPrefill(value) {
+        const text = String(normalizeValue(value)).trim();
+        if (!text) return "";
+        const parsed = parseNumeric(text);
+        if (parsed === null) return text;
+        return String(Math.trunc(parsed));
+      }
+
+      const STAT_VALUE_BY_LABEL = {
+        INT: "statInt",
+        REF: "statRef",
+        DEX: "statDex",
+        TECH: "statTech",
+        COOL: "statCool",
+        WILL: "statWill",
+        MOVE: "statMove",
+        BODY: "statBody"
+      };
+
+      function getEmpCurrentValue() {
+        const humCurr = Numbers.toNullableInt(state.statHumCurr);
+        const humTemp = Numbers.toNullableInt(state.statHumTemp) || 0;
+        if (humCurr === null) return Numbers.toNullableInt(state.statEmpCurr);
+        return Math.floor((humCurr + humTemp) / 10);
+      }
+
+      function getStatValueForLabel(label) {
+        const normalized = String(label || "").toUpperCase();
+        if (normalized === "EMP") return getEmpCurrentValue();
+        const key = STAT_VALUE_BY_LABEL[normalized];
+        if (!key) return null;
+        const base = Numbers.toNullableInt(state[key]);
+        if (base === null) return null;
+        const modifier = getStatModifierTotal(normalized);
+        return base + modifier;
+      }
+
+      function computeBaseFromLevel(levelText, statLabel) {
+        const statNum = getStatValueForLabel(statLabel);
+        if (statNum === null) return "";
+        const trimmedLevel = String(levelText ?? "").trim();
+        const levelNum = Numbers.toNullableInt(trimmedLevel);
+        if (levelNum === null) {
+          if (trimmedLevel === "") return String(statNum);
+          return "";
+        }
+        return String(statNum + levelNum);
+      }
+
+      function recomputeSkillBasesFromStats() {
+        let changed = false;
+        Object.values(state.skills).forEach((skill) => {
+          if (!skill) return;
+          const computed = computeBaseFromLevel(skill.level, skill.stat);
+          if (computed === "") return;
+          if (String(skill.base ?? "") === computed) return;
+          skill.base = computed;
+          syncSkillBase(skill.id, computed, null);
+          changed = true;
+        });
+        if (changed) {
+          renderWeapons();
+          renderWeaponModesPreview();
+        }
+      }
+
       function parseNumeric(value) {
         const text = String(value ?? "").trim();
         if (!text) return null;
@@ -4374,22 +4907,15 @@ const BASE_PREFIX = "BASE ";
         return Math.min(Math.max(0, value), max);
       }
 
-      function adjustBaseForMod(baseValue, modValue) {
-        const baseNum = parseNumeric(baseValue);
-        const modNum = parseNumeric(modValue);
-        if (baseNum === null || modNum === null || modNum === 0) return baseValue;
-        const adjusted = baseNum - modNum;
-        return Number.isFinite(adjusted) ? String(adjusted) : baseValue;
-      }
-
-      function updateLuckPoolDisplay() {
+      function updateLuckPoolDisplay(opts = {}) {
+        const { renderStats = true } = opts;
         if (!luckPoolInput || !luckAfterValue || !luckPoolDisplay) return;
         const current = Math.max(0, state.luckPool || 0);
         const after = Math.max(0, current - Math.max(0, state.luckNext || 0));
-        luckPoolInput.value = current > 0 ? String(current) : "";
+        luckPoolInput.value = String(current);
         luckAfterValue.textContent = String(after);
         luckPoolDisplay.dataset.active = state.luckNext > 0 ? "true" : "false";
-        renderStatsPanel();
+        if (renderStats) renderStatsPanel();
       }
 
       function updateLuckNextInputDisplay() {
@@ -4397,21 +4923,406 @@ const BASE_PREFIX = "BASE ";
         luckNextInput.value = state.luckNext > 0 ? String(state.luckNext) : "";
       }
 
-      function updateLuckTotalInputDisplay() {
+      function updateLuckTotalInputDisplay(opts = {}) {
+        const { renderStats = true } = opts;
         if (!luckTotalInput) return;
         luckTotalInput.value = state.luckTotal > 0 ? String(state.luckTotal) : "";
-        renderStatsPanel();
+        if (renderStats) renderStatsPanel();
       }
 
-      function updateLuckModHints() {
+      function updateLuckModHints(opts = {}) {
+        const {
+          renderWeapons: shouldRenderWeapons = true,
+          renderWeaponModesPreview: shouldRenderWeaponModesPreview = true,
+          renderStats: shouldRenderStats = true
+        } = opts;
         const luckText = state.luckNext > 0 ? `+${state.luckNext}` : "";
         document.querySelectorAll(".mod-luck").forEach((el) => {
           el.textContent = luckText;
           el.dataset.empty = luckText ? "false" : "true";
         });
+        if (shouldRenderWeapons) renderWeapons();
+        if (shouldRenderWeaponModesPreview) renderWeaponModesPreview();
+        if (shouldRenderStats) renderStatsPanel();
+        updateRollCountLuckNote();
+      }
+
+      function updateModifierHints() {
+        document.querySelectorAll(".skill-row").forEach((row) => {
+          const skillId = row.dataset.skillId;
+          if (!skillId) return;
+          const skill = state.skills[skillId];
+          if (!skill) return;
+          const hint = row.querySelector(".mod-toggle");
+          if (!hint) return;
+          const text = formatModifierParts(getSkillModifierParts(skill), " ");
+          hint.textContent = text;
+          hint.dataset.empty = text ? "false" : "true";
+        });
         renderWeapons();
         renderWeaponModesPreview();
-        updateRollCountLuckNote();
+        renderStatsPanel();
+      }
+
+      function getScopeSummary(scope) {
+        if (!scope) return "All";
+        if (scope.applyAll || !scope.targets || scope.targets.length === 0) return "All";
+        if (scope.targets.length <= 3) return scope.targets.join(", ");
+        return `${scope.targets.length} selected`;
+      }
+
+      function getScopePreview(scope) {
+        const summary = getScopeSummary(scope);
+        const normalizedSummary = summary === "All" ? "ALL" : summary;
+        const value = normalizeModifierForRoll(scope?.value || "");
+        if (!value) return "";
+        if (normalizedSummary) return `${value} ${normalizedSummary}`;
+        return value;
+      }
+
+      function renderModifierToggles() {
+        if (!modifierToggleList) return;
+        const mods = ensureModifierState();
+        modifierToggleList.textContent = "";
+        if (mods.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = "No modifiers yet.";
+          modifierToggleList.appendChild(empty);
+          return;
+        }
+        mods.forEach((mod) => {
+          const row = document.createElement("label");
+          row.className = "mod-toggle-item";
+          row.dataset.id = mod.id;
+          const name = document.createElement("span");
+          name.textContent = mod.name || "Modifier";
+          const toggle = document.createElement("input");
+          toggle.type = "checkbox";
+          toggle.checked = Boolean(mod.active);
+          toggle.addEventListener("change", () => {
+            mod.active = toggle.checked;
+            appendCharacterLogEntry(`Modifier ${mod.name || "Modifier"} ${mod.active ? "ON" : "OFF"}`);
+            updateModifierHints();
+            scheduleLocalStateSave();
+          });
+          row.append(toggle, name);
+          modifierToggleList.appendChild(row);
+        });
+      }
+
+      function renderModifierModal() {
+        if (!modifierList) return;
+        const mods = ensureModifierState();
+        modifierList.textContent = "";
+        if (mods.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = "No modifiers yet. Add one below.";
+          modifierList.appendChild(empty);
+          return;
+        }
+
+        const buildScopeField = (labelText, scope, scopeKey, modId) => {
+          const wrap = document.createElement("div");
+          wrap.className = "modifier-field";
+          const scopeWrap = document.createElement("div");
+          scopeWrap.className = "modifier-scope";
+          const selectBtn = document.createElement("button");
+          selectBtn.type = "button";
+          selectBtn.className = "btn-mini";
+          selectBtn.textContent = `Select ${labelText}`;
+          selectBtn.addEventListener("click", () => {
+            openModifierSelection(modId, scopeKey);
+          });
+          scopeWrap.append(selectBtn);
+            wrap.append(scopeWrap);
+            const summary = document.createElement("div");
+            summary.className = "modifier-summary";
+            summary.textContent = getScopePreview(scope);
+            wrap.append(summary);
+            return wrap;
+          };
+
+        mods.forEach((mod) => {
+          if (!mod.skills) mod.skills = { value: "", targets: [], applyAll: false };
+          if (!mod.stats) mod.stats = { value: "", targets: [], applyAll: false };
+          if (!mod.attacks) mod.attacks = { value: "", targets: [], applyAll: false };
+          const row = document.createElement("div");
+          row.className = "modifier-row";
+          row.dataset.id = mod.id;
+
+          const head = document.createElement("div");
+          head.className = "modifier-row-head";
+          const nameInput = document.createElement("input");
+          nameInput.type = "text";
+          nameInput.className = "modifier-name";
+          nameInput.value = mod.name || "";
+          nameInput.placeholder = "Modifier name";
+          nameInput.dataset.logValue = nameInput.value;
+          nameInput.addEventListener("input", () => {
+            mod.name = nameInput.value.trim() || "Modifier";
+            renderModifierToggles();
+            scheduleLocalStateSave();
+          });
+          nameInput.addEventListener("blur", () => {
+            logValueChange("Modifier Name", nameInput.dataset.logValue, nameInput.value);
+            nameInput.dataset.logValue = nameInput.value;
+          });
+          const deleteBtn = document.createElement("button");
+          deleteBtn.className = "btn-mini btn-danger";
+          deleteBtn.type = "button";
+          deleteBtn.textContent = "Delete";
+          deleteBtn.addEventListener("click", () => {
+            appendCharacterLogEntry(`Modifier Deleted ${mod.name || "Modifier"}`);
+            state.modifiers = ensureModifierState().filter((entry) => entry.id !== mod.id);
+            renderModifierToggles();
+            renderModifierModal();
+            updateModifierHints();
+            scheduleLocalStateSave();
+          });
+          head.append(nameInput, deleteBtn);
+
+          const grid = document.createElement("div");
+          grid.className = "modifier-grid";
+          grid.appendChild(buildScopeField("Skills", mod.skills, "skills", mod.id));
+          grid.appendChild(buildScopeField("Stats", mod.stats, "stats", mod.id));
+          grid.appendChild(buildScopeField("Attacks", mod.attacks, "attacks", mod.id));
+
+          row.append(head, grid);
+          modifierList.appendChild(row);
+        });
+      }
+
+      function openModifierModal() {
+        renderModifierModal();
+        setBackdropOpen(modifierBackdrop, true);
+      }
+
+      function closeModifierModal() {
+        setBackdropOpen(modifierBackdrop, false);
+      }
+
+      let modifierSelection = null;
+
+      function openModifierSelection(modifierId, scopeKey) {
+        modifierSelection = { modifierId, scopeKey };
+        renderModifierSelection();
+        setBackdropOpen(modifierSelectBackdrop, true);
+      }
+
+      function closeModifierSelection() {
+        setBackdropOpen(modifierSelectBackdrop, false);
+        modifierSelection = null;
+        if (modifierSelectAmount) modifierSelectAmount.oninput = null;
+        if (modifierSelectAmount) modifierSelectAmount.onblur = null;
+        renderModifierModal();
+      }
+
+      function renderModifierSelection() {
+        if (!modifierSelectList || !modifierSelectTitle || !modifierSelectSub) return;
+        if (!modifierSelection) return;
+        const mods = ensureModifierState();
+        const mod = mods.find((entry) => entry.id === modifierSelection.modifierId);
+        if (!mod) return;
+        const scope = mod[modifierSelection.scopeKey];
+        if (!scope) return;
+
+        modifierSelectList.textContent = "";
+        const scopeLabel = modifierSelection.scopeKey === "skills"
+          ? "Skills"
+          : modifierSelection.scopeKey === "stats"
+            ? "Stats"
+            : "Attacks";
+        if (modifierSelectAmount) {
+          modifierSelectAmount.value = scope.value || "";
+          modifierSelectAmount.dataset.logValue = modifierSelectAmount.value;
+          modifierSelectAmount.oninput = () => {
+            scope.value = modifierSelectAmount.value.trim();
+            updateModifierHints({
+              renderWeapons: false,
+              renderWeaponModesPreview: false,
+              renderStats: false
+            });
+            scheduleLocalStateSave();
+          };
+          modifierSelectAmount.onblur = () => {
+            logValueChange(
+              `Modifier ${mod.name || "Modifier"} ${scopeLabel}`,
+              modifierSelectAmount.dataset.logValue,
+              modifierSelectAmount.value
+            );
+            modifierSelectAmount.dataset.logValue = modifierSelectAmount.value;
+            updateModifierHints();
+            scheduleLocalStateSave();
+          };
+          bindArrowStepperInput(modifierSelectAmount);
+        }
+        modifierSelectTitle.textContent = `Select ${scopeLabel}`;
+        modifierSelectSub.textContent =
+          modifierSelection.scopeKey === "attacks"
+            ? "Choose attack modes or apply to all attacks."
+            : `Choose ${scopeLabel.toLowerCase()} or apply to all.`;
+
+        const setApplyAll = (next) => {
+          scope.applyAll = Boolean(next);
+          if (scope.applyAll) {
+            scope.targets = [];
+          }
+          updateModifierHints();
+          scheduleLocalStateSave();
+          renderModifierSelection();
+        };
+
+        const toggleTarget = (value) => {
+          scope.applyAll = false;
+          const index = scope.targets.indexOf(value);
+          if (index === -1) {
+            scope.targets.push(value);
+          } else {
+            scope.targets.splice(index, 1);
+          }
+          updateModifierHints();
+          scheduleLocalStateSave();
+          renderModifierSelection();
+        };
+
+        const buildAllButton = (label) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "select-button";
+          const active = scope.applyAll || scope.targets.length === 0;
+          if (active) btn.classList.add("active");
+          btn.textContent = label;
+          btn.addEventListener("click", () => setApplyAll(!scope.applyAll));
+          return btn;
+        };
+
+        const buildTargetButton = (label, value) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "select-button";
+          if (scope.targets.includes(value) && !scope.applyAll) {
+            btn.classList.add("active");
+          }
+          btn.textContent = label;
+          btn.addEventListener("click", () => toggleTarget(value));
+          return btn;
+        };
+
+        if (modifierSelection.scopeKey === "skills") {
+          const allGroup = document.createElement("div");
+          allGroup.className = "selection-group";
+          const allGrid = document.createElement("div");
+          allGrid.className = "selection-group-grid";
+          allGrid.appendChild(buildAllButton("All Skills"));
+          allGroup.append(allGrid);
+          modifierSelectList.appendChild(allGroup);
+
+          const columnWrap = document.createElement("div");
+          columnWrap.className = "selection-columns";
+
+          const skillsByCanonical = {};
+          Object.values(state.skills).forEach((skill) => {
+            if (!skill) return;
+            const key = skill.canonicalKey || "";
+            if (!skillsByCanonical[key]) skillsByCanonical[key] = [];
+            skillsByCanonical[key].push(skill);
+          });
+
+          canonicalOrdering.columns.forEach((col, colIndex) => {
+            const colEl = document.createElement("div");
+            colEl.className = "selection-column";
+            col.sections.forEach((section) => {
+              const group = document.createElement("div");
+              group.className = "selection-group";
+              const title = document.createElement("div");
+              title.className = "selection-group-title";
+              title.textContent = section.name;
+              const grid = document.createElement("div");
+              grid.className = "selection-group-grid";
+              section.skills.forEach((skillMeta) => {
+                const key = toKey(skillMeta.name);
+                const skills = skillsByCanonical[key] || [];
+                if (GROUPED_CANONICAL_KEYS.has(key)) {
+                  const groupedSkills = getGroupedSkillsInOrder(key);
+                  if (groupedSkills.length === 0) return;
+                  groupedSkills.forEach((skill) => {
+                    const display = cleanDisplayName(skill.displayName || "");
+                    if (!display) return;
+                    const label = getGroupedChildLabel(skill) || display;
+                    grid.appendChild(buildTargetButton(label, display));
+                  });
+                  return;
+                }
+                if (skills.length === 0) return;
+                const display = skillMeta.name;
+                grid.appendChild(buildTargetButton(display, display));
+              });
+              if (grid.childElementCount > 0) {
+                group.append(title, grid);
+                colEl.appendChild(group);
+              }
+            });
+            columnWrap.appendChild(colEl);
+          });
+
+          modifierSelectList.appendChild(columnWrap);
+          return;
+        }
+
+        if (modifierSelection.scopeKey === "stats") {
+          const group = document.createElement("div");
+          group.className = "selection-group";
+          const grid = document.createElement("div");
+          grid.className = "selection-group-grid";
+          grid.appendChild(buildAllButton("All Stats"));
+          ["INT", "REF", "DEX", "TECH", "COOL", "WILL", "LUCK", "MOVE", "BODY", "EMP"].forEach((stat) => {
+            grid.appendChild(buildTargetButton(stat, stat));
+          });
+          group.append(grid);
+          modifierSelectList.appendChild(group);
+          return;
+        }
+
+        const allGroup = document.createElement("div");
+        allGroup.className = "selection-group";
+        const allGrid = document.createElement("div");
+        allGrid.className = "selection-group-grid";
+        allGrid.appendChild(buildAllButton("All Attacks"));
+        allGroup.append(allGrid);
+        modifierSelectList.appendChild(allGroup);
+
+        const weapons = Array.isArray(state.weapons) ? state.weapons : [];
+        if (weapons.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "empty-state";
+          empty.textContent = "No attacks available yet.";
+          modifierSelectList.appendChild(empty);
+          return;
+        }
+
+        weapons.forEach((weapon) => {
+          const attacks = Array.isArray(weapon.attacks) ? weapon.attacks : [];
+          if (attacks.length === 0) return;
+          const group = document.createElement("div");
+          group.className = "selection-group";
+          const title = document.createElement("div");
+          title.className = "selection-group-title";
+          title.textContent = weapon.name || "Weapon";
+          const grid = document.createElement("div");
+          grid.className = "selection-group-grid";
+          attacks.forEach((attack) => {
+            const rawName = String(attack.name || "").trim();
+            const attackLabel = rawName || getWeaponSkillLabel(attack.skillKey);
+            const value = weapon.name && rawName
+              ? `${weapon.name} - ${attackLabel}`
+              : attackLabel;
+            grid.appendChild(buildTargetButton(attackLabel, value));
+          });
+          group.append(title, grid);
+          modifierSelectList.appendChild(group);
+        });
       }
 
       function updateRollCountLuckNote() {
@@ -4425,36 +5336,63 @@ const BASE_PREFIX = "BASE ";
         rollCountNote.hidden = true;
       }
 
-      function setLuckNext(value) {
+      function setLuckNext(value, opts = {}) {
+        const {
+          clamp = true,
+          updateHints = true,
+          renderStats = true,
+          renderWeapons = true,
+          renderWeaponModesPreview = true
+        } = opts;
         const parsed = parseLuckValue(value);
-        state.luckNext = clampLuckNext(parsed);
+        state.luckNext = clamp ? clampLuckNext(parsed) : parsed;
         updateLuckNextInputDisplay();
-        updateLuckPoolDisplay();
-        updateLuckModHints();
+        updateLuckPoolDisplay({ renderStats });
+        if (updateHints) {
+          updateLuckModHints({ renderStats, renderWeapons, renderWeaponModesPreview });
+        }
       }
 
-      function setLuckTotal(value, resetPool) {
+      function setLuckTotal(value, resetPool, opts = {}) {
+        const {
+          clampPool = true,
+          updateHints = true,
+          renderStats = true,
+          renderWeapons = true,
+          renderWeaponModesPreview = true
+        } = opts;
         const parsed = parseLuckValue(value);
         state.luckTotal = parsed;
         if (resetPool) {
           state.luckPool = parsed;
-        } else if (state.luckPool > parsed) {
+        } else if (clampPool && state.luckPool > parsed) {
           state.luckPool = parsed;
         }
-        state.luckNext = clampLuckNext(state.luckNext || 0);
-        updateLuckTotalInputDisplay();
+        state.luckNext = clampPool ? clampLuckNext(state.luckNext || 0) : state.luckNext || 0;
+        updateLuckTotalInputDisplay({ renderStats });
         updateLuckNextInputDisplay();
-        updateLuckPoolDisplay();
-        updateLuckModHints();
+        updateLuckPoolDisplay({ renderStats });
+        if (updateHints) {
+          updateLuckModHints({ renderStats, renderWeapons, renderWeaponModesPreview });
+        }
       }
 
-      function setLuckPool(value) {
+      function setLuckPool(value, opts = {}) {
+        const {
+          clampToTotal = true,
+          updateHints = true,
+          renderStats = true,
+          renderWeapons = true,
+          renderWeaponModesPreview = true
+        } = opts;
         const parsed = parseLuckValue(value);
         const max = Math.max(0, state.luckTotal || 0);
-        state.luckPool = Math.min(parsed, max);
-        state.luckNext = clampLuckNext(state.luckNext || 0);
-        updateLuckPoolDisplay();
-        updateLuckModHints();
+        state.luckPool = clampToTotal ? Math.min(parsed, max) : parsed;
+        state.luckNext = clampToTotal ? clampLuckNext(state.luckNext || 0) : state.luckNext || 0;
+        updateLuckPoolDisplay({ renderStats });
+        if (updateHints) {
+          updateLuckModHints({ renderStats, renderWeapons, renderWeaponModesPreview });
+        }
       }
 
       function consumeLuckForRoll() {
@@ -4470,14 +5408,27 @@ const BASE_PREFIX = "BASE ";
       function normalizeModifierForRoll(text) {
         const mod = String(text ?? "").trim();
         if (!mod) return "";
+        if (/^[-+]?0+(?:\.0+)?$/.test(mod)) return "";
         if (mod.startsWith("+") || mod.startsWith("-")) return mod;
         return `+${mod}`;
       }
 
-      function buildCombinedModifier(...mods) {
-        const normalized = mods.map(normalizeModifierForRoll).filter(Boolean);
+      function formatModifierParts(parts, joiner = "") {
+        const normalized = parts.map(normalizeModifierForRoll).filter(Boolean);
         if (normalized.length === 0) return "";
-        return normalized.join("");
+        return normalized.join(joiner);
+      }
+
+      function buildCombinedModifier(...mods) {
+        const flattened = [];
+        mods.forEach((mod) => {
+          if (Array.isArray(mod)) {
+            mod.forEach((entry) => flattened.push(entry));
+            return;
+          }
+          flattened.push(mod);
+        });
+        return formatModifierParts(flattened, "");
       }
 
       function toKey(name) {
@@ -4783,6 +5734,7 @@ const BASE_PREFIX = "BASE ";
           btn.className = "btn-remove-skill";
           btn.textContent = label;
           btn.addEventListener("click", () => {
+            appendCharacterLogEntry(`Skill Removed ${formatSkillLabel(skill)}`);
             removeSkill(skill.id);
             render();
             removeGroupDialog.close();
@@ -4851,7 +5803,8 @@ const BASE_PREFIX = "BASE ";
         const base = String(skill.base || "").trim() || "0";
         const luckMod = !isMulti && state.luckNext > 0 ? String(state.luckNext) : "";
         const multiMod = isMulti ? String(extraMod || "").replace(/\s+/g, "") : extraMod;
-        const mod = buildCombinedModifier(skill.mod, state.globalMod, luckMod, multiMod);
+        const toggleMods = getSkillModifierParts(skill);
+        const mod = buildCombinedModifier(skill.mod, state.globalMod, toggleMods, luckMod, multiMod);
         const skillName = skill.displayName;
         if (isMulti) {
           return `!rr ${rollCount} 1d10+${base}${mod} ${skillName}`;
@@ -4889,6 +5842,10 @@ const BASE_PREFIX = "BASE ";
         const extraMod = rollCountModInput ? rollCountModInput.value : "";
         const text = pendingMulti.buildText(count, extraMod);
         await copyRollText(text, pendingMulti.flashEl);
+        if (pendingMulti.logEntry) {
+          const logText = pendingMulti.logEntry(count, extraMod);
+          if (logText) appendCharacterLogEntry(logText);
+        }
         if (pendingMulti.afterCopy) {
           pendingMulti.afterCopy(count);
         }
@@ -5067,15 +6024,44 @@ const BASE_PREFIX = "BASE ";
         el.append(main, divider, sub);
       };
 
+      const setStatWithModifier = (el, baseValue, modifierValue) => {
+        if (!el) return;
+        const baseText = formatStatValue(baseValue);
+        const modNum = parseModifierValue(modifierValue);
+        const modText = formatModifierValue(modNum);
+        if (!modText) {
+          el.textContent = baseText;
+          return;
+        }
+        el.textContent = "";
+        const baseNum = parseLooseNumeric(baseText);
+        if (Number.isFinite(baseNum)) {
+          const total = baseNum + modNum;
+          const totalText = `(${formatStatValue(total)})`;
+          const totalSpan = document.createElement("span");
+          totalSpan.className = "stat-mod-total";
+          totalSpan.textContent = totalText;
+          el.appendChild(totalSpan);
+        }
+        const main = document.createElement("span");
+        main.className = "stat-main";
+        main.textContent = baseText;
+        const modSpan = document.createElement("span");
+        modSpan.className = "stat-mod";
+        modSpan.textContent = modText;
+        el.append(main, modSpan);
+      };
+
       function renderStatsPanel() {
         if (!statInt) return;
-        statInt.textContent = formatStatValue(state.statInt);
-        statRef.textContent = formatStatValue(state.statRef);
-        statDex.textContent = formatStatValue(state.statDex);
-        statTech.textContent = formatStatValue(state.statTech);
-        statCool.textContent = formatStatValue(state.statCool);
-        statWill.textContent = formatStatValue(state.statWill);
-        statMove.textContent = formatStatValue(state.statMove);
+        recomputeSkillBasesFromStats();
+        setStatWithModifier(statInt, state.statInt, getStatModifierTotal("INT"));
+        setStatWithModifier(statRef, state.statRef, getStatModifierTotal("REF"));
+        setStatWithModifier(statDex, state.statDex, getStatModifierTotal("DEX"));
+        setStatWithModifier(statTech, state.statTech, getStatModifierTotal("TECH"));
+        setStatWithModifier(statCool, state.statCool, getStatModifierTotal("COOL"));
+        setStatWithModifier(statWill, state.statWill, getStatModifierTotal("WILL"));
+        setStatWithModifier(statMove, state.statMove, getStatModifierTotal("MOVE"));
         setStatPair(statBody, state.statBody, state.statBodyChargen);
         const luckVisible = (state.luckPool || 0) > 0 || (state.luckTotal || 0) > 0;
         if (luckVisible) {
@@ -5120,6 +6106,7 @@ const BASE_PREFIX = "BASE ";
         renderCharacterLog();
         renderCriticalInjuries();
         renderWeapons();
+        renderModifierToggles();
         renderPinned();
         renderColumns(visibleSkillIds, needle.length === 0);
         scheduleLocalStateSave();
@@ -5235,6 +6222,17 @@ const BASE_PREFIX = "BASE ";
         return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
       }
 
+      function createEmptyModifier() {
+        return {
+          id: uid(),
+          name: "New Modifier",
+          active: false,
+          skills: { value: "", targets: [], applyAll: false },
+          stats: { value: "", targets: [], applyAll: false },
+          attacks: { value: "", targets: [], applyAll: false }
+        };
+      }
+
       function clampAmmo(cur, max) {
         const m = Math.max(0, Number.isFinite(max) ? max : 0);
         const c = Math.max(0, Number.isFinite(cur) ? cur : 0);
@@ -5328,13 +6326,195 @@ const BASE_PREFIX = "BASE ";
         return `+${text}`;
       }
 
+      function normalizeModifierTargets(value) {
+        return String(value || "")
+          .split(",")
+          .map((entry) => entry.trim())
+          .filter(Boolean);
+      }
+
+      function normalizeModifierScope(scope) {
+        const raw = scope && typeof scope === "object" ? scope : {};
+        const value = raw.value !== undefined && raw.value !== null ? String(raw.value).trim() : "";
+        const targets = Array.isArray(raw.targets)
+          ? raw.targets.map((target) => String(target).trim()).filter(Boolean)
+          : [];
+        const applyAll = Boolean(raw.applyAll);
+        return { value, targets, applyAll };
+      }
+
+      function normalizeModifierEntry(entry) {
+        if (!entry || typeof entry !== "object") return null;
+        const name = String(entry.name || "").trim() || "Modifier";
+        const skills = normalizeModifierScope(entry.skills);
+        const globalText = entry.global !== undefined && entry.global !== null ? String(entry.global).trim() : "";
+        if (globalText) {
+          const globalNum = parseLooseNumeric(globalText);
+          const skillNum = parseLooseNumeric(skills.value);
+          if (globalNum !== null && skillNum !== null) {
+            skills.value = formatModifierValue(skillNum + globalNum);
+          } else if (!skills.value) {
+            skills.value = globalText;
+          }
+          skills.applyAll = true;
+          skills.targets = [];
+        }
+        return {
+          id: entry.id || uid(),
+          name,
+          active: Boolean(entry.active),
+          skills,
+          stats: normalizeModifierScope(entry.stats),
+          attacks: normalizeModifierScope(entry.attacks)
+        };
+      }
+
+      function normalizeModifierList(list) {
+        const normalized = Array.isArray(list) ? list.map(normalizeModifierEntry).filter(Boolean) : [];
+        return normalized.length ? normalized : createDefaultModifiers();
+      }
+
+      function ensureModifierState() {
+        if (!Array.isArray(state.modifiers) || state.modifiers.length === 0) {
+          state.modifiers = createDefaultModifiers();
+        }
+        return state.modifiers;
+      }
+
+      function parseModifierValue(value) {
+        const num = parseLooseNumeric(value);
+        return Number.isFinite(num) ? num : 0;
+      }
+
+      function formatModifierValue(value) {
+        if (!Number.isFinite(value) || value === 0) return "";
+        const text = Number.isInteger(value) ? String(value) : String(value);
+        return value > 0 ? `+${text}` : text;
+      }
+
+      function buildNormalizedTargetSet(values, normalizeFn) {
+        const set = new Set();
+        values.forEach((value) => {
+          const normalized = normalizeFn(value);
+          if (normalized) set.add(normalized);
+        });
+        return set;
+      }
+
+      function normalizeSkillTarget(value) {
+        return cleanDisplayName(value).toLowerCase();
+      }
+
+      function normalizeAttackTarget(value) {
+        return normalizeFreeTextName(value).toLowerCase();
+      }
+
+      function normalizeStatTarget(value) {
+        return String(value || "").trim().toUpperCase();
+      }
+
+      function getScopedModifierParts(scopeKey, targetSet, normalizeFn) {
+        const parts = [];
+        ensureModifierState().forEach((mod) => {
+          if (!mod.active) return;
+          const scope = mod[scopeKey];
+          if (!scope) return;
+          const value = normalizeModifierForRoll(scope.value);
+          if (!value) return;
+          if (scope.applyAll) {
+            parts.push(value);
+            return;
+          }
+          const targets = Array.isArray(scope.targets) ? scope.targets : [];
+          if (targets.length === 0) {
+            parts.push(value);
+            return;
+          }
+          const matched = targets.some((target) => targetSet.has(normalizeFn(target)));
+          if (matched) parts.push(value);
+        });
+        return parts;
+      }
+
+      function getSkillModifierParts(skill) {
+        const baseTargets = buildNormalizedTargetSet([skill?.displayName || ""], normalizeSkillTarget);
+        return [
+          ...getScopedModifierParts("skills", baseTargets, normalizeSkillTarget)
+        ];
+      }
+
+      function getAttackModifierParts(weapon, attack) {
+        const candidates = [
+          attack?.name || "",
+          getWeaponSkillLabel(attack?.skillKey || ""),
+          weapon?.name || "",
+          weapon?.name && attack?.name ? `${weapon.name} - ${attack.name}` : ""
+        ];
+        const targetSet = buildNormalizedTargetSet(candidates, normalizeAttackTarget);
+        const skillTargets = buildNormalizedTargetSet(
+          [getWeaponSkillLabel(attack?.skillKey || "")],
+          normalizeSkillTarget
+        );
+        return {
+          skills: getScopedModifierParts("skills", skillTargets, normalizeSkillTarget),
+          attacks: getScopedModifierParts("attacks", targetSet, normalizeAttackTarget)
+        };
+      }
+
+      function getScopedModifierTotal(scopeKey, targetSet, normalizeFn) {
+        return ensureModifierState().reduce((sum, mod) => {
+          if (!mod.active) return sum;
+          const scope = mod[scopeKey];
+          if (!scope) return sum;
+          const value = parseModifierValue(scope.value);
+          if (!value) return sum;
+          if (scope.applyAll) return sum + value;
+          const targets = Array.isArray(scope.targets) ? scope.targets : [];
+          if (targets.length === 0) return sum + value;
+          const matched = targets.some((target) => targetSet.has(normalizeFn(target)));
+          return matched ? sum + value : sum;
+        }, 0);
+      }
+
+      function getSkillRollModifierTotal(skill) {
+        const baseTargets = buildNormalizedTargetSet([skill?.displayName || ""], normalizeSkillTarget);
+        return getScopedModifierTotal("skills", baseTargets, normalizeSkillTarget);
+      }
+
+      function getAttackRollModifierTotal(weapon, attack) {
+        const candidates = [
+          attack?.name || "",
+          getWeaponSkillLabel(attack?.skillKey || ""),
+          weapon?.name || "",
+          weapon?.name && attack?.name ? `${weapon.name} - ${attack.name}` : ""
+        ];
+        const targetSet = buildNormalizedTargetSet(candidates, normalizeAttackTarget);
+        const skillTargets = buildNormalizedTargetSet(
+          [getWeaponSkillLabel(attack?.skillKey || "")],
+          normalizeSkillTarget
+        );
+        return getScopedModifierTotal("attacks", targetSet, normalizeAttackTarget)
+          + getScopedModifierTotal("skills", skillTargets, normalizeSkillTarget);
+      }
+
+      function getStatModifierTotal(statKey) {
+        const targetSet = buildNormalizedTargetSet([statKey], normalizeStatTarget);
+        return getScopedModifierTotal("stats", targetSet, normalizeStatTarget);
+      }
+
       function buildWeaponAttackExpression(skillKey) {
         const baseText = getWeaponSkillBase(skillKey);
         const baseNum = parseLooseNumeric(baseText) ?? 0;
         const parts = [String(baseNum)];
+        const skillLabel = getWeaponSkillLabel(skillKey);
+        const skillTargets = buildNormalizedTargetSet([skillLabel], normalizeSkillTarget);
+        const toggleParts = [
+          ...getScopedModifierParts("skills", skillTargets, normalizeSkillTarget)
+        ];
         const mods = [
           getWeaponSkillModValue(skillKey),
           state.globalMod,
+          ...toggleParts,
           state.luckNext > 0 ? `+${state.luckNext}` : ""
         ];
         mods.forEach((mod) => {
@@ -5671,6 +6851,8 @@ function renderCriticalInjuries() {
       }
 
       function saveWeaponFromModal() {
+        const isEditing = Boolean(state.editingWeaponId);
+        const existingWeapon = isEditing ? state.weapons.find((w) => w.id === state.editingWeaponId) : null;
         const name = weaponNameInput?.value.trim() || "";
         const ammoName = ammoNameInput?.value.trim() || "";
         const ammoMax = Number(ammoMaxInput?.value || 0);
@@ -5695,6 +6877,21 @@ function renderCriticalInjuries() {
           if (idx >= 0) state.weapons[idx] = state.draftWeapon;
         } else {
           state.weapons.push(state.draftWeapon);
+        }
+
+        appendCharacterLogEntry(`${isEditing ? "Weapon Updated" : "Weapon Added"} ${name}`);
+        if (existingWeapon) {
+          if (existingWeapon.name !== name) {
+            logValueChange(`Weapon Name ${existingWeapon.name || "Weapon"}`, existingWeapon.name, name);
+          }
+          if (Number(existingWeapon.ammoMax ?? 0) !== ammoMax) {
+            appendCharacterLogEntry(
+              `AMMO Max ${existingWeapon.name || "Weapon"} ${existingWeapon.ammoMax}->${ammoMax}`
+            );
+          }
+          if (existingWeapon.ammoName !== ammoName) {
+            logValueChange(`Ammo Type ${existingWeapon.name || "Weapon"}`, existingWeapon.ammoName, ammoName);
+          }
         }
 
         state.draftWeapon = null;
@@ -5737,6 +6934,7 @@ function renderCriticalInjuries() {
         const skillKey = normalizeWeaponSkillSelection(attackSkillInput?.value || "");
         const ammoUse = Math.max(0, Number(attackAmmoUseInput?.value || 0));
         const mods = attackModsInput?.value.trim() || "";
+        const isEditing = Boolean(state.editingAttackId);
 
         if (!name) {
           alert("Attack name is required.");
@@ -5761,6 +6959,12 @@ function renderCriticalInjuries() {
           });
         }
 
+        appendCharacterLogEntry(
+          `${isEditing ? "Attack Updated" : "Attack Added"} ${formatWeaponRollLabel(state.draftWeapon, {
+            name,
+            skillKey
+          })}`
+        );
         state.editingAttackId = null;
         setBackdropOpen(attackBackdrop, false);
         renderWeaponModesPreview();
@@ -5779,20 +6983,54 @@ function renderCriticalInjuries() {
 
       function confirmDeleteWeapon() {
         const id = state.deleteWeaponId;
+        const weapon = state.weapons.find((w) => w.id === id);
         state.weapons = state.weapons.filter((w) => w.id !== id);
         state.deleteWeaponId = null;
+        if (weapon) appendCharacterLogEntry(`Weapon Deleted ${weapon.name}`);
         setBackdropOpen(deleteWeaponBackdrop, false);
         renderWeapons();
       }
 
-      function updateWeaponInline(id, patch) {
+      function openClearSheetModal() {
+        setBackdropOpen(clearSheetBackdrop, true);
+      }
+
+      function confirmClearSheet() {
+        setBackdropOpen(clearSheetBackdrop, false);
+        suppressLocalSave = true;
+        try {
+          localStorage.clear();
+        } catch (error) {
+          console.warn("Failed to clear local storage.", error);
+        }
+        if (pdfInput) pdfInput.value = "";
+        if (loadStateInput) loadStateInput.value = "";
+        setRedlinkEnabled(false, false);
+        setRedlinkChannel("", false);
+        state.modifiers = createDefaultModifiers();
+        modifierSelection = null;
+        closeModifierSelection();
+        closeModifierModal();
+        resetStateForNewSheet();
+        localSaveReady = false;
+        setStartupPromptOpen(true);
+        setError("");
+        window.setTimeout(() => {
+          suppressLocalSave = false;
+        }, 0);
+      }
+
+      function updateWeaponInline(id, patch, opts = {}) {
+        const { render = true, clamp = true } = opts;
         const weapon = state.weapons.find((w) => w.id === id);
         if (!weapon) return;
         Object.assign(weapon, patch);
-        const { cur, max } = clampAmmo(Number(weapon.ammoCur), Number(weapon.ammoMax));
-        weapon.ammoCur = cur;
-        weapon.ammoMax = max;
-        renderWeapons();
+        if (clamp) {
+          const { cur, max } = clampAmmo(Number(weapon.ammoCur), Number(weapon.ammoMax));
+          weapon.ammoCur = cur;
+          weapon.ammoMax = max;
+        }
+        if (render) renderWeapons();
       }
 
       function updateAttackInline(weaponId, attackId, patch) {
@@ -5805,20 +7043,25 @@ function renderCriticalInjuries() {
 
       function consumeWeaponAmmo(weapon, attack, count) {
         const ammoUse = Math.max(0, Number(attack?.ammoUse ?? 0));
-        if (!ammoUse) return;
+        if (!ammoUse) return null;
         const totalUse = ammoUse * Math.max(1, count);
+        const before = Number(weapon.ammoCur ?? 0);
         weapon.ammoCur = Math.max(0, Number(weapon.ammoCur ?? 0) - totalUse);
         const { cur, max } = clampAmmo(weapon.ammoCur, Number(weapon.ammoMax ?? 0));
         weapon.ammoCur = cur;
         weapon.ammoMax = max;
+        return { before, after: weapon.ammoCur, used: totalUse };
       }
 
       function buildWeaponRollText(weapon, attack, rollCount, extraMod) {
         const base = getWeaponSkillBase(attack.skillKey);
         const luckMod = !rollCount && state.luckNext > 0 ? `+${state.luckNext}` : "";
+        const toggleMods = getAttackModifierParts(weapon, attack);
         const mod = buildCombinedModifier(
           getWeaponSkillModValue(attack.skillKey),
           state.globalMod,
+          toggleMods.skills,
+          toggleMods.attacks,
           luckMod,
           attack.mods,
           extraMod
@@ -5833,7 +7076,14 @@ function renderCriticalInjuries() {
       async function handleWeaponRoll(weapon, attack, rollCount, flashEl) {
         const text = buildWeaponRollText(weapon, attack, null);
         await copyRollText(text, flashEl);
-        consumeWeaponAmmo(weapon, attack, rollCount);
+        appendCharacterLogEntry(buildWeaponRollLog(weapon, attack));
+        const ammoResult = consumeWeaponAmmo(weapon, attack, rollCount);
+        if (ammoResult) {
+          const weaponLabel = weapon?.name || "Weapon";
+          appendCharacterLogEntry(
+            `AMMO ${weaponLabel} ${ammoResult.before}->${ammoResult.after} (-${ammoResult.used})`
+          );
+        }
         consumeLuckForRoll();
         renderWeapons();
       }
@@ -5894,6 +7144,7 @@ function renderCriticalInjuries() {
             ammoCur.min = "0";
             ammoCur.step = "1";
             ammoCur.value = String(weapon.ammoCur ?? 0);
+            ammoCur.className = "ammo-input";
             ammoCur.dataset.role = "ammo-cur";
             ammoCur.dataset.id = weapon.id;
 
@@ -5913,13 +7164,22 @@ function renderCriticalInjuries() {
             ammoMax.min = "0";
             ammoMax.step = "1";
             ammoMax.value = String(weapon.ammoMax ?? 0);
+            ammoMax.className = "ammo-input";
             ammoMax.dataset.role = "ammo-max";
             ammoMax.dataset.id = weapon.id;
 
-            ammoCell.appendChild(ammoCur);
-            ammoCell.appendChild(reloadBtn);
-            ammoCell.appendChild(ammoLabel);
-            ammoCell.appendChild(ammoMax);
+            const ammoCurGroup = document.createElement("div");
+            ammoCurGroup.className = "ammo-counts-group";
+            ammoCurGroup.appendChild(reloadBtn);
+            ammoCurGroup.appendChild(ammoCur);
+
+            const ammoMaxGroup = document.createElement("div");
+            ammoMaxGroup.className = "ammo-counts-group";
+            ammoMaxGroup.appendChild(ammoLabel);
+            ammoMaxGroup.appendChild(ammoMax);
+
+            ammoCell.appendChild(ammoCurGroup);
+            ammoCell.appendChild(ammoMaxGroup);
             actions.insertBefore(ammoCell, actions.firstChild);
           }
 
@@ -5937,20 +7197,27 @@ function renderCriticalInjuries() {
               const skillKey = normalizeWeaponSkillSelection(attack.skillKey);
               const skillLabel = getWeaponSkillLabel(skillKey);
               const expression = buildWeaponAttackExpression(skillKey);
+              const toggleParts = getAttackModifierParts(weapon, attack).attacks;
+              const toggleMod = formatModifierParts(toggleParts, " ");
               rowEl.innerHTML = `
                 <button class="btn-roll" type="button" data-action="weapon-roll" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!r</button>
                 <button class="btn-roll" type="button" data-action="weapon-roll-multi" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}">!rr</button>
                 <div class="attack-name" title="${escapeHtml(attack.name)}">${escapeHtml(attack.name)}</div>
                 <div class="attack-meta">${escapeHtml(`${skillLabel} (${expression})`)}</div>
                 <div class="attack-meta">${escapeHtml(String(attack.ammoUse || 0))}</div>
-                <input class="mods-input" data-role="attack-mods" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}" type="text" value="${escapeHtml(attack.mods || "")}" placeholder="+/- mods" />
+                <div class="mods-wrap">
+                  <input class="mods-input" data-role="attack-mods" data-wid="${escapeHtml(weapon.id)}" data-aid="${escapeHtml(attack.id)}" type="text" value="${escapeHtml(attack.mods || "")}" placeholder="+/- mods" />
+                  <span class="mods-hint" data-empty="${toggleMod ? "false" : "true"}">${escapeHtml(toggleMod)}</span>
+                </div>
               `;
+              const modsInput = rowEl.querySelector(".mods-input");
+              if (modsInput) modsInput.dataset.logValue = modsInput.value;
               attackTable.appendChild(rowEl);
             });
           } else {
             const empty = document.createElement("div");
             empty.className = "empty-state";
-            empty.textContent = "No attack modes for this weapon.";
+            empty.textContent = "No attacks set for this weapon yet. Use EDIT button to add attacks and set skills used.";
             attackTable.appendChild(empty);
           }
 
@@ -5977,7 +7244,15 @@ function renderCriticalInjuries() {
         if (target.dataset.action === "reload") {
           const weapon = state.weapons.find((w) => w.id === target.dataset.id);
           if (!weapon) return;
+          const beforeCur = Number(weapon.ammoCur ?? 0);
           updateWeaponInline(weapon.id, { ammoCur: Number(weapon.ammoMax ?? 0) });
+          const afterCur = Number(weapon.ammoCur ?? 0);
+          if (beforeCur !== afterCur) {
+            const weaponLabel = weapon?.name || "Weapon";
+            appendCharacterLogEntry(
+              `AMMO Reload ${weaponLabel} ${beforeCur}->${afterCur}`
+            );
+          }
           return;
         }
 
@@ -5997,8 +7272,16 @@ function renderCriticalInjuries() {
             {
               label: formatWeaponRollLabel(weapon, attack),
               buildText: (count, extraMod) => buildWeaponRollText(weapon, attack, count, extraMod),
+              logEntry: (count, extraMod) =>
+                buildWeaponRollLog(weapon, attack, { isMulti: true, rollCount: count, extraMod }),
               afterCopy: (count) => {
-                consumeWeaponAmmo(weapon, attack, count);
+                const ammoResult = consumeWeaponAmmo(weapon, attack, count);
+                if (ammoResult) {
+                  const weaponLabel = weapon?.name || "Weapon";
+                  appendCharacterLogEntry(
+                    `AMMO ${weaponLabel} ${ammoResult.before}->${ammoResult.after} (-${ammoResult.used})`
+                  );
+                }
                 renderWeapons();
               }
             },
@@ -6007,19 +7290,76 @@ function renderCriticalInjuries() {
           return;
         }
 
-        if (target.dataset.role === "ammo-cur") {
+        if (event.type === "blur" && target.dataset.role === "ammo-cur") {
+          const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+          if (!weapon) return;
+          const before = Number(weapon.ammoCur ?? 0);
           updateWeaponInline(target.dataset.id, { ammoCur: Number(target.value || 0) });
+          const after = Number(weapon.ammoCur ?? 0);
+          if (before !== after) {
+            const weaponLabel = weapon?.name || "Weapon";
+            appendCharacterLogEntry(
+              `AMMO Cur ${weaponLabel} ${before}->${after}`
+            );
+          }
           return;
         }
 
-        if (target.dataset.role === "ammo-max") {
+        if (event.type === "blur" && target.dataset.role === "ammo-max") {
+          const weapon = state.weapons.find((w) => w.id === target.dataset.id);
+          if (!weapon) return;
+          const beforeCur = Number(weapon.ammoCur ?? 0);
+          const beforeMax = Number(weapon.ammoMax ?? 0);
           updateWeaponInline(target.dataset.id, { ammoMax: Number(target.value || 0) });
+          const afterCur = Number(weapon.ammoCur ?? 0);
+          const afterMax = Number(weapon.ammoMax ?? 0);
+          if (beforeCur !== afterCur || beforeMax !== afterMax) {
+            const changes = [];
+            if (beforeMax !== afterMax) changes.push(`Max ${beforeMax}->${afterMax}`);
+            if (beforeCur !== afterCur) changes.push(`Cur ${beforeCur}->${afterCur}`);
+            const weaponLabel = weapon?.name || "Weapon";
+            appendCharacterLogEntry(
+              `AMMO ${weaponLabel} ${changes.join(" | ")}`
+            );
+          }
+          return;
+        }
+
+        if (event.type === "blur" && target.dataset.role === "attack-mods") {
+          const before = target.dataset.logValue ?? "";
+          const after = target.value;
+          if (before !== after) {
+            const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
+            const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
+            if (weapon && attack) {
+              appendCharacterLogEntry(
+                `Attack Mod ${formatWeaponRollLabel(weapon, attack)} ${formatLogValue(before)}->${formatLogValue(after)}`
+              );
+            }
+          }
+          target.dataset.logValue = after;
         }
       }
 
       function handleWeaponListInput(event) {
         const target = event.target;
         if (!target) return;
+        if (target.dataset.role === "ammo-cur") {
+          updateWeaponInline(
+            target.dataset.id,
+            { ammoCur: Number(target.value || 0) },
+            { render: false, clamp: false }
+          );
+          return;
+        }
+        if (target.dataset.role === "ammo-max") {
+          updateWeaponInline(
+            target.dataset.id,
+            { ammoMax: Number(target.value || 0) },
+            { render: false, clamp: false }
+          );
+          return;
+        }
         if (target.dataset.role === "attack-mods") {
           updateAttackInline(target.dataset.wid, target.dataset.aid, { mods: target.value });
         }
@@ -6036,9 +7376,15 @@ function renderCriticalInjuries() {
 
         if (target.dataset.action === "delete-attack") {
           if (!state.draftWeapon) return;
+          const attack = state.draftWeapon.attacks.find((entry) => entry.id === target.dataset.aid);
           state.draftWeapon.attacks = state.draftWeapon.attacks.filter(
             (attack) => attack.id !== target.dataset.aid
           );
+          if (attack) {
+            appendCharacterLogEntry(
+              `Attack Deleted ${formatWeaponRollLabel(state.draftWeapon, { name: attack.name, skillKey: attack.skillKey })}`
+            );
+          }
           renderWeaponModesPreview();
         }
       }
@@ -6155,6 +7501,10 @@ function renderCriticalInjuries() {
               nameHead.textContent = "Skills";
             }
 
+            const lvlHead = document.createElement("div");
+            lvlHead.className = "section-head lvl";
+            lvlHead.textContent = "LVL";
+
             const baseHead = document.createElement("div");
             baseHead.className = "section-head base";
             baseHead.textContent = "BASE";
@@ -6169,6 +7519,7 @@ function renderCriticalInjuries() {
 
             titleRow.appendChild(rollHead);
             titleRow.appendChild(nameHead);
+            titleRow.appendChild(lvlHead);
             titleRow.appendChild(baseHead);
             titleRow.appendChild(modHead);
             titleRow.appendChild(pinHead);
@@ -6204,6 +7555,7 @@ function renderCriticalInjuries() {
               const nameCell = document.createElement("div");
               nameCell.className = "skill-group-label";
               nameCell.textContent = formatGroupHeaderLabel(canonicalKey);
+              const levelCell = document.createElement("div");
               const baseCell = document.createElement("div");
               const modCell = document.createElement("div");
               const pinCell = document.createElement("div");
@@ -6225,6 +7577,7 @@ function renderCriticalInjuries() {
                   sectionId
                 };
                 addName.value = "";
+                addLevel.value = "";
                 addBase.value = "";
                 addMod.value = "";
                 addName.placeholder = `New ${groupedPrefixForKey(canonicalKey)}...`;
@@ -6245,6 +7598,7 @@ function renderCriticalInjuries() {
 
               groupRow.appendChild(rollCell);
               groupRow.appendChild(nameCell);
+              groupRow.appendChild(levelCell);
               groupRow.appendChild(baseCell);
               groupRow.appendChild(modCell);
               groupRow.appendChild(pinCell);
@@ -6316,12 +7670,34 @@ function renderCriticalInjuries() {
     function syncSkillInputs(skillId, field, value, sourceRow) {
       const escapedId = CSS.escape(skillId);
       const selector = `.skill-row[data-skill-id="${escapedId}"]`;
-      const inputSelector = field === "mod" ? ".mod-input" : ".base-input";
+      const inputSelector = ".mod-input";
       document.querySelectorAll(selector).forEach((row) => {
         if (row === sourceRow) return;
         const input = row.querySelector(inputSelector);
         if (!input) return;
         if (input.value !== value) input.value = value;
+      });
+    }
+
+    function syncSkillLevel(skillId, value, sourceRow) {
+      const escapedId = CSS.escape(skillId);
+      const selector = `.skill-row[data-skill-id="${escapedId}"]`;
+      document.querySelectorAll(selector).forEach((row) => {
+        if (row === sourceRow) return;
+        const input = row.querySelector(".level-input");
+        if (!input) return;
+        if (input.value !== value) input.value = value;
+      });
+    }
+
+    function syncSkillBase(skillId, value, sourceRow) {
+      const escapedId = CSS.escape(skillId);
+      const selector = `.skill-row[data-skill-id="${escapedId}"]`;
+      document.querySelectorAll(selector).forEach((row) => {
+        if (row === sourceRow) return;
+        const el = row.querySelector(".base-value");
+        if (!el) return;
+        if (el.textContent !== value) el.textContent = value;
       });
     }
       function buildSkillRow(skill, isPinnedRow, pinnedColumnId, options) {
@@ -6386,26 +7762,47 @@ function renderCriticalInjuries() {
           row.classList.add("group-child");
         }
 
-        const baseInput = document.createElement("input");
-        baseInput.type = "text";
-        baseInput.className = "skill-input base-input";
-        baseInput.value = skill.base || "";
-        baseInput.addEventListener("input", () => {
-          skill.base = baseInput.value;
-          syncSkillInputs(skill.id, "base", baseInput.value, row);
+        const levelInput = document.createElement("input");
+        levelInput.type = "text";
+        levelInput.className = "skill-input level-input";
+        levelInput.value = skill.level ?? "";
+        levelInput.dataset.logValue = levelInput.value;
+        levelInput.addEventListener("input", () => {
+          skill.level = levelInput.value;
+          const computed = computeBaseFromLevel(skill.level, skill.stat);
+          if (computed !== "") {
+            skill.base = computed;
+            baseValue.textContent = skill.base;
+            syncSkillBase(skill.id, skill.base, row);
+          }
+          syncSkillLevel(skill.id, levelInput.value, row);
+        });
+        levelInput.addEventListener("blur", () => {
+          logValueChange(`${formatSkillLabel(skill)} level`, levelInput.dataset.logValue, levelInput.value);
+          levelInput.dataset.logValue = levelInput.value;
           renderWeapons();
           renderWeaponModesPreview();
         });
+        bindArrowStepperInput(levelInput, { min: 0 });
+
+        const baseValue = document.createElement("div");
+        baseValue.className = "base-value";
+        baseValue.textContent = skill.base ?? "";
 
         const modInput = document.createElement("input");
         modInput.type = "text";
         modInput.className = "skill-input mod-input";
         modInput.value = skill.mod || "";
+        modInput.dataset.logValue = modInput.value;
         modInput.addEventListener("input", () => {
           skill.mod = modInput.value;
           syncSkillInputs(skill.id, "mod", modInput.value, row);
           renderWeapons();
           renderWeaponModesPreview();
+        });
+        modInput.addEventListener("blur", () => {
+          logValueChange(`${formatSkillLabel(skill)} mod`, modInput.dataset.logValue, modInput.value);
+          modInput.dataset.logValue = modInput.value;
         });
         modInput.addEventListener("keydown", async (event) => {
           if (event.key !== "Enter") return;
@@ -6430,6 +7827,12 @@ function renderCriticalInjuries() {
         modLuck.textContent = state.luckNext > 0 ? `+${state.luckNext}` : "";
         modLuck.dataset.empty = state.luckNext > 0 ? "false" : "true";
 
+        const modToggle = document.createElement("span");
+        modToggle.className = "mod-toggle";
+        const toggleText = formatModifierParts(getSkillModifierParts(skill), " ");
+        modToggle.textContent = toggleText;
+        modToggle.dataset.empty = toggleText ? "false" : "true";
+
         const pinBtn = document.createElement("button");
         pinBtn.className = "btn-pin";
         pinBtn.type = "button";
@@ -6450,6 +7853,7 @@ function renderCriticalInjuries() {
           }
           const text = buildRollText(skill, false);
           await copyRollText(text, row);
+          appendCharacterLogEntry(buildSkillRollLog(skill));
           consumeLuckForRoll();
         });
 
@@ -6463,7 +7867,9 @@ function renderCriticalInjuries() {
           openRollCountModal(
             {
               label: formatSkillLabel(skill),
-              buildText: (count, extraMod) => buildRollText(skill, true, count, extraMod)
+              buildText: (count, extraMod) => buildRollText(skill, true, count, extraMod),
+              logEntry: (count, extraMod) =>
+                buildSkillRollLog(skill, { isMulti: true, rollCount: count, extraMod })
             },
             row
           );
@@ -6487,9 +7893,10 @@ function renderCriticalInjuries() {
         const startPinDrag = (event) => {
           if (dragState) return;
           suppressPinClick = true;
+          const isPinnedSkill = isPinned(skill.id);
           dragState = {
             skillId: skill.id,
-            source: isPinned(skill.id) ? "pinned" : "pin",
+            source: isPinnedSkill ? "pinned" : "column",
             pinnedColumnId: row.dataset.pinnedColumnId || getPinnedColumn(skill.id) || ""
           };
           row.classList.add("dragging");
@@ -6512,9 +7919,11 @@ function renderCriticalInjuries() {
 
         row.appendChild(rollGroup);
         row.appendChild(nameEl);
-        row.appendChild(baseInput);
+        row.appendChild(levelInput);
+        row.appendChild(baseValue);
         modWrap.appendChild(modInput);
         modHints.appendChild(modGlobal);
+        modHints.appendChild(modToggle);
         modHints.appendChild(modLuck);
         modWrap.appendChild(modHints);
         row.appendChild(modWrap);
@@ -6609,7 +8018,7 @@ function renderCriticalInjuries() {
             if (draggedId && state.skills[draggedId]) {
               dragState = {
                 skillId: draggedId,
-                source: isPinned(draggedId) ? "pinned" : "pin",
+                source: isPinned(draggedId) ? "pinned" : "column",
                 pinnedColumnId: getPinnedColumn(draggedId) || ""
               };
               recoveredDrag = true;
@@ -6652,6 +8061,7 @@ function renderCriticalInjuries() {
       addPinnedBtn.addEventListener("click", () => {
         pendingAddContext = { mode: "pinned" };
         addName.value = "";
+        addLevel.value = "";
         addBase.value = "";
         addMod.value = "";
         addName.placeholder = "";
@@ -6670,15 +8080,23 @@ function renderCriticalInjuries() {
           if (!displayName) return;
           const id = `custom-${Date.now()}-${state.customCounter++}`;
           const meta = canonicalMeta[canonicalKey];
+          const levelText = addLevel.value.trim();
+          let baseText = addBase.value.trim();
+          if (!baseText) {
+            const computed = computeBaseFromLevel(levelText, meta?.stat);
+            if (computed !== "") baseText = computed;
+          }
           addSkill({
             id,
             displayName,
-            base: addBase.value.trim(),
+            base: baseText,
+            level: levelText,
             mod: addMod.value.trim(),
             canonicalKey,
             stat: meta ? meta.stat : "",
             source: "custom"
           });
+          appendCharacterLogEntry(`Skill Added ${formatNameWithStat(displayName, meta ? meta.stat : "")}`);
           const columnId = pendingAddContext.columnId || "col3";
           const sectionId = pendingAddContext.sectionId || sectionForSkill(state.skills[id]);
           insertSkillIdIntoColumn(columnId, sectionId, canonicalKey, id);
@@ -6693,15 +8111,23 @@ function renderCriticalInjuries() {
         const id = `custom-${Date.now()}-${state.customCounter++}`;
         const canonicalKey = guessCanonicalKey(name);
         const meta = canonicalMeta[canonicalKey];
+        const levelText = addLevel.value.trim();
+        let baseText = addBase.value.trim();
+        if (!baseText) {
+          const computed = computeBaseFromLevel(levelText, meta?.stat);
+          if (computed !== "") baseText = computed;
+        }
         addSkill({
           id,
           displayName: name,
-          base: addBase.value.trim(),
+          base: baseText,
+          level: levelText,
           mod: addMod.value.trim(),
           canonicalKey: canonicalKey || "",
           stat: meta ? meta.stat : "",
           source: "custom"
         });
+        appendCharacterLogEntry(`Skill Added ${formatNameWithStat(name, meta ? meta.stat : "")}`);
         addPinned(id);
         addDialog.close();
         render();
@@ -6799,6 +8225,8 @@ function renderCriticalInjuries() {
           hpCurrentInput.value = String(next);
           // Trigger any listeners bound via bindStatusField()
           hpCurrentInput.dispatchEvent(new Event("input", { bubbles: true }));
+          renderCombatHud();
+          appendCharacterLogEntry(`HP -5 ${safeCurrent}->${next}`);
         });
       }
       if (critCloseBtn) {
@@ -6847,7 +8275,22 @@ function renderCriticalInjuries() {
         deleteWeaponConfirm.addEventListener("click", confirmDeleteWeapon);
       }
 
-      [weaponBackdrop, attackBackdrop, deleteWeaponBackdrop].forEach((backdrop) => {
+      if (clearSheetCancel) {
+        clearSheetCancel.addEventListener("click", () => setBackdropOpen(clearSheetBackdrop, false));
+      }
+
+      if (clearSheetConfirm) {
+        clearSheetConfirm.addEventListener("click", confirmClearSheet);
+      }
+
+      [
+        weaponBackdrop,
+        attackBackdrop,
+        deleteWeaponBackdrop,
+        clearSheetBackdrop,
+        modifierBackdrop,
+        modifierSelectBackdrop
+      ].forEach((backdrop) => {
         if (!backdrop) return;
         backdrop.addEventListener("click", (event) => {
           if (event.target !== backdrop) return;
@@ -6859,12 +8302,16 @@ function renderCriticalInjuries() {
           if (backdrop === deleteWeaponBackdrop) {
             state.deleteWeaponId = null;
           }
+          if (backdrop === modifierSelectBackdrop) {
+            modifierSelection = null;
+            renderModifierModal();
+          }
         });
       });
 
       if (weaponsList) {
         weaponsList.addEventListener("click", handleWeaponListEvents);
-        weaponsList.addEventListener("change", handleWeaponListEvents);
+        weaponsList.addEventListener("blur", handleWeaponListEvents, true);
         weaponsList.addEventListener("input", handleWeaponListInput);
       }
 
@@ -6939,6 +8386,37 @@ function renderCriticalInjuries() {
         render();
       });
 
+      if (editModifiersBtn) {
+        editModifiersBtn.addEventListener("click", openModifierModal);
+      }
+
+      if (modifierClose) {
+        modifierClose.addEventListener("click", closeModifierModal);
+      }
+
+      if (modifierSelectClose) {
+        modifierSelectClose.addEventListener("click", closeModifierSelection);
+      }
+
+      if (modifierAdd) {
+        modifierAdd.addEventListener("click", () => {
+          const mods = ensureModifierState();
+          const entry = createEmptyModifier();
+          mods.push(entry);
+          appendCharacterLogEntry("Modifier Added");
+          renderModifierToggles();
+          renderModifierModal();
+          updateModifierHints();
+          scheduleLocalStateSave();
+          const selector = `.modifier-row[data-id="${CSS.escape(entry.id)}"] .modifier-name`;
+          const nameInput = modifierList?.querySelector(selector);
+          if (nameInput) {
+            nameInput.focus();
+            nameInput.select();
+          }
+        });
+      }
+
       globalModInput.addEventListener("input", () => {
         state.globalMod = globalModInput.value.trim();
         document.querySelectorAll(".mod-global").forEach((el) => {
@@ -6948,26 +8426,62 @@ function renderCriticalInjuries() {
         renderWeapons();
         renderWeaponModesPreview();
       });
+      bindLogOnBlur(globalModInput, "Global Mod");
 
       luckPlusBtn.addEventListener("click", () => {
         setLuckNext((state.luckNext || 0) + 1);
+        appendCharacterLogEntry(`Luck Next +1 (now ${state.luckNext || 0})`);
       });
 
       luckMinusBtn.addEventListener("click", () => {
         setLuckNext((state.luckNext || 0) - 1);
+        appendCharacterLogEntry(`Luck Next -1 (now ${state.luckNext || 0})`);
       });
 
       luckNextInput.addEventListener("input", () => {
+        setLuckNext(luckNextInput.value, {
+          clamp: false,
+          updateHints: false,
+          renderStats: false,
+          renderWeapons: false,
+          renderWeaponModesPreview: false
+        });
+      });
+      luckNextInput.addEventListener("blur", () => {
         setLuckNext(luckNextInput.value);
       });
+      bindLogOnBlur(luckNextInput, "Luck Next");
+      bindArrowStepperInput(luckNextInput, { min: 0 });
 
       luckTotalInput.addEventListener("input", () => {
+        setLuckTotal(luckTotalInput.value, true, {
+          clampPool: false,
+          updateHints: false,
+          renderStats: false,
+          renderWeapons: false,
+          renderWeaponModesPreview: false
+        });
+      });
+      luckTotalInput.addEventListener("blur", () => {
         setLuckTotal(luckTotalInput.value, true);
       });
+      bindLogOnBlur(luckTotalInput, "Luck Total");
+      bindArrowStepperInput(luckTotalInput, { min: 0 });
 
       luckPoolInput.addEventListener("input", () => {
+        setLuckPool(luckPoolInput.value, {
+          clampToTotal: false,
+          updateHints: false,
+          renderStats: false,
+          renderWeapons: false,
+          renderWeaponModesPreview: false
+        });
+      });
+      luckPoolInput.addEventListener("blur", () => {
         setLuckPool(luckPoolInput.value);
       });
+      bindLogOnBlur(luckPoolInput, "Luck Pool");
+      bindArrowStepperInput(luckPoolInput, { min: 0 });
 
       document.addEventListener("keydown", (event) => {
         if (event.key !== "/" || event.ctrlKey || event.metaKey || event.altKey) return;
@@ -7050,12 +8564,39 @@ function renderCriticalInjuries() {
         "headSpCurrent"
       ]);
 
-      function bindStatusField(input, key) {
+      function bindArrowStepperInput(input, opts = {}) {
         if (!input) return;
+        if (input.dataset.stepperBound === "true") return;
+        input.dataset.stepperBound = "true";
+        const step = Number.isFinite(opts.step) ? opts.step : 1;
+        const min = Number.isFinite(opts.min) ? opts.min : null;
+        const max = Number.isFinite(opts.max) ? opts.max : null;
+        input.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+          if (event.ctrlKey || event.metaKey || event.altKey) return;
+          event.preventDefault();
+          const dir = event.key === "ArrowUp" ? 1 : -1;
+          const current = Numbers.toInt(input.value, 0);
+          let next = current + dir * step;
+          if (min !== null) next = Math.max(min, next);
+          if (max !== null) next = Math.min(max, next);
+          input.value = String(next);
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      }
+
+      function bindStatusField(input, key, opts = {}) {
+        if (!input) return;
+        const { renderOnInput = true, renderOnBlur = false } = opts;
         input.addEventListener("input", () => {
           const raw = input.value;
           state[key] = NUMERIC_STATUS_KEYS.has(key) ? Numbers.toNullableInt(raw) : raw.trim();
-          if (HUD_SYNC_KEYS && HUD_SYNC_KEYS.has(key)) renderCombatHud();
+          if (renderOnInput && HUD_SYNC_KEYS && HUD_SYNC_KEYS.has(key)) renderCombatHud();
+        });
+        input.addEventListener("blur", () => {
+          const raw = input.value;
+          state[key] = NUMERIC_STATUS_KEYS.has(key) ? Numbers.toNullableInt(raw) : raw.trim();
+          if (renderOnBlur && HUD_SYNC_KEYS && HUD_SYNC_KEYS.has(key)) renderCombatHud();
         });
       }
 
@@ -7080,13 +8621,22 @@ function renderCriticalInjuries() {
         if (next.cls) fireReadoutBtn.classList.add(next.cls);
       }
 
-      bindStatusField(hpTotalInput, "hpTotal");
-      bindStatusField(hpCurrentInput, "hpCurrent");
-      bindStatusField(bodySpTotalInput, "bodySpTotal");
-      bindStatusField(bodySpCurrentInput, "bodySpCurrent");
-      bindStatusField(headSpTotalInput, "headSpTotal");
-      bindStatusField(headSpCurrentInput, "headSpCurrent");
-      bindStatusField(damageValueInput, "damageValue");
+      const statusBlurCommit = { renderOnInput: false, renderOnBlur: true };
+      bindStatusField(hpTotalInput, "hpTotal", statusBlurCommit);
+      bindStatusField(hpCurrentInput, "hpCurrent", statusBlurCommit);
+      bindStatusField(bodySpTotalInput, "bodySpTotal", statusBlurCommit);
+      bindStatusField(bodySpCurrentInput, "bodySpCurrent", statusBlurCommit);
+      bindStatusField(headSpTotalInput, "headSpTotal", statusBlurCommit);
+      bindStatusField(headSpCurrentInput, "headSpCurrent", statusBlurCommit);
+      bindStatusField(damageValueInput, "damageValue", { renderOnInput: false, renderOnBlur: false });
+      bindArrowStepperInput(damageValueInput, { min: 0 });
+      bindLogOnBlur(hpTotalInput, "HP Max");
+      bindLogOnBlur(hpCurrentInput, "HP Cur");
+      bindLogOnBlur(bodySpTotalInput, "Body SP Max");
+      bindLogOnBlur(bodySpCurrentInput, "Body SP Cur");
+      bindLogOnBlur(headSpTotalInput, "Head SP Max");
+      bindLogOnBlur(headSpCurrentInput, "Head SP Cur");
+      bindLogOnBlur(damageValueInput, "Damage Value");
 
       if (statHumInput) {
         statHumInput.addEventListener("input", () => {
@@ -7094,6 +8644,7 @@ function renderCriticalInjuries() {
           renderStatsPanel();
           scheduleLocalStateSave();
         });
+        bindLogOnBlur(statHumInput, "Humanity");
       }
 
       if (statHumTempInput) {
@@ -7105,23 +8656,27 @@ function renderCriticalInjuries() {
           renderStatsPanel();
           scheduleLocalStateSave();
         });
+        bindLogOnBlur(statHumTempInput, "Humanity Temp");
       }
 
       if (damageApInput) {
         damageApInput.addEventListener("change", () => {
           state.damageAp = damageApInput.checked;
+          appendCharacterLogEntry(`Damage AP ${state.damageAp ? "ON" : "OFF"}`);
         });
       }
 
       if (damageHeadshotInput) {
         damageHeadshotInput.addEventListener("change", () => {
           state.damageHeadshot = damageHeadshotInput.checked;
+          appendCharacterLogEntry(`Damage Headshot ${state.damageHeadshot ? "ON" : "OFF"}`);
         });
       }
 
       if (damageNoAblateInput) {
         damageNoAblateInput.addEventListener("change", () => {
           state.damageNoAblate = damageNoAblateInput.checked;
+          appendCharacterLogEntry(`Damage No-Ablate ${state.damageNoAblate ? "ON" : "OFF"}`);
         });
       }
 
@@ -7130,6 +8685,10 @@ function renderCriticalInjuries() {
           const severity = clampFireSeverity(fireSliderInput.value);
           state.fireSeverity = severity;
           applyFireSeverity(severity);
+        });
+        fireSliderInput.addEventListener("change", () => {
+          const severity = clampFireSeverity(fireSliderInput.value);
+          appendCharacterLogEntry(`Fire Severity ${severity}`);
         });
       }
 
@@ -7412,6 +8971,19 @@ function renderCriticalInjuries() {
           window.setTimeout(() => selectAllText(span), 0);
         });
         span.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            e.preventDefault();
+            const min = Number.isFinite(opts.min) ? opts.min : 0;
+            const max = Number.isFinite(opts.max) ? opts.max : 999999;
+            const raw = String(span.textContent ?? "").trim();
+            let current = Number.parseInt(raw, 10);
+            if (!Number.isFinite(current)) current = parseIntSafe(input.value, 0);
+            let next = current + (e.key === "ArrowUp" ? 1 : -1);
+            next = Math.max(min, Math.min(max, next));
+            span.textContent = String(next);
+            window.setTimeout(() => selectAllText(span), 0);
+            return;
+          }
           if (e.key === "Enter") {
             e.preventDefault();
             span.blur();
@@ -7451,6 +9023,87 @@ function renderCriticalInjuries() {
         if (state.characterLog.length > 200) state.characterLog = state.characterLog.slice(-200);
         // Update preview + modal content if open.
         if (typeof renderCharacterLog === "function") renderCharacterLog();
+      }
+
+      function formatLogValue(value) {
+        const text = String(value ?? "").trim();
+        return text ? text : "(empty)";
+      }
+
+      function logValueChange(label, before, after) {
+        const prevText = formatLogValue(before);
+        const nextText = formatLogValue(after);
+        if (prevText === nextText) return;
+        appendCharacterLogEntry(`${label} ${prevText}->${nextText}`);
+      }
+
+      function bindLogOnBlur(input, label, getValue = (el) => el.value) {
+        if (!input) return;
+        input.dataset.logValue = String(getValue(input) ?? "");
+        input.addEventListener("focus", () => {
+          input.dataset.logValue = String(getValue(input) ?? "");
+        });
+        input.addEventListener("blur", () => {
+          const before = input.dataset.logValue ?? "";
+          const after = String(getValue(input) ?? "");
+          logValueChange(label, before, after);
+          input.dataset.logValue = after;
+        });
+      }
+
+      function splitModifierText(text) {
+        return String(text ?? "")
+          .trim()
+          .split(/\s+/)
+          .filter(Boolean);
+      }
+
+      function buildRollLogEntry(label, rollLabel, parts) {
+        const detail = parts.filter(Boolean).join(" | ");
+        return detail ? `ROLL ${label} ${rollLabel} | ${detail}` : `ROLL ${label} ${rollLabel}`;
+      }
+
+      function buildSkillRollLog(skill, opts = {}) {
+        const { isMulti = false, rollCount = 1, extraMod = "" } = opts;
+        const rollLabel = isMulti ? `!rr x${rollCount}` : "!r";
+        const parts = [];
+        const base = String(skill?.base ?? "").trim() || "0";
+        parts.push(`base ${base}`);
+        const skillMod = normalizeModifierForRoll(skill?.mod);
+        if (skillMod) parts.push(`skill ${skillMod}`);
+        const globalMod = normalizeModifierForRoll(state.globalMod);
+        if (globalMod) parts.push(`global ${globalMod}`);
+        const toggleText = formatModifierParts(getSkillModifierParts(skill), " ");
+        if (toggleText) parts.push(`toggles ${toggleText}`);
+        const luckUsed = !isMulti ? clampLuckNext(state.luckNext || 0) : 0;
+        if (luckUsed) parts.push(`luck +${luckUsed}`);
+        const extraText = formatModifierParts(splitModifierText(extraMod), " ");
+        if (extraText) parts.push(`multi ${extraText}`);
+        return buildRollLogEntry(formatSkillLabel(skill), rollLabel, parts);
+      }
+
+      function buildWeaponRollLog(weapon, attack, opts = {}) {
+        const { isMulti = false, rollCount = 1, extraMod = "" } = opts;
+        const rollLabel = isMulti ? `!rr x${rollCount}` : "!r";
+        const parts = [];
+        const base = String(getWeaponSkillBase(attack?.skillKey) || "0").trim();
+        parts.push(`base ${base}`);
+        const skillMod = normalizeModifierForRoll(getWeaponSkillModValue(attack?.skillKey));
+        if (skillMod) parts.push(`skill ${skillMod}`);
+        const globalMod = normalizeModifierForRoll(state.globalMod);
+        if (globalMod) parts.push(`global ${globalMod}`);
+        const toggleMods = getAttackModifierParts(weapon, attack);
+        const toggleSkills = formatModifierParts(toggleMods.skills, " ");
+        if (toggleSkills) parts.push(`toggles skill ${toggleSkills}`);
+        const toggleAttacks = formatModifierParts(toggleMods.attacks, " ");
+        if (toggleAttacks) parts.push(`toggles attack ${toggleAttacks}`);
+        const luckUsed = !isMulti ? clampLuckNext(state.luckNext || 0) : 0;
+        if (luckUsed) parts.push(`luck +${luckUsed}`);
+        const attackMods = formatModifierParts(splitModifierText(attack?.mods), " ");
+        if (attackMods) parts.push(`weapon ${attackMods}`);
+        const extraText = formatModifierParts(splitModifierText(extraMod), " ");
+        if (extraText) parts.push(`multi ${extraText}`);
+        return buildRollLogEntry(formatWeaponRollLabel(weapon, attack), rollLabel, parts);
       }
 
       // Clicking the fire readout applies that amount directly to HP (e.g. "-2" subtracts 2 HP).
@@ -7620,6 +9273,13 @@ function renderCriticalInjuries() {
         state.pinnedColumns = { col1: [], col2: [], col3: [] };
         state.customCounter = 0;
         state.globalMod = "";
+        if (Array.isArray(state.modifiers) && state.modifiers.length) {
+          state.modifiers.forEach((mod) => {
+            mod.active = false;
+          });
+        } else {
+          state.modifiers = createDefaultModifiers();
+        }
         state.luckNext = 0;
         state.luckPool = 0;
         state.luckTotal = 0;
@@ -7656,6 +9316,8 @@ function renderCriticalInjuries() {
         updateLuckPoolDisplay();
         updateLuckModHints();
         syncGlobalModDisplay();
+        renderModifierToggles();
+        updateModifierHints();
         renderStatsPanel();
         renderCharacterLog();
         renderCriticalInjuries();
@@ -7768,18 +9430,23 @@ function renderCriticalInjuries() {
           // If a field resolves to an empty name (notably the "(Click)" sub-skills), skip it entirely.
           if (!displayName) return;
           const baseRawValue = normalizeValue(getFieldValue(field));
+          const baseText = String(baseRawValue ?? "").trim();
+          const levelFieldNameLower = `${LVL_PREFIX}${rawSuffix}`.toLowerCase();
+          const levelText = normalizeLevelPrefill(valueByFieldNameLower[levelFieldNameLower]);
           const modFieldNameLower = `${MOD_PREFIX}${rawSuffix}`.toLowerCase();
           const modRawValue = valueByFieldNameLower[modFieldNameLower];
           const modText = normalizeModPrefill(modRawValue);
-          const baseValue = adjustBaseForMod(baseRawValue, modText);
           const canonicalKey = guessCanonicalKey(displayName);
           const meta = canonicalMeta[canonicalKey];
+          const computed = computeBaseFromLevel(levelText, meta?.stat);
+          let baseValue = computed !== "" ? computed : baseText;
 
           parsedSkills.push({
             id: name,
             displayName,
             base: baseValue,
             mod: modText,
+            level: levelText,
             canonicalKey: canonicalKey || "",
             stat: meta ? meta.stat : "",
             source: "pdf"
@@ -7829,6 +9496,16 @@ function renderCriticalInjuries() {
           setError(String(error?.stack || error?.message || error));
         }
       });
+
+      if (clearSheetBtn) {
+        clearSheetBtn.addEventListener("click", () => {
+          if (clearSheetBackdrop) {
+            openClearSheetModal();
+          } else {
+            confirmClearSheet();
+          }
+        });
+      }
       async function saveState() {
         const json = JSON.stringify(buildStatePayload(), null, 2);
         const suggested = buildSuggestedFileName();
@@ -7920,6 +9597,8 @@ function renderCriticalInjuries() {
         updateLuckNextInputDisplay();
         updateLuckPoolDisplay();
         updateLuckModHints();
+        state.modifiers = normalizeModifierList(data.modifiers);
+        renderModifierToggles();
         state.statInt = Numbers.toNullableInt(data.statInt);
         state.statRef = Numbers.toNullableInt(data.statRef);
         state.statDex = Numbers.toNullableInt(data.statDex);
@@ -7936,6 +9615,7 @@ function renderCriticalInjuries() {
         state.statHumTemp = Numbers.toNullableInt(data.statHumTemp) || 0;
         state.statHumTempText = typeof data.statHumTempText === "string" ? data.statHumTempText : "";
         renderStatsPanel();
+        updateModifierHints();
         state.criticalInjuries = Array.isArray(data.criticalInjuries)
           ? data.criticalInjuries.map(normalizeCriticalInjury).filter(Boolean)
           : [];
@@ -7955,6 +9635,7 @@ function renderCriticalInjuries() {
             id: skill.id,
             displayName: skill.displayName,
             base: skill.base,
+            level: skill.level ?? "",
             mod: skill.mod,
             canonicalKey: skill.canonicalKey || "",
             stat: skill.stat || "",

@@ -14,7 +14,7 @@
 ; =========================
 global RL_SheetURL := "https://ryan-cs.github.io/RED-Winter-Sheet-Roller/?redlink=true"
 #NoEnv
-#SingleInstance Ignore
+#SingleInstance Force
 #Persistent
 SetBatchLines, -1
 SendMode, Input
@@ -41,7 +41,6 @@ global RL_DiscordWinTitle := "Discord"
 global RL_RequireChannelMatch := true
 
 ; UX/safety
-global RL_ReturnFocus := true
 global RL_DebounceMs := 350
 global RL_PasteDelayMs := 60
 global RL_Debug := true
@@ -74,7 +73,6 @@ global RL_LastClip := ""      ; rolling backup of user's clipboard (ClipboardAll
 global RL_LastClipText := ""
 global RL_Sending := false
 global RL_LastFireTick := 0
-global RL_PrevWinID := ""
 
 ; -------------------------
 ; TRAY UI
@@ -308,13 +306,9 @@ RL_HandleClipboardText(curText) {
 ; -------------------------
 RL_SendToDiscord(baseCmd, channelName) {
     global RL_DiscordWinTitle, RL_RequireChannelMatch
-    global RL_ReturnFocus, RL_PrevWinID
     global RL_LastClip, RL_Sending, RL_PasteDelayMs
 
     RL_Sending := true
-
-    if (RL_ReturnFocus)
-        RL_PrevWinID := WinExist("A")
 
     Clipboard := baseCmd
     ClipWait, 0.5
@@ -357,8 +351,16 @@ RL_SendToDiscord(baseCmd, channelName) {
             return
         }
     }
+	SetKeyDelay, 50, 50
 
-    SendInput, ^v
+
+    Sleep, 120
+    SendEvent, ^a
+
+    Sleep, 50
+	
+
+    SendEvent, ^v
     Sleep, % RL_PasteDelayMs
 	
 ;   SendInput, {Enter}    <==== Do not use this line unless you know what it is.
@@ -369,7 +371,7 @@ RL_SendToDiscord(baseCmd, channelName) {
 }
 
 RL_Restore() {
-    global RL_LastClip, RL_ReturnFocus, RL_PrevWinID, RL_Sending
+    global RL_LastClip, RL_Sending
 
     if (RL_LastClip != "")
         Clipboard := RL_LastClip
@@ -430,23 +432,48 @@ RL_EscapeRegex(text) {
 RL_BuildQuickswitchQuery(channelName) {
     return Trim(channelName)
 }
-
 RL_QuickSwitchToChannel(channelName) {
     query := RL_BuildQuickswitchQuery(channelName)
     if (query = "")
         return false
-    SendInput, ^k
-	sleep, 250
-    SendInput, %query%
-    sleep, 100
-	SendInput, {Enter}
-	sleep, 750
-	SendInput, {Enter}
-	sleep, 50
-	SendInput, {backspace}
-	sleep, 50
-	return true
+
+
+    SetKeyDelay, 10, 10
+
+    ; 1) Open Quick Switcher
+    Sleep, 50
+    SendEvent, ^k
+    Sleep, 50
+	
+
+    ; 2) Type query
+    SendEvent, %query%
+    Sleep, 75
+
+    ; 3) Enter to go to channel
+    SendEvent, {Enter}
+    Sleep, 250
+    SendEvent, {Esc} ; to make sure laggy quick switcher is closed 
+    Sleep, 250
+	
+
+	SendEvent, {Esc} 
+    Sleep, 250
+	
+
+	
+    SetKeyDelay, 50, 50
+    ; 4) ensure message box focus
+    SendEvent, {backspace}
+    Sleep, 250
+	
+
+
+    return true
 }
+
+
+
 
 RL_WaitForChannelTitle(channelName, timeoutMs, ByRef lastTitle) {
     startTick := A_TickCount
