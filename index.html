@@ -2437,6 +2437,20 @@
         margin-top: 10px;
       }
 
+      .modal-check {
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        gap: 4px;
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--ink-muted);
+      }
+
+      .modal-check input {
+        margin: 0;
+      }
+
       .log-modal {
         width: min(720px, 92vw);
       }
@@ -2848,8 +2862,14 @@
 
       .attack-row {
         display: grid;
-        grid-template-columns: 50px 50px minmax(120px, 1fr) minmax(120px, 160px) 100px minmax(140px, 180px);
-        gap: 8px;
+         grid-template-columns:
+        50px 50px
+        minmax(110px, 1fr)      /* attack name (down from 140px min) */
+        minmax(170px, 220px)    /* damage area (up from 90–140px) */
+        minmax(120px, 160px)
+        90px
+        minmax(130px, 180px);
+        gap: 6px;
         align-items: center;
         padding: 4px 0;
         min-width: 0;
@@ -2899,6 +2919,85 @@
 
       .mods-hint[data-empty="true"] {
         display: none;
+      }
+
+      .attack-damage {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: nowrap;
+        min-width: 0;
+        
+        align-content: flex-start;
+      }
+
+
+
+
+
+
+      .attack-stack {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .attack-stack-row {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .attack-damage .btn-roll-damage{
+        flex: 0 0 auto;
+      }
+
+      .attack-damage .attack-stack{
+        flex: 0 0 auto;
+      }
+
+
+
+      .attack-mini-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        white-space: nowrap;
+      }
+
+      .btn-roll.btn-roll-damage {
+        min-width: 3.6em;
+        padding: 3px 6px;
+      }
+
+      .attack-solo,
+      .attack-autofire {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+      }
+
+      .attack-mini-input {
+        width: 3em;
+        height: 26px;
+        padding: 2px 6px;
+        font-size: 11px;
+        font-family: var(--mono);
+      }
+
+      .no-spinner[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+
+      .no-spinner[type="number"]::-webkit-outer-spin-button,
+      .no-spinner[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
       }
 
       .weapon-select {
@@ -3097,7 +3196,42 @@
           --stats-panel-w: 190px;
         }
       }
-    </style>
+ /* Fix: inputs should align to row top; labels should not push them down */
+      .attack-stack {
+        position: relative;
+        gap: 0; /* label is taken out of flow; avoid phantom spacing */
+      }
+      .attack-stack > .attack-mini-label {
+        position: absolute;
+        top: -12px; /* lift label to the row’s top line */
+        left: -6px;
+        right: 0;
+        text-align: center;
+        pointer-events: none;
+      }
+
+
+      /* Layout tweak: prevent Autofire/Solo labels from cramming together */
+      .attack-damage {
+        gap: 12px;          /* space between damage button, autofire stack, solo stack */
+        row-gap: 6px;
+      }
+
+      /* Give the Autofire multiplier field more width */
+      .attack-mini-input[data-role="attack-autofire-mult"] {
+        width: 4.2em;
+      }
+
+      /* Ensure each mini-stack has a minimum footprint so absolute labels don't overlap */
+      .attack-damage .attack-stack {
+        min-width: 54px;
+      }
+
+
+      /* Prevent wrapping: allow stacks to shrink within nowrap flex */
+      .attack-damage .attack-stack { min-width: 0; }
+
+</style>
   </head>
   <body>
     <div class="app">
@@ -3673,6 +3807,19 @@
           </div>
         </div>
 
+        <div class="modalGrid2">
+          <div class="modalField">
+            <label for="attackDamageDiceInput">Damage dice (d6)</label>
+            <input id="attackDamageDiceInput" class="no-spinner" type="number" min="1" max="99" step="1" value="2" />
+          </div>
+          <div class="modalField">
+            <label class="modal-check" for="attackAutofireInput">
+              <input id="attackAutofireInput" type="checkbox" />
+              <span>Autofire (adds *)</span>
+            </label>
+          </div>
+        </div>
+
         <div class="modalField">
           <label for="attackModsInput">Attack modifiers (optional)</label>
           <input id="attackModsInput" type="text" placeholder="+1 (scope), -2 (smoke)" />
@@ -4214,6 +4361,8 @@
           attackNameInput: byId('attackNameInput'),
           attackSkillInput: byId('attackSkillInput'),
           attackAmmoUseInput: byId('attackAmmoUseInput'),
+          attackDamageDiceInput: byId('attackDamageDiceInput'),
+          attackAutofireInput: byId('attackAutofireInput'),
           attackModsInput: byId('attackModsInput'),
           attackCancel: byId('attackCancel'),
           attackAdd: byId('attackAdd'),
@@ -4252,15 +4401,15 @@
           redlinkToggle: byId('redlinkToggle'),
           redlinkToggleText: byId('redlinkToggleText'),
           redlinkChannelInput: byId('redlinkChannelInput'),
-clearSheetBtn: byId('clearSheetBtn'),
+          clearSheetBtn: byId('clearSheetBtn'),
 
           // Pinned + modifiers + luck
           addPinnedBtn: byId('addPinnedBtn'),
-customRollBackdrop: byId('customRollBackdrop'),
-customRollName: byId('customRollName'),
-customRollCommand: byId('customRollCommand'),
-customRollCancel: byId('customRollCancel'),
-customRollAdd: byId('customRollAdd'),
+          customRollBackdrop: byId('customRollBackdrop'),
+          customRollName: byId('customRollName'),
+          customRollCommand: byId('customRollCommand'),
+          customRollCancel: byId('customRollCancel'),
+          customRollAdd: byId('customRollAdd'),
 
           editModifiersBtn: byId('editModifiersBtn'),
           modifierToggleList: byId('modifierToggleList'),
@@ -4381,6 +4530,8 @@ customRollAdd: byId('customRollAdd'),
           attackNameInput,
           attackSkillInput,
           attackAmmoUseInput,
+          attackDamageDiceInput,
+          attackAutofireInput,
           attackModsInput,
           attackCancel,
           attackAdd,
@@ -4411,7 +4562,7 @@ customRollAdd: byId('customRollAdd'),
           redlinkToggle,
           redlinkToggleText,
           redlinkChannelInput,
-clearSheetBtn,
+          clearSheetBtn,
           addPinnedBtn,
           customRollBackdrop,
           customRollName,
@@ -4836,6 +4987,11 @@ const BASE_PREFIX = "BASE ";
                       name: attack.name,
                       skillKey: attack.skillKey,
                       ammoUse: attack.ammoUse,
+                      damageDice: attack.damageDice,
+                      damageAutofire: attack.damageAutofire,
+                      soloDamageEnabled: attack.soloDamageEnabled,
+                      soloDamageValue: attack.soloDamageValue,
+                      autofireMultiplier: attack.autofireMultiplier,
                       mods: attack.mods
                     }))
                   : []
@@ -6425,6 +6581,36 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
 		toKey("Athletics")
       ];
 
+      const DEFAULT_DAMAGE_DICE = 2;
+      const DAMAGE_DICE_MIN = 1;
+      const DAMAGE_DICE_MAX = 99;
+      const SOLO_DAMAGE_MAX = 10;
+      const AUTOFIRE_MULT_MIN = 1;
+      const AUTOFIRE_MULT_MAX = 9;
+
+      function clampAttackInt(value, min, max, fallback) {
+        const parsed = parseIntSafe(value, NaN);
+        if (!Number.isFinite(parsed)) return fallback;
+        return Math.max(min, Math.min(max, parsed));
+      }
+
+      function normalizeDamageDice(value) {
+        return clampAttackInt(value, DAMAGE_DICE_MIN, DAMAGE_DICE_MAX, DEFAULT_DAMAGE_DICE);
+      }
+
+      function normalizeSoloDamageValue(value) {
+        return clampAttackInt(value, 0, SOLO_DAMAGE_MAX, 0);
+      }
+
+      function normalizeAutofireMultiplier(value) {
+        return clampAttackInt(value, AUTOFIRE_MULT_MIN, AUTOFIRE_MULT_MAX, AUTOFIRE_MULT_MIN);
+      }
+
+      function formatAttackDamageLabel(attack) {
+        const dice = normalizeDamageDice(attack?.damageDice);
+        return `${dice}d6${attack?.damageAutofire ? "*" : ""}`;
+      }
+
       const WEAPON_SKILL_SELECTION_ID_PREFIX = "id:";
 
       function normalizeWeaponSkillSelection(value) {
@@ -6855,12 +7041,24 @@ function renderCriticalInjuries() {
           attack.skillKey || attack.skill || attack.skillName || ""
         );
         const ammoUse = Math.max(0, Number(attack.ammoUse ?? 0));
+        const damageDice = normalizeDamageDice(attack.damageDice ?? attack.damageDiceCount);
+        const damageAutofire = Boolean(attack.damageAutofire ?? attack.autofire);
+        const soloDamageEnabled = Boolean(attack.soloDamageEnabled ?? attack.soloEnabled);
+        const soloDamageValue = normalizeSoloDamageValue(attack.soloDamageValue ?? attack.soloValue);
+        const autofireMultiplier = normalizeAutofireMultiplier(
+          attack.autofireMultiplier ?? attack.autofireMult ?? attack.autofireMultValue
+        );
         const mods = String(attack.mods ?? attack.baseMods ?? "").trim();
         return {
           id: attack.id || uid(),
           name,
           skillKey,
           ammoUse,
+          damageDice,
+          damageAutofire,
+          soloDamageEnabled,
+          soloDamageValue,
+          autofireMultiplier,
           mods
         };
       }
@@ -6986,7 +7184,9 @@ function renderCriticalInjuries() {
           meta.className = "weapon-mode-meta";
           const skillLabel = getWeaponSkillLabel(attack.skillKey);
           const expression = buildWeaponAttackExpression(attack.skillKey);
-          meta.textContent = `${skillLabel} (${expression}) · Ammo/use: ${attack.ammoUse}`;
+          meta.textContent = `${skillLabel} (${expression}) · Ammo/use: ${attack.ammoUse} · Dmg: ${formatAttackDamageLabel(
+            attack
+          )}`;
           line.appendChild(meta);
 
           if (attack.mods) {
@@ -7089,6 +7289,8 @@ function renderCriticalInjuries() {
           if (attackNameInput) attackNameInput.value = attack.name;
           if (attackSkillInput) attackSkillInput.value = normalizeWeaponSkillSelection(attack.skillKey || fallbackKey);
           if (attackAmmoUseInput) attackAmmoUseInput.value = attack.ammoUse;
+          if (attackDamageDiceInput) attackDamageDiceInput.value = normalizeDamageDice(attack.damageDice);
+          if (attackAutofireInput) attackAutofireInput.checked = Boolean(attack.damageAutofire);
           if (attackModsInput) attackModsInput.value = attack.mods || "";
           if (attackAdd) attackAdd.textContent = "Save";
         } else {
@@ -7096,6 +7298,8 @@ function renderCriticalInjuries() {
           if (attackNameInput) attackNameInput.value = "";
           if (attackSkillInput) attackSkillInput.value = fallbackKey;
           if (attackAmmoUseInput) attackAmmoUseInput.value = 1;
+          if (attackDamageDiceInput) attackDamageDiceInput.value = DEFAULT_DAMAGE_DICE;
+          if (attackAutofireInput) attackAutofireInput.checked = false;
           if (attackModsInput) attackModsInput.value = "";
           if (attackAdd) attackAdd.textContent = "Add";
         }
@@ -7108,6 +7312,8 @@ function renderCriticalInjuries() {
         const name = attackNameInput?.value.trim() || "";
         const skillKey = normalizeWeaponSkillSelection(attackSkillInput?.value || "");
         const ammoUse = Math.max(0, Number(attackAmmoUseInput?.value || 0));
+        const damageDice = normalizeDamageDice(attackDamageDiceInput?.value);
+        const damageAutofire = Boolean(attackAutofireInput?.checked);
         const mods = attackModsInput?.value.trim() || "";
         const isEditing = Boolean(state.editingAttackId);
 
@@ -7122,6 +7328,8 @@ function renderCriticalInjuries() {
             attack.name = name;
             attack.skillKey = skillKey;
             attack.ammoUse = ammoUse;
+            attack.damageDice = damageDice;
+            attack.damageAutofire = damageAutofire;
             attack.mods = mods;
           }
         } else {
@@ -7130,6 +7338,11 @@ function renderCriticalInjuries() {
             name,
             skillKey,
             ammoUse,
+            damageDice,
+            damageAutofire,
+            soloDamageEnabled: false,
+            soloDamageValue: 0,
+            autofireMultiplier: AUTOFIRE_MULT_MIN,
             mods
           });
         }
@@ -7226,6 +7439,38 @@ function renderCriticalInjuries() {
         weapon.ammoCur = cur;
         weapon.ammoMax = max;
         return { before, after: weapon.ammoCur, used: totalUse };
+      }
+
+      function getAttackDamageInputs(attack, rowEl) {
+        const soloToggle = rowEl?.querySelector('[data-role="attack-solo-enabled"]');
+        const soloInput = rowEl?.querySelector('[data-role="attack-solo-value"]');
+        const autofireInput = rowEl?.querySelector('[data-role="attack-autofire-mult"]');
+
+        const soloEnabled = soloToggle ? soloToggle.checked : Boolean(attack?.soloDamageEnabled);
+        const soloValue = normalizeSoloDamageValue(soloInput ? soloInput.value : attack?.soloDamageValue);
+        if (soloInput) soloInput.value = String(soloValue);
+
+        const autofireMultiplier = normalizeAutofireMultiplier(
+          autofireInput ? autofireInput.value : attack?.autofireMultiplier
+        );
+        if (autofireInput) autofireInput.value = String(autofireMultiplier);
+
+        return { soloEnabled, soloValue, autofireMultiplier };
+      }
+
+      function buildWeaponDamageText(attack, opts = {}) {
+        const { soloEnabled = false, soloValue = 0, autofireMultiplier = AUTOFIRE_MULT_MIN } = opts;
+        const dice = normalizeDamageDice(attack?.damageDice);
+        const isAutofire = Boolean(attack?.damageAutofire);
+        const mult = normalizeAutofireMultiplier(autofireMultiplier);
+        let base = isAutofire ? `${dice}d6*${mult}` : `${dice}d6`;
+        if (soloEnabled) base += `+${normalizeSoloDamageValue(soloValue)}`;
+        return `!r ${base}`;
+      }
+
+      function buildWeaponDamageLog(weapon, attack, command) {
+        const cmd = String(command || "").replace(/^!r\s+/, "");
+        return buildRollLogEntry(`${formatWeaponRollLabel(weapon, attack)} DMG`, "!r", [`cmd ${cmd}`]);
       }
 
       function buildWeaponRollText(weapon, attack, rollCount, extraMod) {
@@ -7374,6 +7619,10 @@ function renderCriticalInjuries() {
               const expression = buildWeaponAttackExpression(skillKey);
               const toggleParts = getAttackModifierParts(weapon, attack).attacks;
               const toggleMod = formatModifierParts(toggleParts, " ");
+              const damageLabel = formatAttackDamageLabel(attack);
+              const soloDamageValue = normalizeSoloDamageValue(attack.soloDamageValue);
+              const autofireMultiplier = normalizeAutofireMultiplier(attack.autofireMultiplier);
+              const isAutofire = Boolean(attack.damageAutofire);
               rowEl.innerHTML = `
                  <button class="btn-roll" type="button" data-action="weapon-roll"
                   data-wid="${escapeHtml(weapon.id)}"
@@ -7385,6 +7634,62 @@ function renderCriticalInjuries() {
 
                 <div class="attack-name" title="${escapeHtml(attack.name)}">
                   ${escapeHtml(attack.name)}
+                </div>
+
+                <div class="attack-damage">
+                  <button class="btn-roll btn-roll-damage" type="button" data-action="weapon-damage-roll"
+                    data-wid="${escapeHtml(weapon.id)}"
+                    data-aid="${escapeHtml(attack.id)}">${escapeHtml(damageLabel)}</button>
+
+                  ${
+                    isAutofire
+                      ? `<div class="attack-stack">
+                          <span class="attack-mini-label">×Autofire</span>
+                          <input
+                            class="attack-mini-input no-spinner"
+                            data-role="attack-autofire-mult"
+                            data-wid="${escapeHtml(weapon.id)}"
+                            data-aid="${escapeHtml(attack.id)}"
+                            type="number"
+                            inputmode="numeric"
+                            min="${AUTOFIRE_MULT_MIN}"
+                            max="${AUTOFIRE_MULT_MAX}"
+                            step="1"
+                            value="${escapeHtml(String(autofireMultiplier))}"
+                            aria-label="Autofire multiplier"
+                          />
+                        </div>`
+                      : ""
+                  }
+
+                  <div class="attack-stack">
+                    <span class="attack-mini-label">+   Solo</span>
+                    <div class="attack-stack-row">
+                      <label class="attack-solo">
+                        <input
+                          type="checkbox"
+                          data-role="attack-solo-enabled"
+                          data-wid="${escapeHtml(weapon.id)}"
+                          data-aid="${escapeHtml(attack.id)}"
+                          ${attack.soloDamageEnabled ? "checked" : ""}
+                          aria-label="Solo damage"
+                        />
+                      </label>
+                      <input
+                        class="attack-mini-input no-spinner"
+                        data-role="attack-solo-value"
+                        data-wid="${escapeHtml(weapon.id)}"
+                        data-aid="${escapeHtml(attack.id)}"
+                        type="number"
+                        inputmode="numeric"
+                        min="0"
+                        max="${SOLO_DAMAGE_MAX}"
+                        step="1"
+                        value="${escapeHtml(String(soloDamageValue))}"
+                        aria-label="Solo damage value"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div class="attack-meta">
@@ -7542,6 +7847,45 @@ function renderCriticalInjuries() {
       }
 
 
+      if (target.dataset.action === "weapon-damage-roll") {
+        const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
+        const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
+        if (!weapon || !attack) return;
+
+        if (redlinkEnabled) {
+          if (event.type === "dblclick") {
+            event.preventDefault();
+            flashRollButton(target);
+            const rowEl = target.closest(".attack-row");
+            const inputs = getAttackDamageInputs(attack, rowEl);
+            const text = buildWeaponDamageText(attack, inputs);
+            await copyRollText(text, target);
+            appendCharacterLogEntry(buildWeaponDamageLog(weapon, attack, text));
+            return;
+          }
+          if (target.classList.contains("roll-armed")) {
+            flashRollButton(target);
+            const rowEl = target.closest(".attack-row");
+            const inputs = getAttackDamageInputs(attack, rowEl);
+            const text = buildWeaponDamageText(attack, inputs);
+            await copyRollText(text, target);
+            appendCharacterLogEntry(buildWeaponDamageLog(weapon, attack, text));
+            return;
+          }
+          armRollButton(target);
+          return;
+        }
+
+        {
+          const rowEl = target.closest(".attack-row");
+          const inputs = getAttackDamageInputs(attack, rowEl);
+          const text = buildWeaponDamageText(attack, inputs);
+          await copyRollText(text, target);
+          appendCharacterLogEntry(buildWeaponDamageLog(weapon, attack, text));
+        }
+        return;
+      }
+
       if (target.dataset.action === "weapon-roll") {
         const weapon = state.weapons.find((w) => w.id === target.dataset.wid);
         const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
@@ -7622,6 +7966,23 @@ function renderCriticalInjuries() {
         }
         if (target.dataset.role === "attack-mods") {
           updateAttackInline(target.dataset.wid, target.dataset.aid, { mods: target.value });
+          return;
+        }
+        if (target.dataset.role === "attack-solo-enabled") {
+          updateAttackInline(target.dataset.wid, target.dataset.aid, { soloDamageEnabled: target.checked });
+          return;
+        }
+        if (target.dataset.role === "attack-solo-value") {
+          const value = normalizeSoloDamageValue(target.value);
+          target.value = String(value);
+          updateAttackInline(target.dataset.wid, target.dataset.aid, { soloDamageValue: value });
+          return;
+        }
+        if (target.dataset.role === "attack-autofire-mult") {
+          const value = normalizeAutofireMultiplier(target.value);
+          target.value = String(value);
+          updateAttackInline(target.dataset.wid, target.dataset.aid, { autofireMultiplier: value });
+          return;
         }
       }
 

@@ -353,11 +353,15 @@ RL_SendToDiscord(baseCmd, channelName) {
     }
 	SetKeyDelay, 50, 50
 
+    Sleep, 100
+	
 
-    Sleep, 120
+	SendEvent, {Esc} 
+
+    Sleep, 100
     SendEvent, ^a
 
-    Sleep, 50
+    Sleep, 100
 	
 
     SendEvent, ^v
@@ -452,20 +456,20 @@ RL_QuickSwitchToChannel(channelName) {
 
     ; 3) Enter to go to channel
     SendEvent, {Enter}
-    Sleep, 250
+    Sleep, 100
     SendEvent, {Esc} ; to make sure laggy quick switcher is closed 
-    Sleep, 250
+    Sleep, 100
 	
 
 	SendEvent, {Esc} 
-    Sleep, 250
+    Sleep, 100
 	
 
 	
     SetKeyDelay, 50, 50
     ; 4) ensure message box focus
     SendEvent, {backspace}
-    Sleep, 250
+    Sleep, 100
 	
 
 
