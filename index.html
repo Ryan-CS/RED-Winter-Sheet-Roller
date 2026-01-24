@@ -64,7 +64,7 @@
         --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 		    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 
-        --scanline: rgba(190, 255, 245, 0.03);
+        --scanline: rgba(190, 255, 245, 0.73);
         --noise: rgba(255, 255, 255, 0.035);
         --base-input: calc(2.6ch + 4px);
         --level-input: calc(3.5ch + 4px);
@@ -99,10 +99,13 @@
           radial-gradient(920px 620px at 88% 92%, rgba(255, 212, 80, 0.10), transparent 58%),
           linear-gradient(180deg, rgba(7, 10, 16, 0.0), rgba(7, 10, 16, 0.35)),
           var(--bg);
-        min-height: 100vh;
+
+      
+          min-height: 100vh;
         overflow-x: hidden;
         background-repeat: no-repeat;
       }
+
 
       body::before {
         content: "";
@@ -117,7 +120,7 @@
             to bottom,
             rgba(0, 0, 0, 0.00),
             rgba(0, 0, 0, 0.00) 2px,
-            var(--scanline) 3px,
+            var(--scanline) 8px,
             rgba(0, 0, 0, 0.00) 5px
           ),
           repeating-linear-gradient(
@@ -1165,7 +1168,8 @@
       }
 
       .wedge-btn:hover {
-        filter: brightness(1.1);
+        filter: brightness(4);
+        box-shadow: var(--glowA);
       }
 
       .wedge-btn:active {
@@ -2134,6 +2138,17 @@
         --btn-text: rgba(255, 59, 106, 0.92);
 
       }
+
+      /* Weapon multi-roll button (!rr) should read distinct from the single roll (!r). */
+      .btn-roll.btn-roll-multi {
+        background: rgba(44, 246, 232, 0.14);
+        --btn-overlay: #2cf6e8;
+
+        --btn-border: rgba(44, 246, 232, 0.55);
+        --btn-border-boost: rgba(44, 246, 232, 0.95);
+        --btn-text: rgba(44, 246, 232, 0.92);
+      }
+
 
       .btn-roll::before,
       .btn-roll::after {
@@ -3109,8 +3124,7 @@
               placeholder="game1-dice"
               aria-label="REDlink channel name"
             />
-            <button id="redlinkChannelSet" class="redlink-set" type="button">SET</button>
-          </div>
+</div>
           <div class="inline-control inline-clear">
             <!-- <label for="clearSheetBtn">Clear Sheet</label> -->
             <button id="clearSheetBtn" type="button">Clear Sheet</button>
@@ -4238,8 +4252,7 @@
           redlinkToggle: byId('redlinkToggle'),
           redlinkToggleText: byId('redlinkToggleText'),
           redlinkChannelInput: byId('redlinkChannelInput'),
-          redlinkChannelSet: byId('redlinkChannelSet'),
-          clearSheetBtn: byId('clearSheetBtn'),
+clearSheetBtn: byId('clearSheetBtn'),
 
           // Pinned + modifiers + luck
           addPinnedBtn: byId('addPinnedBtn'),
@@ -4398,8 +4411,7 @@ customRollAdd: byId('customRollAdd'),
           redlinkToggle,
           redlinkToggleText,
           redlinkChannelInput,
-          redlinkChannelSet,
-          clearSheetBtn,
+clearSheetBtn,
           addPinnedBtn,
           customRollBackdrop,
           customRollName,
@@ -4927,6 +4939,12 @@ const BASE_PREFIX = "BASE ";
         await copyRollText(text, row);
         appendCharacterLogEntry(buildSkillRollLog(skill));
         if (skill.source !== "custom-roll") consumeLuckForRoll();
+      }
+
+      async function activateWeaponRollButton(button, weapon, attack) {
+        if (!redlinkEnabled) return;
+        flashRollButton(button);
+        await handleWeaponRoll(weapon, attack, 1, button);
       }
 
       function setError(message) {
@@ -7357,11 +7375,11 @@ function renderCriticalInjuries() {
               const toggleParts = getAttackModifierParts(weapon, attack).attacks;
               const toggleMod = formatModifierParts(toggleParts, " ");
               rowEl.innerHTML = `
-                <button class="btn-roll" type="button" data-action="weapon-roll"
+                 <button class="btn-roll" type="button" data-action="weapon-roll"
                   data-wid="${escapeHtml(weapon.id)}"
                   data-aid="${escapeHtml(attack.id)}">!r</button>
 
-                <button class="btn-roll" type="button" data-action="weapon-roll-multi"
+                 <button class="btn-roll btn-roll-multi" type="button" data-action="weapon-roll-multi"
                   data-wid="${escapeHtml(weapon.id)}"
                   data-aid="${escapeHtml(attack.id)}">!rr</button>
 
@@ -7420,7 +7438,7 @@ function renderCriticalInjuries() {
         });
       }
 
-    function handleWeaponListEvents(event) {
+    async function handleWeaponListEvents(event) {
       const target = event.target;
       if (!target) return;
 
@@ -7482,8 +7500,8 @@ function renderCriticalInjuries() {
         return; // ignore all other blur targets
       }
 
-      // CLICK: only handle action buttons.
-      if (event.type !== "click") return;
+      // CLICK/DBLCLICK: only handle action buttons.
+      if (event.type !== "click" && event.type !== "dblclick") return;
 
       if (target.dataset.action === "edit") {
         const weapon = state.weapons.find((w) => w.id === target.dataset.id);
@@ -7529,7 +7547,23 @@ function renderCriticalInjuries() {
         const attack = weapon?.attacks.find((a) => a.id === target.dataset.aid);
         if (!weapon || !attack) return;
 
-        handleWeaponRoll(weapon, attack, 1, target);
+        // When REDlink is active, weapon !r behaves like skill Roll: arm on first click,
+        // activate on second click, and always activate on double-click.
+        if (redlinkEnabled) {
+          if (event.type === "dblclick") {
+            event.preventDefault();
+            await activateWeaponRollButton(target, weapon, attack);
+            return;
+          }
+          if (target.classList.contains("roll-armed")) {
+            await activateWeaponRollButton(target, weapon, attack);
+            return;
+          }
+          armRollButton(target);
+          return;
+        }
+
+        await handleWeaponRoll(weapon, attack, 1, target);
         return;
       }
 
@@ -8633,6 +8667,7 @@ if (customRollName) {
 
       if (weaponsList) {
         weaponsList.addEventListener("click", handleWeaponListEvents);
+        weaponsList.addEventListener("dblclick", handleWeaponListEvents);
         weaponsList.addEventListener("blur", handleWeaponListEvents, true);
         weaponsList.addEventListener("input", handleWeaponListInput);
       }
@@ -8673,21 +8708,23 @@ if (customRollName) {
       redlinkToggle.addEventListener("click", () => {
         setRedlinkEnabled(!redlinkEnabled, true);
       });
+      // REDlink channel is always "live": whatever is in the input is the channel.
+      if (redlinkChannelInput) {
+        redlinkChannelInput.addEventListener("input", () => {
+          setRedlinkChannel(redlinkChannelInput.value, false);
+        });
 
-      function commitRedlinkChannel() {
-        if (!redlinkChannelInput) return;
-        setRedlinkChannel(redlinkChannelInput.value, true);
+        redlinkChannelInput.addEventListener("change", () => {
+          setRedlinkChannel(redlinkChannelInput.value, true);
+        });
+
+        redlinkChannelInput.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          setRedlinkChannel(redlinkChannelInput.value, true);
+          redlinkChannelInput.blur();
+        });
       }
-
-      redlinkChannelSet.addEventListener("click", commitRedlinkChannel);
-
-      redlinkChannelInput.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter") return;
-        event.preventDefault();
-        commitRedlinkChannel();
-        redlinkChannelInput.blur();
-      });
-
       if (startupRedlinkChannelInput) {
         startupRedlinkChannelInput.addEventListener("input", () => {
           setRedlinkChannel(startupRedlinkChannelInput.value, false);
@@ -8839,12 +8876,25 @@ if (customRollName) {
         }
         const armed = document.querySelector(".btn-roll.roll-armed");
         if (!armed) return;
-        const row = armed.closest(".skill-row");
-        const skillId = row ? row.dataset.skillId : "";
-        const skill = skillId ? state.skills[skillId] : null;
-        if (!skill) return;
         event.preventDefault();
-        await activateRollButton(armed, row, skill);
+
+        // Skill-row armed roll button
+        const skillRow = armed.closest(".skill-row");
+        if (skillRow) {
+          const skillId = skillRow.dataset.skillId || "";
+          const skill = skillId ? state.skills[skillId] : null;
+          if (!skill) return;
+          await activateRollButton(armed, skillRow, skill);
+          return;
+        }
+
+        // Weapon attack-row armed roll button
+        if (armed.dataset.action === "weapon-roll") {
+          const weapon = state.weapons.find((w) => w.id === armed.dataset.wid);
+          const attack = weapon?.attacks.find((a) => a.id === armed.dataset.aid);
+          if (!weapon || !attack) return;
+          await activateWeaponRollButton(armed, weapon, attack);
+        }
       });
 
       document.addEventListener("click", (event) => {
