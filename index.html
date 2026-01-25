@@ -2,7 +2,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-  
+  <link rel="icon" type="image/png" sizes="32x32" href="https://ryan-cs.github.io/RED-Winter-Sheet-Roller/REDashhomebadge.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link
@@ -9961,17 +9961,48 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
         }
       }
 
-      // Wire wedge buttons.
+            // Wire wedge buttons.
       const damageFullBtn = document.getElementById("damageFullBtn");
       const damageHalfBtn = document.getElementById("damageHalfBtn");
       const damageBypassBtn = document.getElementById("damageBypassBtn");
 
-      if (damageFullBtn) damageFullBtn.addEventListener("click", () => applyDamageFromWedge("full"));
-      if (damageHalfBtn) damageHalfBtn.addEventListener("click", () => applyDamageFromWedge("half"));
+      function buildDamageCmd(mode) {
+        const dmg = parseIntSafe(damageValueInput?.value, 0);
+        if (!dmg || dmg <= 0) return "";
+        const isHead = Boolean(damageHeadshotInput?.checked);
+        const spCurInput = isHead ? headSpCurrentInput : bodySpCurrentInput;
+        const sp = parseIntSafe(spCurInput?.value, 0);
+        const spText = String(Math.max(0, sp));
+        const dmgText = String(Math.max(0, dmg));
+
+        if (mode === "full") return `!dmg b ${dmgText} ${spText}`;
+        if (mode === "half") return `!dmg m ${dmgText} ${spText}`;
+        return "";
+      }
+
+      async function handleDamageWedgeClick(mode, btnEl) {
+        // Copy command first (applyDamageFromWedge clears the damage field).
+        const cmd = buildDamageCmd(mode);
+        if (!cmd) {
+          flashElement(damageValueInput);
+          return;
+        }
+        await copyRollText(cmd, btnEl || null);
+        applyDamageFromWedge(mode);
+      }
+
+      if (damageFullBtn)
+        damageFullBtn.addEventListener("click", async () => {
+          await handleDamageWedgeClick("full", damageFullBtn);
+        });
+
+      if (damageHalfBtn)
+        damageHalfBtn.addEventListener("click", async () => {
+          await handleDamageWedgeClick("half", damageHalfBtn);
+        });
+
       if (damageBypassBtn) damageBypassBtn.addEventListener("click", () => applyDamageFromWedge("bypass"));
-
-
-      // Hover/focus previews: light up the amount that would be subtracted from HP/SP.
+// Hover/focus previews: light up the amount that would be subtracted from HP/SP.
       bindHudPreview(fireReadoutBtn, () => {
         const delta = parseIntSafe(fireReadoutBtn?.textContent, 0);
         const loss = Math.max(0, Math.abs(delta));
