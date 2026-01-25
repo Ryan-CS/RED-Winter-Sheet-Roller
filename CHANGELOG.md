@@ -1,5 +1,52 @@
 # Changelog
 
+## 2026-01-24
+
+### Summary
+- Added weapon attack damage rolls with solo and autofire controls.
+
+### User-Facing Changes
+- Weapon attack rows now include a damage roll button, solo toggle/input, and autofire multiplier when enabled.
+- Attack modal includes damage dice and autofire settings that drive the damage button label.
+
+### Technical Changes
+- Extended weapon attack state to store damage dice, autofire flags, solo damage settings, and autofire multipliers.
+- Added damage roll command builders and logging for weapon attack damage buttons.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-24
+
+### Summary
+- Refined attack damage controls layout and removed number spinners.
+
+### User-Facing Changes
+- Damage row labels now sit above their checkbox/input controls.
+- Damage dice, solo, and autofire number inputs no longer show spinner buttons.
+
+### Technical Changes
+- Adjusted attack damage row markup/CSS for stacked labels and spinnerless number inputs.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
 ## 2026-01-21
 
 ### Summary
