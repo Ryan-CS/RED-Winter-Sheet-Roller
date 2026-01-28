@@ -13,6 +13,7 @@
 ### Technical Changes
 - Stored per-attack `showDamageButton` flags and derived visibility from the flag plus normalized dice.
 - Allowed 0 damage dice values in attack normalization and modal input.
+- Persisted the per-attack damage-button setting in save files and local state.
 
 ### Integration Notes
 - REDlink prefix/format: unchanged.
