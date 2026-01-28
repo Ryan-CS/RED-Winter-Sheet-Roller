@@ -149,5 +149,5 @@ If REDlink is not detected:
 ## Credits
 
 - Character Sheet: **M.K. Bergins**
-- Tooling & Integration: Ryan-CS
+- Page Tooling & Integration: Ryan "Rysk" S
 - Cyberpunk RED © R. Talsorian Games

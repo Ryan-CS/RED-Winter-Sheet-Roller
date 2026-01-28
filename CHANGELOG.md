@@ -1,5 +1,80 @@
 # Changelog
 
+## 2026-01-28
+
+### Summary
+- Added control to hide weapon damage buttons per attack mode, including a zero-dice shortcut.
+
+### User-Facing Changes
+- Attack modes now include a "Show damage button" checkbox in the modal (default on).
+- Setting attack damage dice to 0 hides the damage button in weapon attack rows.
+- Hidden damage buttons also hide the autofire multiplier and solo damage controls.
+
+### Technical Changes
+- Stored per-attack `showDamageButton` flags and derived visibility from the flag plus normalized dice.
+- Allowed 0 damage dice values in attack normalization and modal input.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-28
+
+### Summary
+- Fixed save/load for custom rolls and martial arts attack skill selections.
+
+### User-Facing Changes
+- Saved states now restore custom quick bar rolls with their command strings.
+- Weapon attack modes now keep martial arts sub-skill selections after reload.
+
+### Technical Changes
+- Persisted custom roll command data in state payloads and restores.
+- Reordered state hydration so weapon attack skill IDs resolve after skills load.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-25
+
+### Summary
+- Made modifier toggles reorderable and surfaced active modifier names in roll labels.
+
+### User-Facing Changes
+- Modifier toggles can be dragged to reorder with drop hints in the list.
+- Skill and weapon roll labels now append active modifier names in parentheses.
+- Stats drawer tab styling/positioning was refined for clearer visibility.
+
+### Technical Changes
+- Added drag/drop handlers plus reorder helpers for modifier toggles and persisted the new order.
+- Added modifier-name helpers for skill/attack/stat scopes and included them in roll-label builders.
+- Tuned stats drawer tab CSS and background accents.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
 ## 2026-01-24
 
 ### Summary

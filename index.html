@@ -96,7 +96,7 @@
         line-height: 1.3;
         background:
           radial-gradient(1200px 520px at 12% 8%, rgba(44, 246, 232, 0.12), transparent 60%),
-          radial-gradient(920px 620px at 88% 92%, rgba(255, 212, 80, 0.10), transparent 58%),
+          radial-gradient(920px 620px at 88% 92%, rgba(255, 80, 80, 0.1), transparent 58%),
           linear-gradient(180deg, rgba(7, 10, 16, 0.0), rgba(7, 10, 16, 0.35)),
           var(--bg);
 
@@ -434,6 +434,25 @@
         color: var(--ink-muted);
       }
 
+      .mod-toggle-item[draggable="true"] {
+        cursor: grab;
+      }
+
+      .mod-toggle-item.dragging {
+        opacity: 0.55;
+      }
+
+      .mod-toggle-item.drop-before {
+        outline: 1px solid rgba(44, 246, 232, 0.55);
+        outline-offset: 3px;
+      }
+
+      .mod-toggle-item.drop-after {
+        outline: 1px solid rgba(44, 246, 232, 0.55);
+        outline-offset: -3px;
+      }
+
+
       .mod-toggle-item input {
         margin: 0;
       }
@@ -447,7 +466,7 @@
         align-items: stretch;
         --stats-tab-w: 38px;
         --stats-panel-w: 210px;
-        transform: translateX(calc(-100% + var(--stats-tab-w)));
+        transform: translateX(calc(-105% + var(--stats-tab-w)));
         transition: transform 220ms ease;
       }
 
@@ -458,26 +477,30 @@
       .stats-tab {
         width: var(--stats-tab-w);
         height: 120px;
-        padding: 0 6px;
+        transform: translateY(-200px);
+        padding: 0px 6px;
+        
         border: 1px solid var(--border-strong);
         border-left: none;
         border-right: 1px solid var(--border-strong);
-        background: rgba(6, 10, 18, 0.92);
+        background: rgba(6, 10, 18, 0.747);
         color: var(--ink-muted);
         font-family: var(--mono);
-        font-size: 11px;
+        font-size: 14px;
         text-transform: uppercase;
         letter-spacing: 0.24em;
+        font-weight: 600;
         display: grid;
         place-items: center;
         cursor: pointer;
         align-self: center;
         margin-left: -1px;
+        
       }
 
       .stats-tab span {
         display: block;
-        transform: rotate(90deg);
+        transform: rotate(90deg) translateY(10px);
       }
 
       .stats-tab:hover,
@@ -532,7 +555,7 @@
 
       .stat-hum-temp-wrap .stat-label-inline {
         position: absolute;
-        top: -14px;
+        top: -10px;
       }
 
       .stat-row--pair {
@@ -3810,7 +3833,7 @@
         <div class="modalGrid2">
           <div class="modalField">
             <label for="attackDamageDiceInput">Damage dice (d6)</label>
-            <input id="attackDamageDiceInput" class="no-spinner" type="number" min="1" max="99" step="1" value="2" />
+            <input id="attackDamageDiceInput" class="no-spinner" type="number" min="0" max="99" step="1" value="2" />
           </div>
           <div class="modalField">
             <label class="modal-check" for="attackAutofireInput">
@@ -3818,6 +3841,13 @@
               <span>Autofire (adds *)</span>
             </label>
           </div>
+        </div>
+
+        <div class="modalField">
+          <label class="modal-check" for="attackShowDamageInput">
+            <input id="attackShowDamageInput" type="checkbox" checked />
+            <span>Show damage button</span>
+          </label>
         </div>
 
         <div class="modalField">
@@ -4363,6 +4393,7 @@
           attackAmmoUseInput: byId('attackAmmoUseInput'),
           attackDamageDiceInput: byId('attackDamageDiceInput'),
           attackAutofireInput: byId('attackAutofireInput'),
+          attackShowDamageInput: byId('attackShowDamageInput'),
           attackModsInput: byId('attackModsInput'),
           attackCancel: byId('attackCancel'),
           attackAdd: byId('attackAdd'),
@@ -4532,6 +4563,7 @@
           attackAmmoUseInput,
           attackDamageDiceInput,
           attackAutofireInput,
+          attackShowDamageInput,
           attackModsInput,
           attackCancel,
           attackAdd,
@@ -5005,7 +5037,8 @@ const BASE_PREFIX = "BASE ";
             mod: skill.mod,
             canonicalKey: skill.canonicalKey,
             stat: skill.stat,
-            source: skill.source
+            source: skill.source,
+            command: skill.command
           })),
           pinnedColumns: state.pinnedColumns,
           columnSkills: state.columnSkills,
@@ -5289,6 +5322,38 @@ const BASE_PREFIX = "BASE ";
         return value;
       }
 
+      let modifierToggleDragId = "";
+
+      function reorderModifierToggles(dragId, dropId, place = "before") {
+        const mods = ensureModifierState();
+        const fromIndex = mods.findIndex((m) => m.id === dragId);
+        if (fromIndex === -1) return false;
+
+        const [moved] = mods.splice(fromIndex, 1);
+
+        if (!dropId) {
+          mods.push(moved);
+          return true;
+        }
+
+        let toIndex = mods.findIndex((m) => m.id === dropId);
+        if (toIndex === -1) {
+          mods.push(moved);
+          return true;
+        }
+
+        if (place === "after") toIndex += 1;
+        mods.splice(Math.max(0, Math.min(mods.length, toIndex)), 0, moved);
+        return true;
+      }
+
+      function clearModifierToggleDropHints() {
+        if (!modifierToggleList) return;
+        modifierToggleList.querySelectorAll(".drop-before, .drop-after").forEach((el) => {
+          el.classList.remove("drop-before", "drop-after");
+        });
+      }
+
       function renderModifierToggles() {
         if (!modifierToggleList) return;
         const mods = ensureModifierState();
@@ -5300,12 +5365,39 @@ const BASE_PREFIX = "BASE ";
           modifierToggleList.appendChild(empty);
           return;
         }
+
+        // Allow dropping to the end of the list.
+        modifierToggleList.ondragover = (event) => {
+          if (!modifierToggleDragId) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = "move";
+        };
+        modifierToggleList.ondrop = (event) => {
+          if (!modifierToggleDragId) return;
+          event.preventDefault();
+          const droppedOnRow = event.target && event.target.closest
+            ? event.target.closest(".mod-toggle-item")
+            : null;
+          if (droppedOnRow && droppedOnRow.dataset && droppedOnRow.dataset.id) return; // Row handler will manage.
+          clearModifierToggleDropHints();
+          const moved = reorderModifierToggles(modifierToggleDragId, "", "before");
+          modifierToggleDragId = "";
+          if (moved) {
+            scheduleLocalStateSave();
+            renderModifierToggles();
+          }
+        };
+
         mods.forEach((mod) => {
           const row = document.createElement("label");
           row.className = "mod-toggle-item";
           row.dataset.id = mod.id;
+          row.draggable = true;
+          row.setAttribute("draggable", "true");
+
           const name = document.createElement("span");
           name.textContent = mod.name || "Modifier";
+
           const toggle = document.createElement("input");
           toggle.type = "checkbox";
           toggle.checked = Boolean(mod.active);
@@ -5315,6 +5407,51 @@ const BASE_PREFIX = "BASE ";
             updateModifierHints();
             scheduleLocalStateSave();
           });
+
+          row.addEventListener("dragstart", (event) => {
+            modifierToggleDragId = mod.id;
+            row.classList.add("dragging");
+            event.dataTransfer.effectAllowed = "move";
+            try {
+              event.dataTransfer.setData("text/plain", mod.id);
+            } catch {}
+          });
+
+          row.addEventListener("dragend", () => {
+            row.classList.remove("dragging");
+            clearModifierToggleDropHints();
+            modifierToggleDragId = "";
+          });
+
+          row.addEventListener("dragover", (event) => {
+            if (!modifierToggleDragId || modifierToggleDragId === mod.id) return;
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            clearModifierToggleDropHints();
+            const rect = row.getBoundingClientRect();
+            const before = event.clientY < rect.top + rect.height / 2;
+            row.classList.add(before ? "drop-before" : "drop-after");
+          });
+
+          row.addEventListener("dragleave", () => {
+            row.classList.remove("drop-before", "drop-after");
+          });
+
+          row.addEventListener("drop", (event) => {
+            if (!modifierToggleDragId || modifierToggleDragId === mod.id) return;
+            event.preventDefault();
+            const place = row.classList.contains("drop-after") ? "after" : "before";
+            clearModifierToggleDropHints();
+            const moved = reorderModifierToggles(modifierToggleDragId, mod.id, place);
+            modifierToggleDragId = "";
+            if (moved) {
+              scheduleLocalStateSave();
+              renderModifierToggles();
+              // Modifier order can affect how you read the toggle stack; refresh hints.
+              updateModifierHints();
+            }
+          });
+
           row.append(toggle, name);
           modifierToggleList.appendChild(row);
         });
@@ -6135,8 +6272,12 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
         const luckMod = !isMulti && state.luckNext > 0 ? String(state.luckNext) : "";
         const multiMod = isMulti ? String(extraMod || "").replace(/\s+/g, "") : extraMod;
         const toggleMods = getSkillModifierParts(skill);
+        const toggleNames = getSkillModifierNames(skill);
         const mod = buildCombinedModifier(skill.mod, state.globalMod, toggleMods, luckMod, multiMod);
-        const skillName = skill.displayName;
+        let skillName = String(skill.displayName || "").trim();
+        if (toggleNames.length) {
+          skillName = `${skillName} (${toggleNames.join(", ")})`.trim();
+        }
         if (isMulti) {
           return `!rr ${rollCount} 1d10+${base}${mod} ${skillName}`;
         }
@@ -6582,7 +6723,7 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
       ];
 
       const DEFAULT_DAMAGE_DICE = 2;
-      const DAMAGE_DICE_MIN = 1;
+      const DAMAGE_DICE_MIN = 0;
       const DAMAGE_DICE_MAX = 99;
       const SOLO_DAMAGE_MAX = 10;
       const AUTOFIRE_MULT_MIN = 1;
@@ -6609,6 +6750,11 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
       function formatAttackDamageLabel(attack) {
         const dice = normalizeDamageDice(attack?.damageDice);
         return `${dice}d6${attack?.damageAutofire ? "*" : ""}`;
+      }
+
+      function shouldShowAttackDamageButton(attack) {
+        const dice = normalizeDamageDice(attack?.damageDice);
+        return Boolean(attack?.showDamageButton ?? true) && dice > 0;
       }
 
       const WEAPON_SKILL_SELECTION_ID_PREFIX = "id:";
@@ -6795,6 +6941,190 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
           if (matched) parts.push(value);
         });
         return parts;
+      }
+
+      function getScopedModifierEffects(scopeKey, targetSet, normalizeFn) {
+        const effects = [];
+        ensureModifierState().forEach((mod) => {
+          if (!mod.active) return;
+          const scope = mod[scopeKey];
+          if (!scope) return;
+          const value = normalizeModifierForRoll(scope.value);
+          if (!value) return;
+
+          const name = String(mod.name || "Modifier").trim() || "Modifier";
+
+          if (scope.applyAll) {
+            effects.push({ name, value });
+            return;
+          }
+          const targets = Array.isArray(scope.targets) ? scope.targets : [];
+          if (targets.length === 0) {
+            effects.push({ name, value });
+            return;
+          }
+          const matched = targets.some((target) => targetSet.has(normalizeFn(target)));
+          if (matched) effects.push({ name, value });
+        });
+        return effects;
+      }
+
+      function uniqueNames(effects) {
+        const seen = new Set();
+        const names = [];
+        effects.forEach((entry) => {
+          const label = String(entry?.name || "").trim();
+          if (!label) return;
+          const key = label.toLowerCase();
+          if (seen.has(key)) return;
+          seen.add(key);
+          names.push(label);
+        });
+        return names;
+      }
+
+      function getStatModifierNames(statKey) {
+        const key = String(statKey || "").trim().toUpperCase();
+        if (!key) return [];
+        const targetSet = buildNormalizedTargetSet([key], normalizeStatTarget);
+        return uniqueNames(getScopedModifierEffects("stats", targetSet, normalizeStatTarget));
+      }
+
+      function getWeaponSkillStatLabel(selection) {
+        const normalized = normalizeWeaponSkillSelection(selection);
+        if (!normalized) return "";
+        if (normalized.startsWith(WEAPON_SKILL_SELECTION_ID_PREFIX)) {
+          const id = normalized.slice(WEAPON_SKILL_SELECTION_ID_PREFIX.length);
+          const stat = state.skills && state.skills[id] ? state.skills[id].stat : "";
+          return String(stat || "").trim().toUpperCase();
+        }
+        const meta = canonicalMeta[normalized];
+        return String(meta?.stat || "").trim().toUpperCase();
+      }
+
+      function getSkillModifierNames(skill) {
+        const baseTargets = buildNormalizedTargetSet([skill?.displayName || ""], normalizeSkillTarget);
+        const skillNames = getScopedModifierEffects("skills", baseTargets, normalizeSkillTarget);
+        const statKey = String(skill?.stat || "").trim().toUpperCase();
+        const statTargets = buildNormalizedTargetSet([statKey], normalizeStatTarget);
+        const statNames = statKey
+          ? getScopedModifierEffects("stats", statTargets, normalizeStatTarget)
+          : [];
+        return uniqueNames([...skillNames, ...statNames]);
+      }
+
+      function getAttackModifierNames(weapon, attack) {
+        const candidates = [
+          attack?.name || "",
+          getWeaponSkillLabel(attack?.skillKey || ""),
+          weapon?.name || "",
+          weapon?.name && attack?.name ? `${weapon.name} - ${attack.name}` : ""
+        ];
+        const targetSet = buildNormalizedTargetSet(candidates, normalizeAttackTarget);
+        const skillTargets = buildNormalizedTargetSet(
+          [getWeaponSkillLabel(attack?.skillKey || "")],
+          normalizeSkillTarget
+        );
+        const skillNames = getScopedModifierEffects("skills", skillTargets, normalizeSkillTarget);
+        const attackNames = getScopedModifierEffects("attacks", targetSet, normalizeAttackTarget);
+        const statKey = getWeaponSkillStatLabel(attack?.skillKey || "");
+        const statTargets = buildNormalizedTargetSet([statKey], normalizeStatTarget);
+        const statNames = statKey
+          ? getScopedModifierEffects("stats", statTargets, normalizeStatTarget)
+          : [];
+        return uniqueNames([...skillNames, ...attackNames, ...statNames]);
+      }
+
+      function getScopedModifierEffects(scopeKey, targetSet, normalizeFn) {
+        const effects = [];
+        ensureModifierState().forEach((mod) => {
+          if (!mod.active) return;
+          const scope = mod[scopeKey];
+          if (!scope) return;
+          const value = normalizeModifierForRoll(scope.value);
+          if (!value) return;
+
+          const name = String(mod.name || "Modifier").trim() || "Modifier";
+
+          if (scope.applyAll) {
+            effects.push({ name, value });
+            return;
+          }
+          const targets = Array.isArray(scope.targets) ? scope.targets : [];
+          if (targets.length === 0) {
+            effects.push({ name, value });
+            return;
+          }
+          const matched = targets.some((target) => targetSet.has(normalizeFn(target)));
+          if (matched) effects.push({ name, value });
+        });
+        return effects;
+      }
+
+      function uniqueNames(effects) {
+        const seen = new Set();
+        const names = [];
+        effects.forEach((entry) => {
+          const label = String(entry?.name || "").trim();
+          if (!label) return;
+          const key = label.toLowerCase();
+          if (seen.has(key)) return;
+          seen.add(key);
+          names.push(label);
+        });
+        return names;
+      }
+
+      function getStatModifierNames(statKey) {
+        const key = String(statKey || "").trim().toUpperCase();
+        if (!key) return [];
+        const targetSet = buildNormalizedTargetSet([key], normalizeStatTarget);
+        return uniqueNames(getScopedModifierEffects("stats", targetSet, normalizeStatTarget));
+      }
+
+      function getWeaponSkillStatLabel(selection) {
+        const normalized = normalizeWeaponSkillSelection(selection);
+        if (!normalized) return "";
+        if (normalized.startsWith(WEAPON_SKILL_SELECTION_ID_PREFIX)) {
+          const id = normalized.slice(WEAPON_SKILL_SELECTION_ID_PREFIX.length);
+          const stat = state.skills && state.skills[id] ? state.skills[id].stat : "";
+          return String(stat || "").trim().toUpperCase();
+        }
+        const meta = canonicalMeta[normalized];
+        return String(meta?.stat || "").trim().toUpperCase();
+      }
+
+      function getSkillModifierNames(skill) {
+        const baseTargets = buildNormalizedTargetSet([skill?.displayName || ""], normalizeSkillTarget);
+        const skillNames = getScopedModifierEffects("skills", baseTargets, normalizeSkillTarget);
+        const statKey = String(skill?.stat || "").trim().toUpperCase();
+        const statTargets = buildNormalizedTargetSet([statKey], normalizeStatTarget);
+        const statNames = statKey
+          ? getScopedModifierEffects("stats", statTargets, normalizeStatTarget)
+          : [];
+        return uniqueNames([...skillNames, ...statNames]);
+      }
+
+      function getAttackModifierNames(weapon, attack) {
+        const candidates = [
+          attack?.name || "",
+          getWeaponSkillLabel(attack?.skillKey || ""),
+          weapon?.name || "",
+          weapon?.name && attack?.name ? `${weapon.name} - ${attack.name}` : ""
+        ];
+        const targetSet = buildNormalizedTargetSet(candidates, normalizeAttackTarget);
+        const skillTargets = buildNormalizedTargetSet(
+          [getWeaponSkillLabel(attack?.skillKey || "")],
+          normalizeSkillTarget
+        );
+        const skillNames = getScopedModifierEffects("skills", skillTargets, normalizeSkillTarget);
+        const attackNames = getScopedModifierEffects("attacks", targetSet, normalizeAttackTarget);
+        const statKey = getWeaponSkillStatLabel(attack?.skillKey || "");
+        const statTargets = buildNormalizedTargetSet([statKey], normalizeStatTarget);
+        const statNames = statKey
+          ? getScopedModifierEffects("stats", statTargets, normalizeStatTarget)
+          : [];
+        return uniqueNames([...skillNames, ...attackNames, ...statNames]);
       }
 
       function getSkillModifierParts(skill) {
@@ -7043,6 +7373,9 @@ function renderCriticalInjuries() {
         const ammoUse = Math.max(0, Number(attack.ammoUse ?? 0));
         const damageDice = normalizeDamageDice(attack.damageDice ?? attack.damageDiceCount);
         const damageAutofire = Boolean(attack.damageAutofire ?? attack.autofire);
+        const showDamageButton = Boolean(
+          attack.showDamageButton ?? attack.showDamage ?? attack.showDamageRoll ?? true
+        );
         const soloDamageEnabled = Boolean(attack.soloDamageEnabled ?? attack.soloEnabled);
         const soloDamageValue = normalizeSoloDamageValue(attack.soloDamageValue ?? attack.soloValue);
         const autofireMultiplier = normalizeAutofireMultiplier(
@@ -7056,6 +7389,7 @@ function renderCriticalInjuries() {
           ammoUse,
           damageDice,
           damageAutofire,
+          showDamageButton,
           soloDamageEnabled,
           soloDamageValue,
           autofireMultiplier,
@@ -7291,6 +7625,7 @@ function renderCriticalInjuries() {
           if (attackAmmoUseInput) attackAmmoUseInput.value = attack.ammoUse;
           if (attackDamageDiceInput) attackDamageDiceInput.value = normalizeDamageDice(attack.damageDice);
           if (attackAutofireInput) attackAutofireInput.checked = Boolean(attack.damageAutofire);
+          if (attackShowDamageInput) attackShowDamageInput.checked = Boolean(attack.showDamageButton ?? true);
           if (attackModsInput) attackModsInput.value = attack.mods || "";
           if (attackAdd) attackAdd.textContent = "Save";
         } else {
@@ -7300,6 +7635,7 @@ function renderCriticalInjuries() {
           if (attackAmmoUseInput) attackAmmoUseInput.value = 1;
           if (attackDamageDiceInput) attackDamageDiceInput.value = DEFAULT_DAMAGE_DICE;
           if (attackAutofireInput) attackAutofireInput.checked = false;
+          if (attackShowDamageInput) attackShowDamageInput.checked = true;
           if (attackModsInput) attackModsInput.value = "";
           if (attackAdd) attackAdd.textContent = "Add";
         }
@@ -7314,6 +7650,7 @@ function renderCriticalInjuries() {
         const ammoUse = Math.max(0, Number(attackAmmoUseInput?.value || 0));
         const damageDice = normalizeDamageDice(attackDamageDiceInput?.value);
         const damageAutofire = Boolean(attackAutofireInput?.checked);
+        const showDamageButton = attackShowDamageInput ? attackShowDamageInput.checked : true;
         const mods = attackModsInput?.value.trim() || "";
         const isEditing = Boolean(state.editingAttackId);
 
@@ -7330,6 +7667,7 @@ function renderCriticalInjuries() {
             attack.ammoUse = ammoUse;
             attack.damageDice = damageDice;
             attack.damageAutofire = damageAutofire;
+            attack.showDamageButton = showDamageButton;
             attack.mods = mods;
           }
         } else {
@@ -7340,6 +7678,7 @@ function renderCriticalInjuries() {
             ammoUse,
             damageDice,
             damageAutofire,
+            showDamageButton,
             soloDamageEnabled: false,
             soloDamageValue: 0,
             autofireMultiplier: AUTOFIRE_MULT_MIN,
@@ -7477,6 +7816,7 @@ function renderCriticalInjuries() {
         const base = getWeaponSkillBase(attack.skillKey);
         const luckMod = !rollCount && state.luckNext > 0 ? `+${state.luckNext}` : "";
         const toggleMods = getAttackModifierParts(weapon, attack);
+        const toggleNames = getAttackModifierNames(weapon, attack);
         const mod = buildCombinedModifier(
           getWeaponSkillModValue(attack.skillKey),
           state.globalMod,
@@ -7486,7 +7826,10 @@ function renderCriticalInjuries() {
           attack.mods,
           extraMod
         );
-        const label = formatWeaponRollLabel(weapon, attack);
+        let label = formatWeaponRollLabel(weapon, attack);
+        if (toggleNames.length) {
+          label = `${label} (${toggleNames.join(", ")})`.trim();
+        }
         if (rollCount) {
           return `!rr ${rollCount} 1d10+${base}${mod} ${label}`;
         }
@@ -7623,6 +7966,7 @@ function renderCriticalInjuries() {
               const soloDamageValue = normalizeSoloDamageValue(attack.soloDamageValue);
               const autofireMultiplier = normalizeAutofireMultiplier(attack.autofireMultiplier);
               const isAutofire = Boolean(attack.damageAutofire);
+              const showDamageButton = shouldShowAttackDamageButton(attack);
               rowEl.innerHTML = `
                  <button class="btn-roll" type="button" data-action="weapon-roll"
                   data-wid="${escapeHtml(weapon.id)}"
@@ -7637,59 +7981,63 @@ function renderCriticalInjuries() {
                 </div>
 
                 <div class="attack-damage">
-                  <button class="btn-roll btn-roll-damage" type="button" data-action="weapon-damage-roll"
-                    data-wid="${escapeHtml(weapon.id)}"
-                    data-aid="${escapeHtml(attack.id)}">${escapeHtml(damageLabel)}</button>
-
                   ${
-                    isAutofire
-                      ? `<div class="attack-stack">
-                          <span class="attack-mini-label">×Autofire</span>
-                          <input
-                            class="attack-mini-input no-spinner"
-                            data-role="attack-autofire-mult"
-                            data-wid="${escapeHtml(weapon.id)}"
-                            data-aid="${escapeHtml(attack.id)}"
-                            type="number"
-                            inputmode="numeric"
-                            min="${AUTOFIRE_MULT_MIN}"
-                            max="${AUTOFIRE_MULT_MAX}"
-                            step="1"
-                            value="${escapeHtml(String(autofireMultiplier))}"
-                            aria-label="Autofire multiplier"
-                          />
+                    showDamageButton
+                      ? `<button class="btn-roll btn-roll-damage" type="button" data-action="weapon-damage-roll"
+                          data-wid="${escapeHtml(weapon.id)}"
+                          data-aid="${escapeHtml(attack.id)}">${escapeHtml(damageLabel)}</button>
+
+                        ${
+                          isAutofire
+                            ? `<div class="attack-stack">
+                                <span class="attack-mini-label">×Autofire</span>
+                                <input
+                                  class="attack-mini-input no-spinner"
+                                  data-role="attack-autofire-mult"
+                                  data-wid="${escapeHtml(weapon.id)}"
+                                  data-aid="${escapeHtml(attack.id)}"
+                                  type="number"
+                                  inputmode="numeric"
+                                  min="${AUTOFIRE_MULT_MIN}"
+                                  max="${AUTOFIRE_MULT_MAX}"
+                                  step="1"
+                                  value="${escapeHtml(String(autofireMultiplier))}"
+                                  aria-label="Autofire multiplier"
+                                />
+                              </div>`
+                            : ""
+                        }
+
+                        <div class="attack-stack">
+                          <span class="attack-mini-label">+   Solo</span>
+                          <div class="attack-stack-row">
+                            <label class="attack-solo">
+                              <input
+                                type="checkbox"
+                                data-role="attack-solo-enabled"
+                                data-wid="${escapeHtml(weapon.id)}"
+                                data-aid="${escapeHtml(attack.id)}"
+                                ${attack.soloDamageEnabled ? "checked" : ""}
+                                aria-label="Solo damage"
+                              />
+                            </label>
+                            <input
+                              class="attack-mini-input no-spinner"
+                              data-role="attack-solo-value"
+                              data-wid="${escapeHtml(weapon.id)}"
+                              data-aid="${escapeHtml(attack.id)}"
+                              type="number"
+                              inputmode="numeric"
+                              min="0"
+                              max="${SOLO_DAMAGE_MAX}"
+                              step="1"
+                              value="${escapeHtml(String(soloDamageValue))}"
+                              aria-label="Solo damage value"
+                            />
+                          </div>
                         </div>`
                       : ""
                   }
-
-                  <div class="attack-stack">
-                    <span class="attack-mini-label">+   Solo</span>
-                    <div class="attack-stack-row">
-                      <label class="attack-solo">
-                        <input
-                          type="checkbox"
-                          data-role="attack-solo-enabled"
-                          data-wid="${escapeHtml(weapon.id)}"
-                          data-aid="${escapeHtml(attack.id)}"
-                          ${attack.soloDamageEnabled ? "checked" : ""}
-                          aria-label="Solo damage"
-                        />
-                      </label>
-                      <input
-                        class="attack-mini-input no-spinner"
-                        data-role="attack-solo-value"
-                        data-wid="${escapeHtml(weapon.id)}"
-                        data-aid="${escapeHtml(attack.id)}"
-                        type="number"
-                        inputmode="numeric"
-                        min="0"
-                        max="${SOLO_DAMAGE_MAX}"
-                        step="1"
-                        value="${escapeHtml(String(soloDamageValue))}"
-                        aria-label="Solo damage value"
-                      />
-                    </div>
-                  </div>
                 </div>
 
                 <div class="attack-meta">
@@ -10391,14 +10739,6 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
           ? data.criticalInjuries.map(normalizeCriticalInjury).filter(Boolean)
           : [];
         renderCriticalInjuries();
-        state.weapons = Array.isArray(data.weapons)
-          ? data.weapons.map(normalizeWeapon).filter(Boolean)
-          : [];
-        state.draftWeapon = null;
-        state.editingWeaponId = null;
-        state.deleteWeaponId = null;
-        state.editingAttackId = null;
-        renderWeapons();
         state.skills = {};
 
         (data.skills || []).forEach((skill) => {
@@ -10410,9 +10750,19 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
             mod: skill.mod,
             canonicalKey: skill.canonicalKey || "",
             stat: skill.stat || "",
-            source: skill.source || "pdf"
+            source: skill.source || "pdf",
+            command: skill.command
           });
         });
+
+        state.weapons = Array.isArray(data.weapons)
+          ? data.weapons.map(normalizeWeapon).filter(Boolean)
+          : [];
+        state.draftWeapon = null;
+        state.editingWeaponId = null;
+        state.deleteWeaponId = null;
+        state.editingAttackId = null;
+        renderWeapons();
 
         state.columnSkills = data.columnSkills || { col1: [], col2: [], col3: [] };
         if (data.pinnedColumns) {
