@@ -93,8 +93,9 @@ The REDlink toggle also checks for a running REDlink instance (via an F21 handsh
 ## Running REDlink (No Compilation)
 
 1. Install AutoHotkey  
-2. Double-click `REDlink.ahk`  
-3. Look for the green **H** icon in the system tray  
+2. Download REDlink: https://github.com/Ryan-CS/RED-Winter-Sheet-Roller/blob/main/REDlink.ahk
+3. Double-click `REDlink.ahk`  
+4. Look for the green **H** icon in the system tray
 
 REDlink is now active.
 

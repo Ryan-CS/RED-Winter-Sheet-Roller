@@ -754,17 +754,71 @@
 
       .status-kicker {
         font-family: var(--mono);
-        font-size: 10px;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--ink-muted);
-        line-height: 1;
+        font-size: 12px;
+        text-align: center;
+        margin: 0;
+        padding: 0 0px;
+        width: 10ch;
+        background: var(--panel);
+        position: relative;
+        z-index: 1;
+        margin-bottom: -20px;
+      
       }
 
       .status-damage {
         display: grid;
         gap: 6px;
         align-content: end;
+      }
+
+      .status-death-save {
+        display: grid;
+        gap: 6px;
+        align-content: end;
+      }
+
+      .status-death-save .stat-label {
+        background: transparent;
+        margin: 0;
+        padding: 0;
+        margin-bottom: -6px; 
+        font-size: 10px;
+        letter-spacing: 0.18em;
+      }
+
+      .death-save-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .death-save-row .btn-roll {
+        min-width: 2.4em;
+        --btn-base: #16303f; /* shifted from deep red-brown → deep magenta-brown */
+        
+        
+                
+        
+        
+        background: rgba(44, 246, 232, 0.14);
+        --btn-overlay: #2cf6e956;
+
+        --btn-border: rgba(44, 246, 232, 0.55);
+        --btn-border-boost: rgba(44, 246, 232, 0.95);
+        --btn-text: rgba(44, 246, 232, 0.92);
+      }
+
+      .status-death-save input.death-save-input {
+        width: 100%;
+        min-width: 0;
+        height: 26px;
+        padding: 2px 6px;
+        text-align: center;
+        font-size: 14px;
       }
 
       .status-damage .damage-input {
@@ -3419,6 +3473,20 @@
                   </div>
 
               <div class="status-damage" aria-label="Damage entry">
+                <div id="deathSaveWrap" class="status-death-save" aria-label="Death save">
+                  <label class="stat-label" for="deathSaveInput">Death Save</label>
+                  <div class="death-save-row">
+                    <button id="deathSaveRollBtn" class="btn-roll" type="button" aria-label="Roll death save">!r</button>
+                    <input
+                      id="deathSaveInput"
+                      class="death-save-input"
+                      type="text"
+                      inputmode="numeric"
+                      placeholder="0"
+                      aria-label="Death save modifier"
+                    />
+                  </div>
+                </div>
                 <div class="status-kicker">Damage</div>
                 <input
                   id="damageValue"
@@ -4403,6 +4471,9 @@
           hudBodyMax: byId('hudBodyMax'),
 
           // Damage + fire
+          deathSaveWrap: byId('deathSaveWrap'),
+          deathSaveInput: byId('deathSaveInput'),
+          deathSaveRollBtn: byId('deathSaveRollBtn'),
           damageValueInput: byId('damageValue'),
           damageApInput: byId('damageAp'),
           damageHeadshotInput: byId('damageHeadshot'),
@@ -4586,6 +4657,9 @@
           hudBodyTicks,
           hudBodyCur,
           hudBodyMax,
+          deathSaveWrap,
+          deathSaveInput,
+          deathSaveRollBtn,
           damageValueInput,
           damageApInput,
           damageHeadshotInput,
@@ -4890,6 +4964,7 @@ const BASE_PREFIX = "BASE ";
         bodySpCurrent: 0,
         headSpTotal: 0,
         headSpCurrent: 0,
+        deathSave: 0,
         damageValue: "",
         damageAp: false,
         damageHeadshot: false,
@@ -5038,6 +5113,7 @@ const BASE_PREFIX = "BASE ";
           bodySpCurrent: state.bodySpCurrent,
           headSpTotal: state.headSpTotal,
           headSpCurrent: state.headSpCurrent,
+          deathSave: state.deathSave,
           damageValue: state.damageValue,
           damageAp: state.damageAp,
           damageHeadshot: state.damageHeadshot,
@@ -7420,14 +7496,23 @@ function addCriticalInjury(item) {
     (ci) => ci && ci.location === normalized.location && Number(ci.roll) === normalized.roll
   );
 
-  if (!exists) state.criticalInjuries.push(normalized);
+  if (!exists) {
+    state.criticalInjuries.push(normalized);
+    if (normalized.deathSave === 1) {
+      setDeathSaveValue(getDeathSaveValue() + 1);
+    }
+  }
 
   renderCriticalInjuries();
 }
 
 function removeCriticalInjury(index) {
   if (!Array.isArray(state.criticalInjuries)) return;
+  const removed = state.criticalInjuries[index];
   state.criticalInjuries.splice(index, 1);
+  if (removed?.deathSave === 1) {
+    setDeathSaveValue(getDeathSaveValue() - 1);
+  }
   renderCriticalInjuries();
 }
 
@@ -9773,7 +9858,8 @@ if (customRollName) {
         "bodySpTotal",
         "bodySpCurrent",
         "headSpTotal",
-        "headSpCurrent"
+        "headSpCurrent",
+        "deathSave"
       ]);
 
       function bindArrowStepperInput(input, opts = {}) {
@@ -9840,7 +9926,9 @@ if (customRollName) {
       bindStatusField(bodySpCurrentInput, "bodySpCurrent", statusBlurCommit);
       bindStatusField(headSpTotalInput, "headSpTotal", statusBlurCommit);
       bindStatusField(headSpCurrentInput, "headSpCurrent", statusBlurCommit);
+      bindStatusField(deathSaveInput, "deathSave", { renderOnInput: false, renderOnBlur: false });
       bindStatusField(damageValueInput, "damageValue", { renderOnInput: false, renderOnBlur: false });
+      bindArrowStepperInput(deathSaveInput, { min: 0 });
       bindArrowStepperInput(damageValueInput, { min: 0 });
       bindLogOnBlur(hpTotalInput, "HP Max");
       bindLogOnBlur(hpCurrentInput, "HP Cur");
@@ -9848,6 +9936,7 @@ if (customRollName) {
       bindLogOnBlur(bodySpCurrentInput, "Body SP Cur");
       bindLogOnBlur(headSpTotalInput, "Head SP Max");
       bindLogOnBlur(headSpCurrentInput, "Head SP Cur");
+      bindLogOnBlur(deathSaveInput, "Death Save");
       bindLogOnBlur(damageValueInput, "Damage Value");
 
       if (statHumInput) {
@@ -9911,6 +10000,53 @@ if (customRollName) {
         applyFireSeverity(severity);
       }
 
+      function parseIntSafe(value, fallback = 0) {
+        const n = Number.parseInt(String(value ?? "").trim(), 10);
+        return Number.isFinite(n) ? n : fallback;
+      }
+
+      function getCriticalInjuryDeathSaveTotal() {
+        if (!Array.isArray(state.criticalInjuries)) return 0;
+        return state.criticalInjuries.reduce(
+          (sum, item) => sum + (item?.deathSave === 1 ? 1 : 0),
+          0
+        );
+      }
+
+      function getDeathSaveValue() {
+        return Math.max(0, parseIntSafe(deathSaveInput?.value, 0));
+      }
+
+      function setDeathSaveValue(next) {
+        const clamped = Math.max(0, parseIntSafe(next, 0));
+        state.deathSave = clamped;
+        if (deathSaveInput) deathSaveInput.value = String(clamped);
+      }
+
+      let lastDeathSaveHidden = null;
+
+      function updateDeathSaveVisibility() {
+        if (!deathSaveWrap) return;
+        const hudValue = hudHpCur ? hudHpCur.textContent : "";
+        const fallback = state.hpCurrent === null || state.hpCurrent === undefined ? 0 : state.hpCurrent;
+        const hpCur = parseIntSafe(hpCurrentInput?.value, parseIntSafe(hudValue, fallback));
+        const shouldHide = hpCur > 0;
+        deathSaveWrap.hidden = shouldHide;
+        deathSaveWrap.style.display = shouldHide ? "none" : "";
+        if (lastDeathSaveHidden === null) {
+          lastDeathSaveHidden = shouldHide;
+          return;
+        }
+        if (shouldHide && !lastDeathSaveHidden) {
+          const critTotal = getCriticalInjuryDeathSaveTotal();
+          if (state.deathSave !== critTotal) {
+            setDeathSaveValue(critTotal);
+            scheduleLocalStateSave();
+          }
+        }
+        lastDeathSaveHidden = shouldHide;
+      }
+
       function syncStatusInputs() {
         if (hpTotalInput) hpTotalInput.value = state.hpTotal === null ? "" : String(state.hpTotal);
         if (hpCurrentInput) hpCurrentInput.value = state.hpCurrent === null ? "" : String(state.hpCurrent);
@@ -9918,10 +10054,12 @@ if (customRollName) {
         if (bodySpCurrentInput) bodySpCurrentInput.value = state.bodySpCurrent === null ? "" : String(state.bodySpCurrent);
         if (headSpTotalInput) headSpTotalInput.value = state.headSpTotal === null ? "" : String(state.headSpTotal);
         if (headSpCurrentInput) headSpCurrentInput.value = state.headSpCurrent === null ? "" : String(state.headSpCurrent);
+        if (deathSaveInput) deathSaveInput.value = state.deathSave === null ? "" : String(state.deathSave);
         if (damageValueInput) damageValueInput.value = state.damageValue || "";
         if (damageApInput) damageApInput.checked = Boolean(state.damageAp);
         if (damageHeadshotInput) damageHeadshotInput.checked = Boolean(state.damageHeadshot);
         if (damageNoAblateInput) damageNoAblateInput.checked = Boolean(state.damageNoAblate);
+        updateDeathSaveVisibility();
 
         // Keep the HUD visuals in sync whenever state is hydrated.
         renderCombatHud();
@@ -9930,12 +10068,6 @@ if (customRollName) {
       syncStatusInputs();
       syncFireSeverity();
       bindCombatHudEditables();
-
-
-      function parseIntSafe(value, fallback = 0) {
-        const n = Number.parseInt(String(value ?? "").trim(), 10);
-        return Number.isFinite(n) ? n : fallback;
-      }
 
       const HUD_SYNC_KEYS = new Set([
         "hpTotal",
@@ -10069,6 +10201,7 @@ if (customRollName) {
         setSpanIfNotActive(hudHeadCur, parseIntSafe(headSpCurrentInput?.value, 0));
         setSpanIfNotActive(hudBodyMax, parseIntSafe(bodySpTotalInput?.value, 0));
         setSpanIfNotActive(hudBodyCur, parseIntSafe(bodySpCurrentInput?.value, 0));
+        updateDeathSaveVisibility();
       }
 
 
@@ -10531,6 +10664,17 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
       bindHudPreview(damageHalfBtn, () => computeWedgeImpact("half"));
       bindHudPreview(damageBypassBtn, () => computeWedgeImpact("bypass"));
 
+      if (deathSaveRollBtn) {
+        deathSaveRollBtn.addEventListener("click", async () => {
+          const current = getDeathSaveValue();
+          const cmd = `!r 1d10+${current}`;
+          await copyRollText(cmd, deathSaveRollBtn);
+          appendCharacterLogEntry(buildRollLogEntry("Death Save", "!r", [`1d10+${current}`]));
+          setDeathSaveValue(current + 1);
+          scheduleLocalStateSave();
+        });
+      }
+
       function syncGlobalModDisplay() {
         if (globalModInput) globalModInput.value = state.globalMod;
         document.querySelectorAll(".mod-global").forEach((el) => {
@@ -10549,6 +10693,7 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
         state.bodySpCurrent = null;
         state.headSpTotal = null;
         state.headSpCurrent = null;
+        state.deathSave = 0;
         state.damageValue = "";
         state.damageAp = false;
         state.damageHeadshot = false;
@@ -10590,6 +10735,7 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
         state.editingWeaponId = null;
         state.deleteWeaponId = null;
         state.editingAttackId = null;
+        lastDeathSaveHidden = null;
 
         setBackdropOpen(weaponBackdrop, false);
         setBackdropOpen(attackBackdrop, false);
@@ -10864,14 +11010,13 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
         state.bodySpCurrent = Numbers.toNullableInt(data.bodySpCurrent);
         state.headSpTotal = Numbers.toNullableInt(data.headSpTotal);
         state.headSpCurrent = Numbers.toNullableInt(data.headSpCurrent);
+        state.deathSave = data.deathSave === undefined ? null : Numbers.toNullableInt(data.deathSave);
         state.damageValue =
           data.damageValue !== undefined && data.damageValue !== null ? String(data.damageValue) : "";
         state.damageAp = Boolean(data.damageAp);
         state.damageHeadshot = Boolean(data.damageHeadshot);
         state.damageNoAblate = Boolean(data.damageNoAblate);
         state.fireSeverity = clampFireSeverity(data.fireSeverity);
-        syncStatusInputs();
-        syncFireSeverity();
         state.luckTotal = parseLuckValue(data.luckTotal);
         if (data.luckPool === undefined || data.luckPool === null) {
           state.luckPool = state.luckTotal;
@@ -10905,6 +11050,11 @@ if (skill && skill.source === "custom-roll" && String(skill.command || "").trim(
         state.criticalInjuries = Array.isArray(data.criticalInjuries)
           ? data.criticalInjuries.map(normalizeCriticalInjury).filter(Boolean)
           : [];
+        if (data.deathSave === undefined || data.deathSave === null) {
+          state.deathSave = getCriticalInjuryDeathSaveTotal();
+        }
+        syncStatusInputs();
+        syncFireSeverity();
         renderCriticalInjuries();
         state.skills = {};
 

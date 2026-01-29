@@ -3,6 +3,118 @@
 ## 2026-01-29
 
 ### Summary
+- Reset Death Save to critical-injury-only total whenever HP recovers above 0.
+
+### User-Facing Changes
+- Death Save now clears back to the critical injury total when HP rises above 0 and the control hides.
+
+### Technical Changes
+- Reset Death Save when the control transitions from visible to hidden and recompute from critical injuries.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-29
+
+### Summary
+- Forced Death Save controls to fully hide via inline display when HP is above 0.
+
+### User-Facing Changes
+- Death Save controls are now hidden reliably when HP is greater than 0.
+
+### Technical Changes
+- Death Save visibility now toggles `hidden` plus an inline `display: none` safeguard.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-29
+
+### Summary
+- Fixed Death Save visibility to reflect HUD HP value.
+
+### User-Facing Changes
+- Death Save controls now hide/show based on the HP displayed in the HUD, even before committing edits.
+
+### Technical Changes
+- Death Save visibility now falls back to the HUD HP text when the hidden input is stale.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-29
+
+### Summary
+- Hid Death Save controls until HP reaches 0.
+
+### User-Facing Changes
+- Death Save label/input/roll button stay hidden unless current HP is 0 or below.
+
+### Technical Changes
+- Added visibility toggle for the Death Save UI tied to HP updates.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-29
+
+### Summary
+- Added a Death Save control with roll button, auto-increments, and critical injury integration.
+
+### User-Facing Changes
+- Added a Death Save input above the Damage control with a !r roll button that copies `1d10+<Death Save>` and increments after each roll.
+- Death Save now increases by +1 when adding critical injuries that raise the death save penalty.
+
+### Technical Changes
+- Introduced new Death Save UI elements, state storage, and save/load support.
+- Wired Death Save updates to critical injury add/remove flows and new roll action.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-29
+
+### Summary
 - Added HUD warning markers for seriously/mortally wounded HP states.
 
 ### User-Facing Changes
