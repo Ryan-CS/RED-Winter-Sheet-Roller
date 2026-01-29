@@ -63,6 +63,7 @@ REDlink is an **optional Windows helper** that listens for roll commands from th
 - Visual feedback confirms the handoff
 
 If REDlink is **not running**, the page safely falls back to clipboard mode.
+The REDlink toggle also checks for a running REDlink instance (via an F21 handshake) and shows a setup link if it is not detected.
 
 ---
 

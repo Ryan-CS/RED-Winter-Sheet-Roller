@@ -1,5 +1,53 @@
 # Changelog
 
+## 2026-01-29
+
+### Summary
+- Added HUD warning markers for seriously/mortally wounded HP states.
+
+### User-Facing Changes
+- The HP bar now shows a midline marker and a warning icon at half HP (rounded up) or a skull at 0 HP.
+- Seriously/Mortally Wounded modifier toggles get a red outline when the HP state applies but the toggle is not checked.
+
+### Technical Changes
+- Added HUD overlay elements and state-driven toggling for warning icons.
+- Added a helper to compute HP thresholds and outline relevant modifier toggles without toggling them on.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: unchanged.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
+## 2026-01-29
+
+### Summary
+- Added a REDlink handshake check from the toggle with a not-found modal and setup link.
+
+### User-Facing Changes
+- Turning REDlink on now pings the REDlink helper and shows a setup modal if it is not detected, but still enables REDlink mode.
+- The not-found modal links to the project page and explains what REDlink does.
+
+### Technical Changes
+- Implemented a clipboard request + F21 response handshake for REDlink activation checks.
+- Added a dedicated modal and UI handlers for REDlink detection failures.
+
+### Integration Notes
+- REDlink prefix/format: unchanged.
+- Clipboard handling or focus behavior: REDlink toggle writes a handshake request and waits 1s for an F21 key response.
+- Dependencies/tooling: unchanged.
+
+### Testing
+- [ ] PDF parse and roll copy
+- [ ] Luck adjustments and displays
+- [ ] Save/load skills JSON
+- [ ] REDlink clipboard -> Discord flow (if applicable)
+
 ## 2026-01-28
 
 ### Summary

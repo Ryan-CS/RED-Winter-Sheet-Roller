@@ -6,6 +6,7 @@
 ;   Clipboard starts with: "[REDlink] "
 ;   Everything after that is the BASE COMMAND (opaque text)
 ;   Optional: "channel:<name>||<command>"
+;   Handshake: "handshake:request:<token>" -> sends F21 key
 ;
 ; Discord safety:
 ;   Will only send if the active Discord window title
@@ -55,6 +56,8 @@ global RL_LogFile := A_ScriptDir . "\\redlink-debug.log"
 global RL_Prefix := "[REDlink] "
 global RL_ChannelPrefix := "channel:"
 global RL_ChannelSeparator := "||"
+global RL_HandshakeRequestPrefix := "handshake:request:"
+global RL_HandshakeResponseKey := "F21"
 
 
 
@@ -275,6 +278,14 @@ RL_HandleClipboardText(curText) {
         return
     }
 
+    ; Extract payload (optional channel + base command)
+    payload := SubStr(curText, StrLen(RL_Prefix) + 1)
+    if (payload = "")
+        return
+
+    if (RL_HandleHandshake(payload))
+        return
+
     if (!RL_Enabled)
         return
 
@@ -283,11 +294,6 @@ RL_HandleClipboardText(curText) {
     if (now - RL_LastFireTick < RL_DebounceMs)
         return
     RL_LastFireTick := now
-
-    ; Extract payload (optional channel + base command)
-    payload := SubStr(curText, StrLen(RL_Prefix) + 1)
-    if (payload = "")
-        return
 
     channelName := ""
     baseCmd := ""
@@ -299,6 +305,19 @@ RL_HandleClipboardText(curText) {
     RL_LastCommandTick := A_TickCount
 
     RL_SendToDiscord(baseCmd, channelName)
+}
+
+RL_HandleHandshake(payload) {
+    global RL_HandshakeRequestPrefix, RL_HandshakeResponseKey
+    reqLen := StrLen(RL_HandshakeRequestPrefix)
+    if (SubStr(payload, 1, reqLen) = RL_HandshakeRequestPrefix) {
+        token := SubStr(payload, reqLen + 1)
+        if (token = "")
+            return true
+        SendInput, {%RL_HandshakeResponseKey%}
+        return true
+    }
+    return false
 }
 
 ; -------------------------

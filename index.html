@@ -452,6 +452,12 @@
         outline-offset: -3px;
       }
 
+      .mod-toggle-item.hud-wound-outline {
+        outline: 1px solid rgba(255, 59, 106, 0.7);
+        outline-offset: 2px;
+        box-shadow: 0 0 0.5rem rgba(255, 59, 106, 0.2);
+      }
+
 
       .mod-toggle-item input {
         margin: 0;
@@ -926,9 +932,10 @@
         position: relative;
         height: 16px;
         border: 0px solid rgba(255, 59, 106, 0.5);
-        background: rgba(218, 13, 13, 0.35);
+        background: rgba(218, 13, 13, 0.185);
         overflow: hidden;
         min-width: 0;
+        
         --cut-w: 10px;
         --cut-h: 10px;
         clip-path: polygon(
@@ -940,12 +947,52 @@
       );
       }
 
+      .hud-hp-shell {
+        position: relative;
+        min-width: 0;
+      }
+
+      .hud-hp-midline {
+        position: absolute;
+        top: -2px;  
+        left: 51%;
+        width: 2px;
+        height: 8px;
+        z-index: 2;
+        background: rgba(226, 226, 226, 0.548);
+        box-shadow: 0 0 6px rgba(255, 59, 106, 0.35);
+        transform: translateX(-51%);
+        pointer-events: none;
+      }
+
+      .hud-hp-alert {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        font-size: 14px;
+        line-height: 1;
+        text-shadow: 0 0 8px rgba(255, 59, 106, 0.45);
+        opacity: 0;
+        transform: translateY(-50%) scale(0.95);
+        transition: opacity 120ms ease, transform 120ms ease;
+        pointer-events: none;
+      }
+
+      .hud-hp-alert[data-state="serious"],
+      .hud-hp-alert[data-state="mortally"] {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+      }
+
       .hud-hp-fill {
         position: absolute;
         inset: 0;
         width: 0%;
+        z-index: 1;
         background: linear-gradient(90deg, rgba(255, 59, 106, 0.95), rgba(255, 59, 106, 0.32));
         transform-origin: left center;
+          
+        /* border-right: 2px solid rgba(255, 59, 105, 0.685);  */
 
       }
 
@@ -3324,9 +3371,13 @@
                     <div class="hud-row" id="hudHpRow">
                       <div class="hud-kicker">HP</div>
                       <div>
-                        <div class="hud-hp-bar" id="hudHpBar" role="meter" aria-label="HP bar" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
-                          <div class="hud-hp-fill" id="hudHpFill"></div>
-                          <div class="hud-hp-preview" id="hudHpPreview" aria-hidden="true"></div>
+                        <div class="hud-hp-shell">
+                          <div class="hud-hp-midline" aria-hidden="true"></div>
+                          <div class="hud-hp-alert" id="hudHpAlert" aria-hidden="true"></div>
+                          <div class="hud-hp-bar" id="hudHpBar" role="meter" aria-label="HP bar" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+                            <div class="hud-hp-fill" id="hudHpFill"></div>
+                            <div class="hud-hp-preview" id="hudHpPreview" aria-hidden="true"></div>
+                          </div>
                         </div>
 
                       </div>
@@ -3927,6 +3978,22 @@
       </div>
     </div>
 
+    <div id="redlinkNotFoundBackdrop" class="modalBackdrop" data-open="false">
+      <div class="modal" data-label="REDlink Not Found" role="dialog" aria-modal="true" aria-labelledby="redlinkNotFoundTitle">
+        <h2 id="redlinkNotFoundTitle" class="modalTitle">Newest REDlink Not Found</h2>
+        <p class="modalSub">
+          REDlink is an optional Windows helper that listens for roll commands from this page and pastes them into REDice.
+        </p>
+        <p class="modalSub">
+          Visit the project page for setup details:
+          <a href="https://github.com/Ryan-CS/RED-Winter-Sheet-Roller?tab=readme-ov-file#installing-autohotkey" target="_blank" rel="noreferrer">RED Winter Sheet Roller</a>
+        </p>
+        <div class="modalActions">
+          <button id="redlinkNotFoundClose" class="right" type="button">Got It</button>
+        </div>
+      </div>
+    </div>
+
     <dialog id="addDialog">
       <form method="dialog">
         <div>
@@ -4322,6 +4389,7 @@
           hudHpBar: byId('hudHpBar'),
           hudHpFill: byId('hudHpFill'),
           hudHpPreview: byId('hudHpPreview'),
+          hudHpAlert: byId('hudHpAlert'),
           hudHpTicks: byId('hudHpTicks'),
           hudHpCur: byId('hudHpCur'),
           hudHpMax: byId('hudHpMax'),
@@ -4432,6 +4500,8 @@
           redlinkToggle: byId('redlinkToggle'),
           redlinkToggleText: byId('redlinkToggleText'),
           redlinkChannelInput: byId('redlinkChannelInput'),
+          redlinkNotFoundBackdrop: byId('redlinkNotFoundBackdrop'),
+          redlinkNotFoundClose: byId('redlinkNotFoundClose'),
           clearSheetBtn: byId('clearSheetBtn'),
 
           // Pinned + modifiers + luck
@@ -4504,6 +4574,7 @@
           hudHpBar,
           hudHpFill,
           hudHpPreview,
+          hudHpAlert,
           hudHpTicks,
           hudHpCur,
           hudHpMax,
@@ -4594,6 +4665,8 @@
           redlinkToggle,
           redlinkToggleText,
           redlinkChannelInput,
+          redlinkNotFoundBackdrop,
+          redlinkNotFoundClose,
           clearSheetBtn,
           addPinnedBtn,
           customRollBackdrop,
@@ -4856,6 +4929,9 @@ const BASE_PREFIX = "BASE ";
       const REDLINK_STORAGE_KEY = "redlink.enabled";
       const REDLINK_CHANNEL_KEY = "redlink.channel";
       const REDLINK_PREFIX = "[REDlink] ";
+      const REDLINK_HANDSHAKE_REQUEST_PREFIX = "handshake:request:";
+      const REDLINK_HANDSHAKE_RESPONSE_KEY = "F21";
+      const REDLINK_HANDSHAKE_DELAY_MS = 1000;
       const REDLINK_FLASH_MS = 180;
       const REDLINK_DIM_MS = 180;
       const LOCAL_STATE_KEY = "redwinter.state.v1";
@@ -5096,6 +5172,43 @@ const BASE_PREFIX = "BASE ";
           return `${REDLINK_PREFIX}${buildRedlinkPayload(baseCommand)}`;
         }
         return baseCommand;
+      }
+
+      async function requestRedlinkHandshake() {
+        if (!navigator?.clipboard?.writeText) {
+          return false;
+        }
+        const token = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`;
+        const request = `${REDLINK_PREFIX}${REDLINK_HANDSHAKE_REQUEST_PREFIX}${token}`;
+        try {
+          const responsePromise = new Promise((resolve) => {
+            let resolved = false;
+            const handler = (event) => {
+              if (event.key === REDLINK_HANDSHAKE_RESPONSE_KEY) {
+                resolved = true;
+                window.removeEventListener("keydown", handler);
+                resolve(true);
+              }
+            };
+            window.addEventListener("keydown", handler, { once: false });
+            window.setTimeout(() => {
+              if (resolved) return;
+              window.removeEventListener("keydown", handler);
+              resolve(false);
+            }, REDLINK_HANDSHAKE_DELAY_MS);
+          });
+          await navigator.clipboard.writeText(request);
+          return await responsePromise;
+        } catch {
+          return false;
+        }
+      }
+
+      function openRedlinkNotFoundModal() {
+        setBackdropOpen(redlinkNotFoundBackdrop, true);
+        if (redlinkNotFoundClose) {
+          redlinkNotFoundClose.focus();
+        }
       }
 
       function armRollButton(button) {
@@ -5406,6 +5519,7 @@ const BASE_PREFIX = "BASE ";
             mod.active = toggle.checked;
             appendCharacterLogEntry(`Modifier ${mod.name || "Modifier"} ${mod.active ? "ON" : "OFF"}`);
             updateModifierHints();
+            updateHpWoundIndicators();
             scheduleLocalStateSave();
           });
 
@@ -5456,6 +5570,8 @@ const BASE_PREFIX = "BASE ";
           row.append(toggle, name);
           modifierToggleList.appendChild(row);
         });
+
+        updateHpWoundIndicators();
       }
 
       function renderModifierModal() {
@@ -9349,11 +9465,16 @@ if (customRollName) {
         clearSheetConfirm.addEventListener("click", confirmClearSheet);
       }
 
+      if (redlinkNotFoundClose) {
+        redlinkNotFoundClose.addEventListener("click", () => setBackdropOpen(redlinkNotFoundBackdrop, false));
+      }
+
       [
         weaponBackdrop,
         attackBackdrop,
         deleteWeaponBackdrop,
         clearSheetBackdrop,
+        redlinkNotFoundBackdrop,
         modifierBackdrop,
         modifierSelectBackdrop
       ].forEach((backdrop) => {
@@ -9415,8 +9536,17 @@ if (customRollName) {
         }
       });
 
-      redlinkToggle.addEventListener("click", () => {
-        setRedlinkEnabled(!redlinkEnabled, true);
+      redlinkToggle.addEventListener("click", async () => {
+        const nextState = !redlinkEnabled;
+        if (!nextState) {
+          setRedlinkEnabled(false, true);
+          return;
+        }
+        const handshakeOk = await requestRedlinkHandshake();
+        setRedlinkEnabled(true, true);
+        if (!handshakeOk) {
+          openRedlinkNotFoundModal();
+        }
       });
       // REDlink channel is always "live": whatever is in the input is the channel.
       if (redlinkChannelInput) {
@@ -9881,6 +10011,41 @@ if (customRollName) {
         });
       }
 
+      function updateHpWoundIndicators() {
+        const hpMax = Math.max(0, parseIntSafe(hpTotalInput?.value, 0));
+        const hpCur = Math.max(0, Math.min(hpMax || 999999, parseIntSafe(hpCurrentInput?.value, 0)));
+        const seriousThreshold = hpMax > 0 ? Math.ceil(hpMax / 2) : 0;
+        const isMortally = hpMax > 0 && hpCur <= 0;
+        const isSeriously = hpMax > 0 && hpCur > 0 && hpCur <= seriousThreshold;
+
+        if (hudHpAlert) {
+          if (isMortally) {
+            hudHpAlert.textContent = "💀";
+            hudHpAlert.dataset.state = "mortally";
+          } else if (isSeriously) {
+            hudHpAlert.textContent = "⚠";
+            hudHpAlert.dataset.state = "serious";
+          } else {
+            hudHpAlert.textContent = "";
+            hudHpAlert.dataset.state = "none";
+          }
+        }
+
+        if (!modifierToggleList) return;
+
+        const setOutline = (modId, shouldOutline) => {
+          const selector = `.mod-toggle-item[data-id="${CSS.escape(modId)}"]`;
+          const row = modifierToggleList.querySelector(selector);
+          if (!row) return;
+          const toggle = row.querySelector('input[type="checkbox"]');
+          const isActive = toggle ? toggle.checked : false;
+          row.classList.toggle("hud-wound-outline", shouldOutline && !isActive);
+        };
+
+        setOutline("seriously-wounded", isSeriously && !isMortally);
+        setOutline("mortally-wounded", isMortally);
+      }
+
       function renderCombatHud() {
         // HP
         const hpMax = Math.max(0, parseIntSafe(hpTotalInput?.value, 0));
@@ -9895,6 +10060,7 @@ if (customRollName) {
         renderHpTicks(hpFill);
         setSpanIfNotActive(hudHpCur, hpCur);
         setSpanIfNotActive(hudHpMax, hpMax);
+        updateHpWoundIndicators();
 
         // SP (Head/Body)
         renderSpTicks(hudHeadTicks, headSpTotalInput?.value, headSpCurrentInput?.value);
