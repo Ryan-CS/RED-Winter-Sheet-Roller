@@ -958,7 +958,7 @@
         left: 51%;
         width: 2px;
         height: 8px;
-        z-index: 2;
+        z-index: 2; 
         background: rgba(226, 226, 226, 0.548);
         box-shadow: 0 0 6px rgba(255, 59, 106, 0.35);
         transform: translateX(-51%);
@@ -10014,7 +10014,7 @@ if (customRollName) {
       function updateHpWoundIndicators() {
         const hpMax = Math.max(0, parseIntSafe(hpTotalInput?.value, 0));
         const hpCur = Math.max(0, Math.min(hpMax || 999999, parseIntSafe(hpCurrentInput?.value, 0)));
-        const seriousThreshold = hpMax > 0 ? Math.ceil(hpMax / 2) : 0;
+        const seriousThreshold = hpMax > 0 ? (Math.ceil(hpMax / 2)-1) : 0;
         const isMortally = hpMax > 0 && hpCur <= 0;
         const isSeriously = hpMax > 0 && hpCur > 0 && hpCur <= seriousThreshold;
 
